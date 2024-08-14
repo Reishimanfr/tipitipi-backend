@@ -50,6 +50,6 @@ func main() {
 	if err := srv.Shutdown(ctx); err != nil {
 		fmt.Println("Server forced to shutdown:", err)
 	} else {
-		fmt.Println("Server exiting")
+		fmt.Println("Server exiting") 
 	}
 }
