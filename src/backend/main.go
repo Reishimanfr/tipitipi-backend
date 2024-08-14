@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bash06/strona-fundacja/src/backend/core"
+	"bash06/strona-fundacja/src/backend/routes"
 	"context"
 	"fmt"
 	"net/http"
@@ -11,45 +13,51 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func main() {
-	// Create a new Gin router
-	r := gin.Default()
-	gin.SetMode(gin.ReleaseMode)
-	r.HEAD("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
+var (
+	port = "8080"
+)
 
-	// Create an http.Server with the Gin router
-	srv := &http.Server{
-		Addr:    ":8080",
-		Handler: r,
+func main() {
+	router := gin.Default()
+	err := core.InitDatabase()
+
+	if err != nil {
+		panic("Failed to initialize database: " + err.Error())
 	}
 
-	// Start the server in a goroutine
+	// TODO: set this to prod if env variable says we're in docker
+	// gin.SetMode(gin.ReleaseMode)
+
+	routes.NewHandler(&routes.Config{
+		Router: router,
+	})
+
+	server := &http.Server{
+		Addr:        ":" + port,
+		Handler:     router,
+		IdleTimeout: -1,
+	}
+
 	go func() {
-		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			fmt.Printf("listen: %s\n", err)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			panic("Failed to start server: " + err.Error())
 		}
 	}()
 
-	fmt.Println("Server started on http://localhost:8080")
+	fmt.Println("Server started on http://localhost:" + port)
 
-	// Wait for an interrupt signal to shut down the server
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
 	fmt.Println("Shutting down server...")
 
-	// Create a deadline to wait for the shutdown
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	// Shutdown the server gracefully, waiting for current operations to complete
-	if err := srv.Shutdown(ctx); err != nil {
+	if err := server.Shutdown(ctx); err != nil {
 		fmt.Println("Server forced to shutdown:", err)
 	} else {
-		fmt.Println("Server exiting")
+		fmt.Println("Server shutting down...")
 	}
 }
