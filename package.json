@@ -4,10 +4,9 @@
         "version": "0.0.0",
         "type": "module",
         "scripts": {
-                "build:server": "cd ./src/backend && mkdir dist && go build -o ./dist/server && chmod +x ./dist/server",
+                "start:dev:windows": "./start_windows.bat",
+                "startd:dev:linux": "./start_linux.bat",
                 "start:server": "./src/backend/dist/server &",
-                "clean": "rm -rf ./src/backend/dist",
-                "dev": "bun clean && bun build:server && bun start:server && ./check_server.sh",
                 "build": "tsc -b && vite build"
         },
         "dependencies": {
