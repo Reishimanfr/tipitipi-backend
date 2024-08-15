@@ -2,6 +2,7 @@
 ```sh
 http://localhost:8080/api
 ```
+
 # Blog operations
 ## Create blog post
 ```sh
@@ -32,12 +33,12 @@ Example request body:
   ]
 }
 ```
-# Server heartbeat
-```sh
-/api/heartbeat
-```
-
 ## Delete blog post
 ```sh
 /api/blog/delete/:id
+```
+
+# Server heartbeat
+```sh
+/api/heartbeat
 ```
