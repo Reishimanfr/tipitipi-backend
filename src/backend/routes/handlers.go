@@ -18,7 +18,7 @@ func NewHandler(cfg *Config) {
 
 	// Blog stuff
 	cfg.Router.Group("/api/blog").
-		DELETE("/delete", h.DeleteBlogPost).
+		DELETE("/delete/:id", h.DeleteBlogPost).
 		POST("/create", h.CreateBlogPost).
-		PATCH("/edit", h.EditBlogPost)
+		PATCH("/edit/:id", h.EditBlogPost)
 }
