@@ -4,13 +4,13 @@ import (
 	"bash06/strona-fundacja/src/backend/core"
 	"bash06/strona-fundacja/src/backend/routes"
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 var (
@@ -19,10 +19,17 @@ var (
 
 func main() {
 	router := gin.Default()
-	err := core.InitDatabase()
+	dbError := core.InitDatabase()
 
-	if err != nil {
-		panic("Failed to initialize database: " + err.Error())
+	loggerErr := core.InitLogger()
+	log := core.GetLogger()
+
+	if dbError != nil {
+		panic("Failed to initialize database: " + dbError.Error())
+	}
+
+	if loggerErr != nil {
+		panic("Failed to initialize logger: " + loggerErr.Error())
 	}
 
 	// TODO: set this to prod if env variable says we're in docker
@@ -44,20 +51,18 @@ func main() {
 		}
 	}()
 
-	fmt.Println("Server started on http://localhost:" + port)
+	log.Info("Server started on http://localhost:" + port)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
-	fmt.Println("Shutting down server...")
+
+	log.Warn("Gracefully shutting down backend server...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Shutdown the server gracefully, waiting for current operations to complete
 	if err := server.Shutdown(ctx); err != nil {
-		fmt.Println("Server forced to shutdown:", err)
-	} else {
-		fmt.Println("Server shutting down...")
+		log.Error("Server forced to shutdown", zap.Error(err))
 	}
 }

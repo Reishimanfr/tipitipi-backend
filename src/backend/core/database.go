@@ -10,24 +10,29 @@ import (
 )
 
 var (
-	db          *gorm.DB
-	err         error
-	initialized = false
-	path        = "./src/backend/database.sqlite"
+	db   *gorm.DB
+	err  error
+	path = "../../database.sqlite"
 )
 
 type BlogPost struct {
-	Id        int `gorm:"autoIncrement,primaryKey"`
-	CreatedAt time.Time
-	EditedAt  time.Time
-	Title     string
-	Content   string
-	Images    string
+	ID         int `gorm:"primaryKey,autoIncrement"`
+	Created_At time.Time
+	Edited_At  time.Time
+	Title      string
+	Content    string
+	Images     string
 }
 
 func InitDatabase() error {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		os.Create(path)
+		file, err := os.Create(path)
+
+		if err != nil {
+			return err
+		}
+
+		defer file.Close()
 	}
 
 	db, err = gorm.Open(sqlite.Open(path), &gorm.Config{})
@@ -38,12 +43,11 @@ func InitDatabase() error {
 
 	db.AutoMigrate(&BlogPost{})
 
-	initialized = true
 	return nil
 }
 
 func GetDb() (*gorm.DB, error) {
-	if !initialized {
+	if db == nil {
 		return nil, errors.New("database not initialized")
 	}
 
