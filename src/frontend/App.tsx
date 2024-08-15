@@ -5,6 +5,7 @@ import Blog from "./pages/blog";
 import Gallery from "./pages/gallery";
 import About from "./pages/about";
 import Pricing from "./pages/pricing";
+import Footer from './components/footer';
 
 function App() {
 
@@ -19,6 +20,7 @@ function App() {
         <Route path="/pricing" element={<Pricing/>}/>
         <Route path="/blog" element={<Blog/>}/>
       </Routes>
+      <Footer/>
       </BrowserRouter>
     </> 
   )
