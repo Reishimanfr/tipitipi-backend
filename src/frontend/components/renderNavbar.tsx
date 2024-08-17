@@ -10,11 +10,11 @@ function getUrls(mobile: boolean) {
     const css = mobile ? MOBILE_CSS : DESKTOP_CSS
   
     const urls = [
-      <Link to='/' className={css}> Strona główna</Link>,
-      <Link to='/blog' className={css}> Blog </Link>,
-      <Link to='/gallery' className={css}> Galeria </Link>,
-      <Link to='/pricing' className={css}> Cennik </Link>,
-      <Link to='/about' className={css}> O nas </Link>
+      <Link key={1} to='/' className={css}> Strona główna</Link>,
+      <Link key={2} to='/blog' className={css}> Blog </Link>,
+      <Link key={3} to='/gallery' className={css}> Galeria </Link>,
+      <Link key={4}to='/pricing' className={css}> Cennik </Link>,
+      <Link key={5} to='/about' className={css}> O nas </Link>
     ];
   
     if (mobile) {
