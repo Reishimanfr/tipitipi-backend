@@ -81,7 +81,7 @@ function Navbar() {
   //ustawia menuVisible na fałsz kiedy okno jest duże , żeby nie było 2 duplikatów i 2 navbarow , po prostu idiotoodpornosc
 
   return (
-    <div className="w-full h-20 bg-black fixed ">
+    <div className="w-full h-20 bg-black sticky ">
       <div>
         <Link to="/">
           <img
