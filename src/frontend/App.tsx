@@ -10,7 +10,7 @@ import Footer from './components/footer';
 function App() {
 
   return (
-    <>
+    <div className='relative min-h-screen'>
       <BrowserRouter>
       <Navbar/>
       <Routes>
@@ -22,7 +22,7 @@ function App() {
       </Routes>
       <Footer/>
       </BrowserRouter>
-    </> 
+    </div> 
   )
 }
 
