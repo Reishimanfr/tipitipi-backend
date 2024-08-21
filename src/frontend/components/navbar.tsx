@@ -62,7 +62,6 @@ function RenderMobileMenu(
 function Navbar() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
-  const [shouldNavbarHide , setShouldNavbarHide] = useState("top-0");
   //u góry mamy state od tego że menu dla urzadzen mobilnych ma byc wyswietlane
 
   const handleResize = () => {

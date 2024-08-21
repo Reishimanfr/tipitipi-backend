@@ -4,7 +4,7 @@ const Mainpage = (props : any) => {
         <div>
             <h1>Mainpage</h1>
             <Link to="/admin">Admin</Link>
-            <h1>{props.mainpageFirstHeader}</h1>
+            <h1 className="text-center">{props.mainpageFirstHeader}</h1>
         </div>
     )
 }
