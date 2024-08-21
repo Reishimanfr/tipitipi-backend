@@ -10,8 +10,6 @@ import (
 )
 
 var (
-	db   *gorm.DB
-	err  error
 	path = "../../database.sqlite"
 )
 
@@ -24,32 +22,35 @@ type BlogPost struct {
 	Images     string
 }
 
-func InitDatabase() error {
+type AdminUser struct {
+	ID           int    `gorm:"primaryKey"`
+	Username     string `gorm:"unique, not null"`
+	PasswordHash string `gorm:"not null"`
+}
+
+type Database struct {
+	*gorm.DB
+}
+
+func (d *Database) Init() Database {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		file, err := os.Create(path)
 
 		if err != nil {
-			return err
+			panic(err)
 		}
 
 		defer file.Close()
 	}
 
-	db, err = gorm.Open(sqlite.Open(path), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
 
 	if err != nil {
-		return err
+		panic(err)
 	}
 
-	db.AutoMigrate(&BlogPost{})
+	db.AutoMigrate(&BlogPost{}, &AdminUser{})
+	d.DB = db
 
-	return nil
-}
-
-func GetDb() (*gorm.DB, error) {
-	if db == nil {
-		return nil, errors.New("database not initialized")
-	}
-
-	return db, nil
+	return *d
 }

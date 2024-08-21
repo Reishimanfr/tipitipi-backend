@@ -7,6 +7,7 @@ import (
 
 var (
 	logger *zap.Logger
+	err    error
 )
 
 func InitLogger() error {

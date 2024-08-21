@@ -2,6 +2,7 @@ package main
 
 import (
 	"bash06/strona-fundacja/src/backend/core"
+	"bash06/strona-fundacja/src/backend/middleware"
 	"bash06/strona-fundacja/src/backend/routes"
 	"context"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 )
 
@@ -18,15 +20,16 @@ var (
 )
 
 func main() {
+	godotenv.Load()
+	db := core.Database{}
+	db.Init()
+
 	router := gin.Default()
-	dbError := core.InitDatabase()
 
 	loggerErr := core.InitLogger()
 	log := core.GetLogger()
 
-	if dbError != nil {
-		panic("Failed to initialize database: " + dbError.Error())
-	}
+	limiter := middleware.NewRateLimiter(5, 10)
 
 	if loggerErr != nil {
 		panic("Failed to initialize logger: " + loggerErr.Error())
@@ -35,9 +38,11 @@ func main() {
 	// TODO: set this to prod if env variable says we're in docker
 	// gin.SetMode(gin.ReleaseMode)
 
+	router.Use(middleware.RateLimiterMiddleware(limiter))
+
 	routes.NewHandler(&routes.Config{
 		Router: router,
-	})
+	}, &db)
 
 	server := &http.Server{
 		Addr:        ":" + port,
