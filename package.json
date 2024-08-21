@@ -5,7 +5,7 @@
         "type": "module",
         "scripts": {
                 "start:dev:windows": "./start_windows.bat",
-                "startd:dev:linux": "./start_linux.bat",
+                "start:dev:linux": "./start_linux.bat",
                 "start:server": "./src/backend/dist/server &",
                 "build": "tsc -b && vite build"
         },
