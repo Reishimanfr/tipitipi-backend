@@ -1,5 +1,13 @@
 import { useState } from "react"
 
+type TODO = any
+
+interface CreateBlogPostRequestBody {
+        title: string
+        content: string
+        images: TODO[]
+}
+
 const Admin = (props : any) => {
     const BORDER_CSS = "border"
 
@@ -9,7 +17,31 @@ const Admin = (props : any) => {
     //dodawanie postów
     const [title,setTitle] = useState("")
     const [content,setContent] = useState("")
-    const postHandler = () => {
+    const postHandler = async () => {
+        // const alive = await fetch("http://localhost:8080/heartbeat", {
+        //         method: "HEAD"
+        // })
+
+        // if (alive.status !== 200) {
+        //         throw new Error("Connection to backend server lost")
+        // }
+
+        let rq: CreateBlogPostRequestBody = {
+                images: [],
+                title,
+                content
+        }
+
+        const ok = await fetch("http://localhost:8080/api/blog/create", {
+                body: JSON.stringify(rq),
+                method: "POST"
+        })
+
+        console.log(ok)
+
+        null
+
+
         console.log("Post")
         console.log("tytuł : " + title)
         console.log("treść : " + content)

@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
-import { List, X } from "phosphor-react";
-import React from "react";
-import { Link } from "react-router-dom";
-import logoSmall from "../react.svg";
-import RenderNavbar from "./renderNavbar";
+import { List, X } from "phosphor-react"
+import React, { useEffect, useState } from "react"
+import { Link } from "react-router-dom"
+import logoSmall from "../react.svg"
+import RenderNavbar from "./renderNavbar"
 
 function toggleMenuVisibility(visible: boolean) {
   const xAndListStyle = "text-white float-right mr-12";

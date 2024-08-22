@@ -3,7 +3,6 @@ package routes
 import (
 	"bash06/strona-fundacja/src/backend/core"
 	"net/http"
-	"slices"
 	"strings"
 	"time"
 
@@ -44,18 +43,19 @@ func sanitizeData(data *CreateRequestBody, ctx *gin.Context) bool {
 		return false
 	}
 
-	var seenIds []int
+	// var seenIds []int
 
-	for _, v := range data.Images {
-		if slices.Contains(seenIds, v.Id) {
-			ctx.JSON(http.StatusConflict, gin.H{
-				"error": "duplicate image ids found",
-			})
-			return false
-		}
+	// for _, v := range data.Images {
+	// 	fmt.Println(seenIds)
+	// 	if slices.Contains(seenIds, v.Id) {
+	// 		ctx.JSON(http.StatusConflict, gin.H{
+	// 			"error": "duplicate image ids found",
+	// 		})
+	// 		return false
+	// 	}
 
-		seenIds = append(seenIds, v.Id)
-	}
+	// 	seenIds = append(seenIds, v.Id)
+	// }
 
 	return true
 }
@@ -76,12 +76,12 @@ func (h *Handler) CreateBlogPost(ctx *gin.Context) {
 
 	h.Db.Where("title = ?", data.Title).First(&postRecord)
 
-	if postRecord != nil {
-		ctx.JSON(http.StatusConflict, gin.H{
-			"error": "post with this name already exists",
-		})
-		return
-	}
+	// if postRecord != nil {
+	// 	ctx.JSON(http.StatusConflict, gin.H{
+	// 		"error": "post with this name already exists",
+	// 	})
+	// 	return
+	// }
 
 	newPost := &core.BlogPost{
 		Title:      data.Title,

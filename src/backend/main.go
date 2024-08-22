@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
@@ -39,6 +40,11 @@ func main() {
 	// gin.SetMode(gin.ReleaseMode)
 
 	router.Use(middleware.RateLimiterMiddleware(limiter))
+	router.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"*"}, // Allow all origins
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "HEAD"},
+		AllowHeaders: []string{"Origin", "Content-Type", "Authorization"},
+	}))
 
 	routes.NewHandler(&routes.Config{
 		Router: router,

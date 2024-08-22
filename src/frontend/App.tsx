@@ -1,13 +1,13 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import Navbar from './components/navbar';
+import { useState } from 'react'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import Footer from './components/footer'
+import Navbar from './components/navbar'
+import About from "./pages/about"
+import Admin from './pages/admin'
+import Blog from "./pages/blog"
+import Gallery from "./pages/gallery"
 import Mainpage from "./pages/mainpage"
-import Blog from "./pages/blog";
-import Gallery from "./pages/gallery";
-import About from "./pages/about";
-import Pricing from "./pages/pricing";
-import Footer from './components/footer';
-import Admin from './pages/admin';
-import { useState } from 'react';
+import Pricing from "./pages/pricing"
 
 function App() {
 
