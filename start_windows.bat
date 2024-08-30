@@ -1,6 +1,6 @@
 @echo off
 set DIST_PATH=.\src\backend\dist
-set URL=http://localhost:8080
+set URL=http://localhost:2333
 set MAX_ATTEMPTS=10
 set WAIT_TIME=1
 set attempt=1
@@ -14,7 +14,7 @@ if not exist "%DIST_PATH%\server.exe" (
     cd ./src/backend
 
     @REM Build server binary
-    go build -o ".\dist\server.ex\"
+    go build -o ".\dist\server.exe\"
     cd ../../
 )
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DIST_PATH=./src/backend/dist
-URL=http://localhost:8080
+URL=http://localhost:2333/heartbeat
 MAX_ATTEMPTS=10
 WAIT_TIME=1
 attempt=1
@@ -42,4 +42,5 @@ while [ $attempt -le $MAX_ATTEMPTS ]; do
 done
 
 echo "Failed to reach the server after $MAX_ATTEMPTS attempts."
+pkill server
 exit 1

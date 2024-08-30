@@ -10,69 +10,55 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type Claims struct {
-	Username string `json:"username"`
-	jwt.StandardClaims
-}
+var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
-func CreateToken(username string) (string, error) {
-	expirationTime := time.Now().Add(15 * time.Minute)
-	jwtSecret := os.Getenv("JWT_SECRET")
-
-	fmt.Println(jwtSecret)
-
-	claims := &Claims{
-		Username: username,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
-			Issuer:    "strona-fundacja-backend",
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
-	return token.SignedString(jwtSecret)
-}
-
-func ValidateToken(tokenString string) (*Claims, error) {
-	claims := &Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
-		return os.Getenv("JWT_SECRET"), nil
+func GenerateJWT(userID string, admin bool) (string, error) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"user_id": userID,
+		"admin":   admin,
+		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 	})
 
-	if err != nil {
-		return nil, err
-	}
-
-	if !token.Valid {
-		return nil, err
-	}
-
-	return claims, nil
+	return token.SignedString(jwtSecret)
 }
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		tokenString, err := ctx.Cookie("token")
+		tokenString := ctx.GetHeader("Authorization")
 
-		if err != nil {
+		if tokenString == "" {
 			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"error": "unauthorized",
+				"error": "Authorization header is missing",
 			})
 			ctx.Abort()
 			return
 		}
 
-		claims, err := ValidateToken(tokenString)
+		token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
+			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %s", t.Header["alg"])
+			}
+			return jwtSecret, nil
+		})
 
-		if err != nil {
+		if err != nil || !token.Valid {
 			ctx.JSON(http.StatusUnauthorized, gin.H{
-				"error": "invalid token",
+				"error": "Invalid token",
 			})
 			ctx.Abort()
 			return
 		}
 
-		ctx.Set("username", claims.Username)
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok || !claims["admin"].(bool) {
+			ctx.JSON(http.StatusForbidden, gin.H{
+				"error": "Forbidden",
+			})
+			ctx.Abort()
+			return
+		}
+
+		ctx.Set("user_id", claims["user_id"])
 		ctx.Next()
 	}
 }

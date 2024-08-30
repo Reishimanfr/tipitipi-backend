@@ -3,10 +3,10 @@ package core
 import (
 	"errors"
 	"os"
-	"time"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var (
@@ -15,17 +15,18 @@ var (
 
 type BlogPost struct {
 	ID         int `gorm:"primaryKey,autoIncrement"`
-	Created_At time.Time
-	Edited_At  time.Time
-	Title      string
+	Created_At int64
+	Edited_At  int64
+	Title      string `gorm:"unique"`
 	Content    string
 	Images     string
 }
 
 type AdminUser struct {
-	ID           int    `gorm:"primaryKey"`
-	Username     string `gorm:"unique, not null"`
-	PasswordHash string `gorm:"not null"`
+	ID       int `gorm:"primaryKey,autoIncrement:false"`
+	Username string
+	Hash     string
+	Salt     string
 }
 
 type Database struct {
@@ -43,7 +44,13 @@ func (d *Database) Init() Database {
 		defer file.Close()
 	}
 
-	db, err := gorm.Open(sqlite.Open(path), &gorm.Config{})
+	gormConfig := &gorm.Config{}
+
+	if os.Getenv("DEV") != "true" {
+		gormConfig.Logger = logger.Discard
+	}
+
+	db, err := gorm.Open(sqlite.Open(path), gormConfig)
 
 	if err != nil {
 		panic(err)

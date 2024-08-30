@@ -1,30 +1,38 @@
 package core
 
 import (
+	"os"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
 var (
-	logger *zap.Logger
+	Logger *zap.Logger
 	err    error
 )
 
-func InitLogger() error {
-	config := zap.NewDevelopmentConfig()
-	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+func InitLogger() (*zap.Logger, error) {
+	var config zap.Config
 
-	logger, err = config.Build()
-
-	if err != nil {
-		return err
+	if os.Getenv("DEV") != "true" {
+		config = zap.NewProductionConfig()
+	} else {
+		config = zap.NewDevelopmentConfig()
+		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	}
 
-	defer logger.Sync()
+	Logger, err = config.Build()
 
-	return nil
+	if err != nil {
+		return nil, err
+	}
+
+	defer Logger.Sync()
+
+	return Logger, nil
 }
 
 func GetLogger() *zap.Logger {
-	return logger
+	return Logger
 }

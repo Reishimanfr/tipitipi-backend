@@ -16,32 +16,43 @@ import (
 	"go.uber.org/zap"
 )
 
-var (
-	port = "8080"
-)
+var port string
 
 func main() {
-	godotenv.Load()
-	db := core.Database{}
-	db.Init()
+	godotenv.Load(".env")
 
-	router := gin.Default()
-
-	loggerErr := core.InitLogger()
-	log := core.GetLogger()
-
-	limiter := middleware.NewRateLimiter(5, 10)
+	log, loggerErr := core.InitLogger()
 
 	if loggerErr != nil {
 		panic("Failed to initialize logger: " + loggerErr.Error())
 	}
 
-	// TODO: set this to prod if env variable says we're in docker
-	// gin.SetMode(gin.ReleaseMode)
+	if os.Getenv("JWT_SECRET") == "" {
+		panic("No JWT secret provided in .env file")
+	}
 
-	router.Use(middleware.RateLimiterMiddleware(limiter))
+	port = os.Getenv("BACKEND_PORT")
+
+	if port == "" {
+		log.Warn("No backend port provided in .env, setting port to default value (2333)")
+		port = "2333"
+	}
+
+	if os.Getenv("DEV") != "true" {
+		// Disable gin's debug logs
+		gin.SetMode(gin.ReleaseMode)
+	}
+
+	db := core.Database{}
+	db.Init()
+
+	router := gin.Default()
+
+	router.Use(middleware.RateLimiterMiddleware(middleware.NewRateLimiter(5, 10)))
+
+	// TODO: set this up correctly
 	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"*"}, // Allow all origins
+		AllowOrigins: []string{"*://localhost:*/*"},
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "HEAD"},
 		AllowHeaders: []string{"Origin", "Content-Type", "Authorization"},
 	}))
@@ -50,6 +61,7 @@ func main() {
 		Router: router,
 	}, &db)
 
+	// TODO: set this correctly also
 	server := &http.Server{
 		Addr:        ":" + port,
 		Handler:     router,
