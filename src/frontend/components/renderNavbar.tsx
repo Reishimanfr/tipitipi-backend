@@ -1,22 +1,26 @@
 import { Link } from "react-router-dom"
 
+
+// const mobile_css = "text-white"
+
 const MOBILE_CSS = "mt-6 clear-right float-right no-underline text-white text-xl mr-2.5 bg-black-700 font-sans hover:border border-black-700 hover:bg-white hover:text-black" as const
 const DESKTOP_CSS = "float-right no-underline text-white text-3xl mr-2.5 bg-black-700 font-sans hover:duration-500  hover:bg-white hover:text-black" as const
 
-const DIV_MOBILE_CSS = "w-fit  h-screen pt-0 float-right bg-black" as const
-const DIV_DESKTOP_CSS = "w-full h-20 flex-wrap bg-black top-0 p-2.5 text-right" as const
+const DIV_MOBILE_CSS = "w-fit p-5 h-screen float-right top-20 bg-black" as const
+const DIV_DESKTOP_CSS = "w-full h-20 flex-wrap bg-black top-20 p-2.5 text-right" as const
 
 function getUrls(mobile: boolean) {
-    const css = mobile ? MOBILE_CSS : DESKTOP_CSS
+    const divCss = mobile ? MOBILE_CSS : DESKTOP_CSS
   
     const urls = [
-      <Link key={1} to='/' className={css}> Strona główna</Link>,
-      <Link key={2} to='/blog' className={css}> Blog </Link>,
-      <Link key={3} to='/gallery' className={css}> Galeria </Link>,
-      <Link key={4}to='/pricing' className={css}> Cennik </Link>,
-      <Link key={5} to='/about' className={css}> O nas </Link>
+      <Link key={1} to='/' className={divCss}> Strona główna</Link>,
+      <Link key={2} to='/blog' className={divCss}> Blog </Link>,
+      <Link key={3} to='/gallery' className={divCss}> Galeria </Link>,
+      <Link key={4}to='/pricing' className={divCss}> Cennik </Link>,
+      <Link key={5} to='/about' className={divCss}> O nas </Link>
     ];
   
+    // If we're on mobile add a new line for each menu
     if (mobile) {
       for (let i = 0; i < urls.length; i++) {
         urls.splice(i + 1, 0, <br />)
@@ -24,6 +28,7 @@ function getUrls(mobile: boolean) {
       }
     }
   
+    // Menu entries will appear in the wrong order if array isn't reversed
     return mobile ? urls : urls.reverse();
   }
   

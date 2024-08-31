@@ -4,7 +4,6 @@
         "version": "0.0.0",
         "type": "module",
         "scripts": {
-                "start:dev:windows": "./start_windows.bat",
                 "start:dev:linux": "./start_linux.bat",
                 "start:server": "./src/backend/dist/server &",
                 "build": "tsc -b && vite build"
@@ -16,7 +15,8 @@
                 "react": "^18.3.1",
                 "react-dom": "^18.3.1",
                 "react-i18next": "^15.0.1",
-                "react-router-dom": "^6.26.0"
+                "react-router-dom": "^6.26.0",
+                "tailwindcss-animated": "^1.1.2"
         },
         "devDependencies": {
                 "@types/react": "^18.3.3",

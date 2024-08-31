@@ -40,8 +40,8 @@ function RenderMobileMenu(
       <div
         className={`float-right fixed right-0 top-20 ${
           render
-            ? "animate-slide-in fill-forwards"
-            : "animate-slide-out fill-forwards"
+            ? "animate-fade-left animate-duration-[350ms] animate-ease-out"
+            : "animate-slide-out"
         }`}
       >
         <div className="opacity-80">

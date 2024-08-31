@@ -10,7 +10,6 @@ import Mainpage from "./pages/mainpage"
 import Pricing from "./pages/pricing"
 
 function App() {
-
   const [mainpageFirstHeader,setMainpageFirstHeader] = useState("")
   const changeMainpageFirstHeader = (newMessage : string) => {
     setMainpageFirstHeader(newMessage)

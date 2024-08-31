@@ -42,5 +42,6 @@ export default {
       
       addUtilities(newUtilities, ['responsive', 'hover']);
     },
+    require('tailwindcss-animated')
   ],
 };
