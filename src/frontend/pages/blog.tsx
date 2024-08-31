@@ -3,7 +3,7 @@ interface BlogPostDataBodyJson {
         Created_At: string 
         Edited_At: string
         ID: number
-        Images: string
+        Images: any[]
         Title: string
 }
 
@@ -12,7 +12,7 @@ const Blog = () => {
         let startIdx = 0
 
         async function getPosts(amount: number,  sortBy: "likes" | "newest" | "oldest") {
-                const request = await fetch("http://localhost:8080/api/blog/getPostById/1", {
+                const request = await fetch("http://localhost:8080/api/blog/posts/1", {
                         method: "GET"
                 })
 

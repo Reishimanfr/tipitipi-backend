@@ -1,11 +1,12 @@
 import { useState } from "react"
 
-type TODO = any
-
-interface CreateBlogPostRequestBody {
-        title: string
-        content: string
-        images: TODO[]
+interface BlogPostDataBodyJson {
+    Content: string
+    Created_At: string 
+    Edited_At: string
+    ID: number
+    Images: any[]
+    Title: string
 }
 
 const Admin = (props : any) => {
@@ -17,35 +18,24 @@ const Admin = (props : any) => {
     //dodawanie postów
     const [title,setTitle] = useState("")
     const [content,setContent] = useState("")
-    const postHandler = async () => {
-        // const alive = await fetch("http://localhost:8080/heartbeat", {
-        //         method: "HEAD"
-        // })
+    async function addPost() {
+        const formData = new FormData()
+        formData.append("title",title)
+        formData.append("content",content)
+        formData.append("images","")
+        const request = await fetch("http://localhost:2333/api/blog/create", {
+            method: "POST",
+            body: formData
+    })
+    
+    const data: BlogPostDataBodyJson = await request.json()
 
-        // if (alive.status !== 200) {
-        //         throw new Error("Connection to backend server lost")
-        // }
+    console.log(data.Title)
 
-        let rq: CreateBlogPostRequestBody = {
-                images: [],
-                title,
-                content
-        }
-
-        const ok = await fetch("http://localhost:8080/api/blog/create", {
-                body: JSON.stringify(rq),
-                method: "POST"
-        })
-
-        console.log(ok)
-
-        null
-
-
-        console.log("Post")
-        console.log("tytuł : " + title)
-        console.log("treść : " + content)
-        console.log("dodano do bazy danych")
+        // console.log("Post")
+        // console.log("tytuł : " + title)
+        // console.log("treść : " + content)
+        // console.log("dodano do bazy danych")
     }
 
     return(
@@ -75,7 +65,7 @@ const Admin = (props : any) => {
                 <input type="file" name="image" accept="image/*"></input><br></br><br></br>
             </form>
                 {/* <input type="submit" value="Postuj" name="submitButton" className={BORDER_CSS +" w-40 ml-5"} onSubmit={() => setTest("xd")}/> */}
-            <button className={BORDER_CSS +" w-40 ml-5"} onClick={() => postHandler()}>Postuj</button>
+            <button className={BORDER_CSS +" w-40 ml-5"} onClick={() => addPost()}>Postuj</button>
          
         </div>
         </>
