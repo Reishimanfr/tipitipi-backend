@@ -1,44 +1,39 @@
-# API entry URL
+### Get post by ID
 ```sh
-http://localhost:8080/api
+/api/blog/post/:id
 ```
-
-# Blog operations
-## Create blog post
-```sh
-/api/blog/create
-```
-Example request body:
+Returns:
 ```json
 {
-  "title": "Some title for the post",
-  "content": "Some content of the blog post",
-  "images": [
-      { "id": 1, "path": "path/to/image", "settings": [] }
-  ]
+  "Title": "Some post title (unique)",
+  "Content": "Some content",
+  "Created_At": 123456789, // Unix timestamp
+  "Edited_at": 123456789, // Unix timestamp
+  "Images": [] // TODO
 }
 ```
+Auth: `true` - TO BE CHANGED
 
-## Edit blog post
+### Get posts in batch
 ```sh
-/api/blog/edit/:id
+/api/blog/posts/
 ```
-Example request body:
-```json
-{
-  "title": "Some title for the post",
-  "content": "Some content of the blog post",
-  "images": [
-      { "id": 1, "path": "path/to/image", "settings": [] }
-  ]
-}
-```
-## Delete blog post
+Returns: array of posts like in `/api/blog/post/:id`<br>
+URL options: 
+* `sortBy` -> `likes`, `newest`, `oldest`
+* `limit` -> int, amount of posts to get
+* `offset` -> int, amount of posts to skip
+Auth: `true` - TO BE CHANGED
+
+### Delete post
 ```sh
 /api/blog/delete/:id
 ```
+Returns: `nil` or `error` if something went wrong
 
-# Server heartbeat
+
+### Edit post
 ```sh
-/api/heartbeat
+/api/blog/edit/:id
 ```
+Returns: `nil` or `error` if something went wrong
