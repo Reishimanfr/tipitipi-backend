@@ -5,9 +5,11 @@ import Navbar from './components/navbar'
 import About from "./pages/about"
 import Admin from './pages/admin'
 import Blog from "./pages/blog"
+import Login from './pages/login'
 import Gallery from "./pages/gallery"
 import Mainpage from "./pages/mainpage"
 import Pricing from "./pages/pricing"
+import Dashboard from './pages/dashboard'
 
 function App() {
   const [mainpageFirstHeader,setMainpageFirstHeader] = useState("")
@@ -20,7 +22,9 @@ function App() {
       <BrowserRouter>
       <Navbar/>
       <Routes>
-        <Route path="/admin" element={<Admin  mainpageFirstHeader={mainpageFirstHeader} changeMainpageFirstHeader={changeMainpageFirstHeader}/>}/>
+        <Route path='/admin' element ={<Admin/>}/>
+        <Route path="/admin/dashboard" element={<Dashboard  mainpageFirstHeader={mainpageFirstHeader} changeMainpageFirstHeader={changeMainpageFirstHeader}/>}/>
+        <Route path="/admin/login" element={<Login/>}/>
         <Route path="/" element={<Mainpage mainpageFirstHeader={mainpageFirstHeader}/>}/>
         <Route path="/gallery" element={<Gallery/>}/>
         <Route path="/about" element={<About/>}/>
