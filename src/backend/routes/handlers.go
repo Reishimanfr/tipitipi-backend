@@ -26,7 +26,7 @@ func NewHandler(cfg *Config, db *core.Database) {
 
 	cfg.Router.
 		HEAD("/heartbeat", h.Heartbeat).
-		POST("/admin/login", h.AdminLogin)
+		POST("/api/admin/login", h.AdminLogin)
 
 	// Define protected routes with a different group
 	protected := cfg.Router.Group("/")

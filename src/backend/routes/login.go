@@ -56,7 +56,7 @@ func (h *Handler) AdminLogin(c *gin.Context) {
 	}
 
 	err = h.A.Compare([]byte(adminData.Hash), []byte(adminData.Salt), []byte(password))
-
+	
 	if username != adminData.Username || err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "Invalid credentials",
