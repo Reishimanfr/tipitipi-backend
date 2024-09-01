@@ -9,6 +9,7 @@
                 "build": "tsc -b && vite build"
         },
         "dependencies": {
+                "@types/node": "^22.5.2",
                 "i18next": "^23.13.0",
                 "json-edit-react": "^1.15.7",
                 "phosphor-react": "^1.4.1",

@@ -1,8 +1,11 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 const Login = () => {
     const [login,setLogin] = useState("")
     const [password,setPassword] = useState("")
+
+    const navigate = useNavigate()
 
     console.log("Trying to log in")
 
@@ -14,9 +17,17 @@ const Login = () => {
             method: "POST",
             body: formData
         })
-
-        const data = await request.json()       //TODO idk what data type is 
-        console.log(data.Code)
+      
+        const response = await request.json()       //TODO idk what data type is 
+        if(request.ok && response.token != undefined) {
+            console.log(response.token)
+            localStorage.setItem("token",response.token)
+            navigate("/admin")
+        }
+        else{
+            console.log("something went wrong" , response.error)
+        }
+        
     }
 
     return(
@@ -26,7 +37,7 @@ const Login = () => {
                 <label htmlFor="login">Podaj login</label>
                 <input type="text" name="login" onChange={(event) => setLogin(event.target.value)}/><br></br>
 
-                <label htmlFor="password">Podaj login</label>
+                <label htmlFor="password">Podaj Hasło</label>
                 <input type="text" name="password" onChange={(event) => setPassword(event.target.value)}/><br></br>
                 
             </form>
