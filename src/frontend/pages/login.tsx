@@ -7,7 +7,6 @@ const Login = () => {
 
     const navigate = useNavigate()
 
-    console.log("Trying to log in")
 
     async function loginHandler(){
         const formData = new FormData()
@@ -18,14 +17,14 @@ const Login = () => {
             body: formData
         })
       
-        const response = await request.json()       //TODO idk what data type is 
+        const response  = await request.json()       //TODO idk what data type is 
+
         if(request.ok && response.token != undefined) {
-            console.log(response.token)
             localStorage.setItem("token",response.token)
-            navigate("/admin")
+            navigate("/admin/dashboard")
         }
         else{
-            console.log("something went wrong" , response.error)
+            console.log("something went wrong: " , response.error)
         }
         
     }

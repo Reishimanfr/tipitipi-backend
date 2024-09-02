@@ -5,7 +5,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
-
+	
+	"github.com/gin-gonic/gin/binding"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -17,10 +18,16 @@ type RequestBodyImageData struct {
 }
 
 type CreateRequestBody struct {
-	Title   string                 `json:"title"`
-	Content string                 `json:"content"`
-	Images  []RequestBodyImageData `json:"images"`
+	Title   string                 `form:"title" binding:"required"`
+	Content string                 `form:"content" binding:"required"`
+	Images  any `form:"images"`
 }
+
+// type CreateRequestBody struct {
+// 	Title   string                 `json:"title"`
+// 	Content string                 `json:"content"`
+// 	Images  any `json:"images"`
+// }
 
 func sanitizeData(data *CreateRequestBody, ctx *gin.Context) bool {
 	if strings.Trim(data.Title, "") == "" {
@@ -64,11 +71,12 @@ func sanitizeData(data *CreateRequestBody, ctx *gin.Context) bool {
 func (h *Handler) create(ctx *gin.Context) {
 	var data CreateRequestBody
 
-	if err := ctx.BindJSON(&data); err != nil {
+	if err := ctx.ShouldBindWith(&data, binding.FormMultipart); err != nil {
 		h.Log.Error("Failed to bind json data", zap.Error(err))
 		ctx.JSON(http.StatusUnprocessableEntity, gin.H{
 			"error": "Failed to bind json data",
 		})
+		ctx.Abort()
 		return
 	}
 

@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 interface BlogPostDataBodyJson {
     Content: string
@@ -7,10 +8,12 @@ interface BlogPostDataBodyJson {
     ID: number
     Images: any[]
     Title: string
+    error?:  string
 }
 
 const Dashboard = (props : any) => {
     const BORDER_CSS = "border"
+    const navigate = useNavigate()
 
     //edycja tekstu na stronie
     const [mainpageFirstHeader , setMainpageFirstHeader] = useState(props.mainpageFirstHeader)  //tworzymy stan lokalny ktorego poczatkowym stanem jest to co widzą wszyscy , czyli state z app.tsx
@@ -18,24 +21,55 @@ const Dashboard = (props : any) => {
     //dodawanie postów
     const [title,setTitle] = useState("")
     const [content,setContent] = useState("")
+
+    function validateDataForm() {
+        if(title === "") {
+            alert("Podano pusty tytuł")
+    
+            return false
+        }
+        if(content === "") {
+            alert("Podano pustą treść")
+            return false
+        }
+        const confirm = window.confirm("Czy jesteś pewien że chcesz opublikować ten post?")
+        if(!confirm){
+            return false;
+        }
+        return true
+    }
+
     async function addPost() {
+        if (!validateDataForm()) {return}
+
         const formData = new FormData()
         formData.append("title",title)
         formData.append("content",content)
-        formData.append("images","")
+        //formData.append("images","")
+
+        const token = localStorage.getItem("token")
+        if (!token) {
+            console.debug("Token is invalid, redirecting to login page...")
+            navigate("/admin/login")
+            return
+        }
+
         const request = await fetch("http://localhost:2333/api/blog/create", {
             method: "POST",
-            body: formData
-    })
+            body: formData,
+            headers: {Authorization: token}
+        })
     
-    const data: BlogPostDataBodyJson = await request.json()
-
-    console.log(data.Title)
-
-        // console.log("Post")
-        // console.log("tytuł : " + title)
-        // console.log("treść : " + content)
-        // console.log("dodano do bazy danych")
+    
+        if(request.ok){
+            alert("Opublikowano post")
+            window.location.reload();
+            
+        }
+        else {
+            const response: BlogPostDataBodyJson = await request.json()
+            alert("Błąd: " + response.error)
+        }
     }
 
     return(
@@ -52,6 +86,8 @@ const Dashboard = (props : any) => {
             
             <hr></hr>
         </div>
+
+
         <div>
             <h1 className="font-bold text-3xl">Dodawanie postów</h1><br></br>
             <form>
