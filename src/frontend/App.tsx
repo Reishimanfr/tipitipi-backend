@@ -17,6 +17,11 @@ function App() {
     setMainpageFirstHeader(newMessage)
   }
 
+
+
+      //TODO moze autoryzacja ma byc  tutaj flaga i zmienna isAuthorized ( wsensie czy token jwt sie zgadza) powinna byc rozsyłana po kodzie
+
+
   return (
     <div className='relative min-h-screen'>
       <BrowserRouter>
