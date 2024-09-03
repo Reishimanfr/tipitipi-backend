@@ -18,8 +18,8 @@ type AuthenticationBody struct {
 }
 
 func (h *Handler) AdminLogin(c *gin.Context) {
-	var adminData core.AdminUser
-	var body AuthenticationBody
+	adminData := new(core.AdminUser)
+	body := new(AuthenticationBody)
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{
@@ -42,7 +42,7 @@ func (h *Handler) AdminLogin(c *gin.Context) {
 			hashSalt, genErr := h.A.GenerateHash([]byte(body.Password), nil)
 
 			if genErr == nil {
-				adminData = core.AdminUser{
+				adminData = &core.AdminUser{
 					ID:       1,
 					Username: "admin",
 					Hash:     string(hashSalt.Hash),
