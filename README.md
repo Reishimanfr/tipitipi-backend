@@ -74,7 +74,7 @@ Response:
 ]
 ```
 
-### `GET /blog/posts`
+### `GET /blog/post/:id`
 Request:
 ```ts
 await fetch("http://localhost:2333/blog/post/3", {
