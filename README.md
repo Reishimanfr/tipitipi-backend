@@ -125,7 +125,7 @@ Codes:
 Request:
 ```ts
 await fetch("http://localhost:2333/blog/post/3", {
-  method: "DELETE",
+  method: "POST",
   headers: {
     Authorization: "JWT token here"
   },
