@@ -12,11 +12,22 @@ import (
 	"gorm.io/gorm"
 )
 
-func (h *Handler) AdminLogin(c *gin.Context) {
-	username := c.PostForm("username")
-	password := c.PostForm("password")
+type AuthenticationBody struct {
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+}
 
+func (h *Handler) AdminLogin(c *gin.Context) {
 	var adminData core.AdminUser
+	var body AuthenticationBody
+
+	if err := c.ShouldBindJSON(&body); err != nil {
+		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{
+			"error":   err.Error(),
+			"message": "Malformed or invalid JSON",
+		})
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(c.Request.Context(), time.Second*5)
 	defer cancel()
@@ -28,7 +39,7 @@ func (h *Handler) AdminLogin(c *gin.Context) {
 		result := h.Db.WithContext(ctx).First(&adminData, "id = 1")
 
 		if result.Error == gorm.ErrRecordNotFound {
-			hashSalt, genErr := h.A.GenerateHash([]byte(password), nil)
+			hashSalt, genErr := h.A.GenerateHash([]byte(body.Password), nil)
 
 			if genErr == nil {
 				adminData = core.AdminUser{
@@ -51,31 +62,29 @@ func (h *Handler) AdminLogin(c *gin.Context) {
 
 	if err != nil {
 		h.Log.Error("Error during password operation", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error": "Internal server error",
+		})
 		return
 	}
 
-	err = h.A.Compare([]byte(adminData.Hash), []byte(adminData.Salt), []byte(password))
-	
-	if username != adminData.Username || err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
+	err = h.A.Compare([]byte(adminData.Hash), []byte(adminData.Salt), []byte(body.Password))
+
+	if body.Username != adminData.Username || err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"error": "Invalid credentials",
 		})
-		c.Abort()
 		return
 	}
 
-	token, err := middleware.GenerateJWT(username, true)
+	token, err := middleware.GenerateJWT(body.Username, true)
 	if err != nil {
 		h.Log.Error("Error while generating JWT token", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error": "Could not generate token",
 		})
-		c.Abort()
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"token": token,
-	})
+	c.JSON(http.StatusOK, gin.H{"token": token})
 }

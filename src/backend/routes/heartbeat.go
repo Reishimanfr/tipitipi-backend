@@ -6,6 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (h *Handler) Heartbeat(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, gin.H{})
+func (h *Handler) Heartbeat(c *gin.Context) {
+	c.Status(http.StatusOK)
 }

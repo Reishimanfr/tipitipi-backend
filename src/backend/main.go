@@ -12,15 +12,14 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 )
 
-var port string
+var (
+	port = "2333"
+)
 
 func main() {
-	godotenv.Load(".env")
-
 	log, loggerErr := core.InitLogger()
 
 	if loggerErr != nil {
@@ -31,11 +30,8 @@ func main() {
 		panic("No JWT secret provided in .env file")
 	}
 
-	port = os.Getenv("BACKEND_PORT")
-
-	if port == "" {
-		log.Warn("No backend port provided in .env, setting port to default value (2333)")
-		port = "2333"
+	if os.Getenv("BACKEND_PORT") != "" {
+		port = os.Getenv("BACKEND_PORT")
 	}
 
 	if os.Getenv("DEV") != "true" {
@@ -52,20 +48,25 @@ func main() {
 
 	// TODO: set this up correctly
 	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"*"},
-		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "HEAD"},
-		AllowHeaders: []string{"Origin", "Content-Type", "Authorization"},
+		AllowOrigins:           []string{"*localhost*"},
+		AllowMethods:           []string{"HEAD", "POST", "DELETE", "PATCH", "GET"},
+		AllowHeaders:           []string{"Origin", "Content-Type", "Authorization"},
+		AllowFiles:             true,
+		AllowWebSockets:        false,
+		AllowBrowserExtensions: false,
 	}))
 
 	routes.NewHandler(&routes.Config{
 		Router: router,
 	}, &db)
 
-	// TODO: set this correctly also
 	server := &http.Server{
-		Addr:        ":" + port,
-		Handler:     router,
-		IdleTimeout: -1,
+		Addr:           ":" + port,
+		Handler:        router,
+		ReadTimeout:    5 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		IdleTimeout:    120 * time.Second,
+		MaxHeaderBytes: 1 << 20, // 1 MB
 	}
 
 	go func() {
