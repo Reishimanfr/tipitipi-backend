@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 type EditRequestBody struct {
@@ -17,9 +18,9 @@ type EditRequestBody struct {
 }
 
 func (h *Handler) edit(c *gin.Context) {
-	var data EditRequestBody
+	body := new(EditRequestBody)
 
-	if err := c.BindJSON(&data); err != nil {
+	if err := c.BindJSON(&body); err != nil {
 		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   err.Error(),
 			"message": "Malformed or invalid JSON",
@@ -27,7 +28,8 @@ func (h *Handler) edit(c *gin.Context) {
 		return
 	}
 
-	var postRecord *core.BlogPost
+	postRecord := new(core.BlogPost)
+
 	stringId := c.Param("id")
 	id, err := strconv.Atoi(stringId)
 
@@ -47,21 +49,21 @@ func (h *Handler) edit(c *gin.Context) {
 		return
 	}
 
-	var newBlog core.BlogPost
+	newBlog := new(core.BlogPost)
 
-	if strings.Trim(data.Title, "") != "" && data.Title != postRecord.Title {
-		newBlog.Title = data.Title
+	if strings.Trim(body.Title, "") != "" && body.Title != postRecord.Title {
+		newBlog.Title = body.Title
 	}
 
-	if data.Content != "" && data.Content != postRecord.Content {
-		newBlog.Content = data.Content
+	if body.Content != "" && body.Content != postRecord.Content {
+		newBlog.Content = body.Content
 	}
 
-	if len(data.Images) > 0 {
+	if len(body.Images) > 0 {
 		// TODO
 	}
 
-	if newBlog == (core.BlogPost{}) {
+	if newBlog.Title == "" && newBlog.Content == "" && len(newBlog.Images) == 0 {
 		c.JSON(http.StatusNotModified, postRecord)
 		return
 	}
@@ -71,6 +73,7 @@ func (h *Handler) edit(c *gin.Context) {
 	result := h.Db.Where("id = ?", id).UpdateColumns(newBlog)
 
 	if result.Error != nil {
+		h.Log.Error("Error while updating post record", zap.Error(err))
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   result.Error.Error(),
 			"message": "Error while updating post",

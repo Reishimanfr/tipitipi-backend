@@ -24,9 +24,9 @@ type CreateRequestBody struct {
 }
 
 func validateImages(data []*RequestBodyImageData, c *gin.Context) bool {
-	var seenIds []uint8
+	seenIds := make([]uint8, len(data))
 
-	for _, v := range data {
+	for i, v := range data {
 		if slices.Contains(seenIds, v.Id) {
 			c.JSON(http.StatusConflict, gin.H{
 				"error": "Duplicate image ids",
@@ -34,14 +34,14 @@ func validateImages(data []*RequestBodyImageData, c *gin.Context) bool {
 			return false
 		}
 
-		seenIds = append(seenIds, v.Id)
+		seenIds[i] = v.Id
 	}
 
 	return true
 }
 
 func (h *Handler) create(c *gin.Context) {
-	var data CreateRequestBody
+	data := new(CreateRequestBody)
 
 	if err := c.ShouldBindWith(&data, binding.JSON); err != nil {
 		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{
@@ -58,7 +58,7 @@ func (h *Handler) create(c *gin.Context) {
 
 	if result.Error != nil {
 		h.Log.Error("Error while checking for post in database", zap.Error(result.Error))
-		c.AbortWithStatusJSON(http.StatusConflict, gin.H{
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   result.Error.Error(),
 			"message": "Error while cheching if post exists",
 		})
@@ -72,7 +72,7 @@ func (h *Handler) create(c *gin.Context) {
 		return
 	}
 
-	newPost := &core.BlogPost{
+	newPost := core.BlogPost{
 		Title:      data.Title,
 		Content:    data.Content,
 		Created_At: time.Now().Unix(),

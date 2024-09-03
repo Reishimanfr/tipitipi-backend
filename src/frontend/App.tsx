@@ -5,11 +5,9 @@ import Navbar from './components/navbar'
 import About from "./pages/about"
 import Admin from './pages/admin'
 import Blog from "./pages/blog"
-import Login from './pages/login'
 import Gallery from "./pages/gallery"
 import Mainpage from "./pages/mainpage"
 import Pricing from "./pages/pricing"
-import Dashboard from './pages/dashboard'
 
 function App() {
   const [mainpageFirstHeader,setMainpageFirstHeader] = useState("")
@@ -17,19 +15,12 @@ function App() {
     setMainpageFirstHeader(newMessage)
   }
 
-
-
-      //TODO moze autoryzacja ma byc  tutaj flaga i zmienna isAuthorized ( wsensie czy token jwt sie zgadza) powinna byc rozsyłana po kodzie
-
-
   return (
     <div className='relative min-h-screen'>
       <BrowserRouter>
       <Navbar/>
       <Routes>
-        <Route path='/admin' element ={<Admin/>}/>
-        <Route path="/admin/dashboard" element={<Dashboard  mainpageFirstHeader={mainpageFirstHeader} changeMainpageFirstHeader={changeMainpageFirstHeader}/>}/>
-        <Route path="/admin/login" element={<Login/>}/>
+        <Route path="/admin" element={<Admin  mainpageFirstHeader={mainpageFirstHeader} changeMainpageFirstHeader={changeMainpageFirstHeader}/>}/>
         <Route path="/" element={<Mainpage mainpageFirstHeader={mainpageFirstHeader}/>}/>
         <Route path="/gallery" element={<Gallery/>}/>
         <Route path="/about" element={<About/>}/>

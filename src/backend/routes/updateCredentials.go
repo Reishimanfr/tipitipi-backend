@@ -18,10 +18,9 @@ type CredentialsRequestBody struct {
 }
 
 func (h *Handler) changePassword(c *gin.Context) {
-	var newCredentials CredentialsRequestBody
+	newCredentials := new(CredentialsRequestBody)
 
 	if err := c.ShouldBindWith(&newCredentials, binding.JSON); err != nil {
-		h.Log.Error("Failed to bind json data", zap.Error(err))
 		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   err.Error(),
 			"message": "Malformed or invalid JSON",
@@ -31,6 +30,7 @@ func (h *Handler) changePassword(c *gin.Context) {
 
 	hashSalt, err := h.A.GenerateHash([]byte(newCredentials.Password), nil)
 	if err != nil {
+		h.Log.Error("Error while hashing password", zap.Error(err))
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"message": "Error while hashing the new password",
 			"error":   err.Error(),
@@ -49,7 +49,6 @@ func (h *Handler) changePassword(c *gin.Context) {
 	// managed to login without having an account created and changed
 	// their password with some voodoo fucking magic
 	if result.Error == gorm.ErrRecordNotFound {
-		h.Log.Info("Admin user managed to change their password while not existing")
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error":   result.Error.Error(),
 			"message": "Admin user managed to try to change their password while not existing",

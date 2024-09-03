@@ -6,6 +6,7 @@ import (
 	"slices"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -17,7 +18,7 @@ type PostsInBatchBody struct {
 }
 
 func (h *Handler) posts(c *gin.Context) {
-	var body PostsInBatchBody
+	body := new(PostsInBatchBody)
 
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{
@@ -34,7 +35,8 @@ func (h *Handler) posts(c *gin.Context) {
 		return
 	}
 
-	var postRecords *[]core.BlogPost
+	postRecords := make([]*core.BlogPost, body.Limit)
+
 	orderClause := clause.OrderByColumn{
 		Desc: true,
 		Column: clause.Column{
@@ -54,6 +56,7 @@ func (h *Handler) posts(c *gin.Context) {
 	result := h.Db.Order(orderClause).Offset(int(body.Offset)).Limit(int(body.Limit)).Find(&postRecords)
 
 	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
+		h.Log.Error("Error while getting post records from database", zap.Error(result.Error))
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   result.Error.Error(),
 			"message": "Error while getting records from database",
@@ -61,7 +64,7 @@ func (h *Handler) posts(c *gin.Context) {
 		return
 	}
 
-	if len(*postRecords) < 1 {
+	if len(postRecords) < 1 {
 		c.AbortWithStatusJSON(http.StatusNoContent, gin.H{
 			"error": "Post not found",
 		})
