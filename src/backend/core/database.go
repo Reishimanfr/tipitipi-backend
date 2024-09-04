@@ -31,6 +31,7 @@ type AdminUser struct {
 
 type Database struct {
 	*gorm.DB
+	Memory bool
 }
 
 func (d *Database) Init() Database {
@@ -50,7 +51,13 @@ func (d *Database) Init() Database {
 		gormConfig.Logger = logger.Discard
 	}
 
-	db, err := gorm.Open(sqlite.Open(path), gormConfig)
+	var db *gorm.DB
+
+	if d.Memory {
+		db, err = gorm.Open(sqlite.Open("../../test.db"), gormConfig)
+	} else {
+		db, err = gorm.Open(sqlite.Open(path), gormConfig)
+	}
 
 	if err != nil {
 		panic(err)
