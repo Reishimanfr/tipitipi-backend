@@ -24,3 +24,11 @@ jobs:
     - name: Build
       run: go build -v ./src/backend
 
+    - name: go-test-report
+      uses: brian-pickens/go-test-report@v1
+      with:
+        packages: ./src/backend # optional, default is ./...
+        reports_only: false # optional, default is false
+        summary: true # optional, default is true
+        GO111MODULE: auto # optional, default is auto
+          
