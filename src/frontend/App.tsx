@@ -10,6 +10,8 @@ import Gallery from "./pages/gallery"
 import Mainpage from "./pages/mainpage"
 import Pricing from "./pages/pricing"
 import Dashboard from './pages/dashboard'
+import PostCreating from './pages/admin/dashboardPages/postCreating'
+
 
 function App() {
   const [mainpageFirstHeader,setMainpageFirstHeader] = useState("")
@@ -30,6 +32,7 @@ function App() {
         <Route path='/admin' element ={<Admin/>}/>
         <Route path="/admin/dashboard" element={<Dashboard  mainpageFirstHeader={mainpageFirstHeader} changeMainpageFirstHeader={changeMainpageFirstHeader}/>}/>
         <Route path="/admin/login" element={<Login/>}/>
+        <Route path='/admin/dashboard/create-post' element={<PostCreating/>}/>
         <Route path="/" element={<Mainpage mainpageFirstHeader={mainpageFirstHeader}/>}/>
         <Route path="/gallery" element={<Gallery/>}/>
         <Route path="/about" element={<About/>}/>
