@@ -16,21 +16,21 @@ func GenerateJWT(userID string, admin bool) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": userID,
 		"admin":   admin,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(),
+		"exp":     time.Now().Add(time.Hour * 12).Unix(),
 	})
 
 	return token.SignedString(jwtSecret)
 }
 
 func AuthMiddleware() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		tokenString := ctx.GetHeader("Authorization")
+	return func(c *gin.Context) {
+		tokenString := c.GetHeader("Authorization")
 
 		if tokenString == "" {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "Authorization header is missing",
 			})
-			ctx.Abort()
+			c.Abort()
 			return
 		}
 
@@ -42,23 +42,23 @@ func AuthMiddleware() gin.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
-			ctx.JSON(http.StatusUnauthorized, gin.H{
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid token",
 			})
-			ctx.Abort()
+			c.Abort()
 			return
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok || !claims["admin"].(bool) {
-			ctx.JSON(http.StatusForbidden, gin.H{
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
 				"error": "Forbidden",
 			})
-			ctx.Abort()
+			c.Abort()
 			return
 		}
 
-		ctx.Set("user_id", claims["user_id"])
-		ctx.Next()
+		c.Set("user_id", claims["user_id"])
+		c.Next()
 	}
 }

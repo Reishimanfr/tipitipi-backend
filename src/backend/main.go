@@ -12,15 +12,65 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
-	"go.uber.org/zap"
 )
 
-var port string
+var (
+	port   = "2333"
+	server *http.Server
+)
+
+func startServer(router *gin.Engine) {
+	server = &http.Server{
+		Addr:           ":" + port,
+		Handler:        router,
+		ReadTimeout:    5 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		IdleTimeout:    120 * time.Second,
+		MaxHeaderBytes: 1 << 20, // 1 MB
+	}
+
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			panic("Failed to start server: " + err.Error())
+		}
+	}()
+}
+
+func stopServer() {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		panic("Server forced to shutdown: " + err.Error())
+	}
+}
+
+func setupRouter(db *core.Database, testing bool) *gin.Engine {
+	router := gin.Default()
+
+	if !testing {
+		router.Use(middleware.RateLimiterMiddleware(middleware.NewRateLimiter(5, 10)))
+		router.Use(middleware.BodySizeLimiterMiddleware(middleware.NewSizeLimiter(1 << 20)))
+
+		// TODO: set this up correctly
+		router.Use(cors.New(cors.Config{
+			AllowOrigins:           []string{"*localhost*"},
+			AllowMethods:           []string{"HEAD", "POST", "DELETE", "PATCH", "GET"},
+			AllowHeaders:           []string{"Origin", "Content-Type", "Authorization"},
+			AllowFiles:             false,
+			AllowWebSockets:        false,
+			AllowBrowserExtensions: false,
+		}))
+	}
+
+	routes.NewHandler(&routes.Config{
+		Router: router,
+	}, db)
+
+	return router
+}
 
 func main() {
-	godotenv.Load(".env")
-
 	log, loggerErr := core.InitLogger()
 
 	if loggerErr != nil {
@@ -31,11 +81,8 @@ func main() {
 		panic("No JWT secret provided in .env file")
 	}
 
-	port = os.Getenv("BACKEND_PORT")
-
-	if port == "" {
-		log.Warn("No backend port provided in .env, setting port to default value (2333)")
-		port = "2333"
+	if os.Getenv("BACKEND_PORT") != "" {
+		port = os.Getenv("BACKEND_PORT")
 	}
 
 	if os.Getenv("DEV") != "true" {
@@ -43,36 +90,13 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	db := core.Database{}
+	db := core.Database{
+		Memory: false,
+	}
 	db.Init()
 
-	router := gin.Default()
-
-	router.Use(middleware.RateLimiterMiddleware(middleware.NewRateLimiter(5, 10)))
-
-	// TODO: set this up correctly
-	router.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"*"},
-		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "HEAD"},
-		AllowHeaders: []string{"Origin", "Content-Type", "Authorization"},
-	}))
-
-	routes.NewHandler(&routes.Config{
-		Router: router,
-	}, &db)
-
-	// TODO: set this correctly also
-	server := &http.Server{
-		Addr:        ":" + port,
-		Handler:     router,
-		IdleTimeout: -1,
-	}
-
-	go func() {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			panic("Failed to start server: " + err.Error())
-		}
-	}()
+	r := setupRouter(&db, false)
+	startServer(r)
 
 	log.Info("Server started on http://localhost:" + port)
 
@@ -81,11 +105,4 @@ func main() {
 	<-quit
 
 	log.Warn("Gracefully shutting down backend server...")
-
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	if err := server.Shutdown(ctx); err != nil {
-		log.Error("Server forced to shutdown", zap.Error(err))
-	}
 }

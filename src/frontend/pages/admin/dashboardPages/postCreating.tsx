@@ -1,6 +1,6 @@
+import { useState } from "react"
 import ReactQuill from "react-quill"
 import 'react-quill/dist/quill.snow.css'
-import { useState } from "react";
 
 export default function PostCreating() {
   const [convertedText, setConvertedText] = useState("Some default content");

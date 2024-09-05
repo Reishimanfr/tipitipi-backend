@@ -4,13 +4,13 @@ import Footer from './components/footer'
 import Navbar from './components/navbar'
 import About from "./pages/about"
 import Admin from './pages/admin'
+import PostCreating from './pages/admin/dashboardPages/postCreating'
 import Blog from "./pages/blog"
-import Login from './pages/login'
+import Dashboard from './pages/dashboard'
 import Gallery from "./pages/gallery"
+import Login from './pages/login'
 import Mainpage from "./pages/mainpage"
 import Pricing from "./pages/pricing"
-import Dashboard from './pages/dashboard'
-import PostCreating from './pages/admin/dashboardPages/postCreating'
 
 
 function App() {
@@ -18,11 +18,6 @@ function App() {
   const changeMainpageFirstHeader = (newMessage : string) => {
     setMainpageFirstHeader(newMessage)
   }
-
-
-
-      //TODO moze autoryzacja ma byc  tutaj flaga i zmienna isAuthorized ( wsensie czy token jwt sie zgadza) powinna byc rozsyłana po kodzie
-
 
   return (
     <div className='relative min-h-screen'>

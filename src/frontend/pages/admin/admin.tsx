@@ -1,6 +1,6 @@
-import { useNavigate } from "react-router-dom";
-import { Buffer } from "buffer";
-import { useEffect } from "react";
+import { Buffer } from "buffer"
+import { useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 
 const decode = (str: string):string => Buffer.from(str, 'base64').toString('binary');
 
