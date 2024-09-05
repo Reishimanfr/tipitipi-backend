@@ -13,6 +13,7 @@ import (
 func (h *Handler) post(c *gin.Context) {
 	stringId := c.Param("id")
 	id, err := strconv.Atoi(stringId)
+	images := c.Query("images") == "true"
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -22,8 +23,14 @@ func (h *Handler) post(c *gin.Context) {
 	}
 
 	postRecord := new(core.BlogPost)
+	result := new(gorm.DB)
 
-	result := h.Db.Where("id = ?", id).First(&postRecord)
+	if images {
+		result = h.Db.Preload("Images").Where("id = ?", id).First(&postRecord)
+	} else {
+		result = h.Db.Where("id = ?", id).First(&postRecord)
+	}
+
 	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
 		h.Log.Error("Error while searching for a post record", zap.Error(err))
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{

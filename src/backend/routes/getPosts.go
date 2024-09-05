@@ -22,9 +22,10 @@ var (
 )
 
 func (h *Handler) posts(c *gin.Context) {
-	offsetStr := c.Param("offset")
-	limitStr := c.Param("limit")
-	sort := c.Param("sort")
+	offsetStr := c.DefaultQuery("offset", "0")
+	limitStr := c.DefaultQuery("limit", "5")
+	sort := c.DefaultQuery("sort", "newest")
+	images := c.DefaultQuery("images", "false")
 
 	offset, err := strconv.Atoi(offsetStr)
 	if err != nil {
@@ -69,7 +70,13 @@ func (h *Handler) posts(c *gin.Context) {
 		}
 	}
 
-	result := h.Db.Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords)
+	result := new(gorm.DB)
+
+	if images == "true" {
+		result = h.Db.Preload("Images").Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords)
+	} else {
+		result = h.Db.Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords)
+	}
 
 	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
 		h.Log.Error("Error while getting post records from database", zap.Error(result.Error))
