@@ -3,23 +3,28 @@ interface BlogPostDataBodyJson {
         Created_At: string 
         Edited_At: string
         ID: number
-        Images: any[]
+        Images: string
         Title: string
 }
 
 const Blog = () => {
-        let posts = 6
-        let startIdx = 0
+        let limit = 6
+        let offset = 0
 
         async function getPosts(amount: number,  sortBy: "likes" | "newest" | "oldest") {
                 const request = await fetch("http://localhost:8080/api/blog/posts/1", {
-                        method: "GET"
+                        method: "GET",
+                        body: JSON.stringify({
+                                limit: amount,
+                                offset: offset,
+                                sortBy: sortBy
+                        })
                 })
 
 
-                const data: BlogPostDataBodyJson = await request.json()
+                const data: BlogPostDataBodyJson[] = await request.json()
 
-                console.log(data.Title)
+                console.log(data[0].Title)
         }
 
     return(
