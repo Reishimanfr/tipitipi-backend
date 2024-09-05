@@ -2,7 +2,6 @@ package routes
 
 import (
 	"bash06/strona-fundacja/src/backend/core"
-	"bash06/strona-fundacja/src/backend/middleware"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -34,7 +33,7 @@ func NewHandler(cfg *Config, db *core.Database) {
 	}
 
 	protected := cfg.Router.Group("/")
-	protected.Use(middleware.AuthMiddleware())
+	// protected.Use(middleware.AuthMiddleware())
 	{
 		blog := protected.Group("/blog/post")
 		{

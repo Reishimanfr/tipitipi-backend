@@ -50,7 +50,8 @@ func setupRouter(db *core.Database, testing bool) *gin.Engine {
 
 	if !testing {
 		router.Use(middleware.RateLimiterMiddleware(middleware.NewRateLimiter(5, 10)))
-		router.Use(middleware.BodySizeLimiterMiddleware(middleware.NewSizeLimiter(1 << 20)))
+		// TODO: implement limiter
+		// router.Use(middleware.BodySizeLimiterMiddleware(middleware.NewSizeLimiter(5000000)))
 
 		// TODO: set this up correctly
 		router.Use(cors.New(cors.Config{
@@ -100,6 +101,7 @@ func main() {
 
 	log.Info("Server started on http://localhost:" + port)
 
+	// Keeps the server from shutting itself down
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	<-quit

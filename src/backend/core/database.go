@@ -13,13 +13,20 @@ var (
 	path = "../../database.sqlite"
 )
 
+type ImageRecord struct {
+	ID         int `gorm:"primaryKey,autoIncrement"`
+	Filename   string
+	Path       string
+	BlogPostID int `gorm:"index"`
+}
+
 type BlogPost struct {
 	ID         int `gorm:"primaryKey,autoIncrement"`
 	Created_At int64
 	Edited_At  int64
 	Title      string `gorm:"unique"`
 	Content    string
-	Images     string
+	Images     []ImageRecord `gorm:"foreignKey:BlogPostID"`
 }
 
 type AdminUser struct {
@@ -63,7 +70,7 @@ func (d *Database) Init() Database {
 		panic(err)
 	}
 
-	db.AutoMigrate(&BlogPost{}, &AdminUser{})
+	db.AutoMigrate(&BlogPost{}, &AdminUser{}, &ImageRecord{})
 	d.DB = db
 
 	return *d

@@ -12,9 +12,9 @@ import (
 )
 
 type EditRequestBody struct {
-	Title   string                  `json:"title" binding:"required"`
-	Content string                  `json:"content" binding:"required"`
-	Images  []*RequestBodyImageData `json:"images"`
+	Title   string `json:"title" binding:"required"`
+	Content string `json:"content" binding:"required"`
+	// Images  []*RequestBodyAttachmentData `json:"images"`
 }
 
 func (h *Handler) edit(c *gin.Context) {
@@ -59,9 +59,9 @@ func (h *Handler) edit(c *gin.Context) {
 		newBlog.Content = body.Content
 	}
 
-	if len(body.Images) > 0 {
-		// TODO
-	}
+	// if len(body.Images) > 0 {
+	// 	// TODO
+	// }
 
 	if newBlog.Title == "" && newBlog.Content == "" && len(newBlog.Images) == 0 {
 		c.JSON(http.StatusNotModified, postRecord)
