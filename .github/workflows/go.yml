@@ -17,7 +17,7 @@ jobs:
       with:
         go-version: '1.23'
     - name: Install dependencies
-      run: go get.
+      run: go get .
     - name: Build
       run: go build -v ./src/backend
     - name: Test with the Go CLI
