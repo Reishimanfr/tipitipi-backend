@@ -2,7 +2,7 @@ import { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+//import axios from "axios";
 
 
 
@@ -41,10 +41,11 @@ export default function PostCreating() {
 
   async function addPost() {
     if (!validateDataForm()) {return}
+    console.log(typeof content)
 
-    const formData = new FormData()
-    formData.append("title",title)
-    formData.append("content",content)
+    // const formData = new FormData()
+    // formData.append("title",title)
+    // formData.append("content",content)
     //formData.append("images","")
 
     const token = localStorage.getItem("token")
@@ -60,7 +61,7 @@ export default function PostCreating() {
         body: JSON.stringify({
           "Title": title,
           "Content": content,
-          "Images": []
+          "Images": ['']
         })
 
     })
