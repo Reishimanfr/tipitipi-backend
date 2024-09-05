@@ -4,6 +4,8 @@ import (
 	"bash06/strona-fundacja/src/backend/core"
 	"net/http"
 	"slices"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -11,31 +13,45 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-type PostsInBatchBody struct {
-	SortBy string `json:"sortBy" binding:"required"`
-	Limit  uint8  `json:"limit" binding:"required,max=10,min=1"`
-	Offset uint16 `json:"offset"`
-}
+var (
+	sortByOptions = []string{
+		"newest",
+		"oldest",
+		"likes",
+	}
+)
 
 func (h *Handler) posts(c *gin.Context) {
-	body := new(PostsInBatchBody)
+	offsetStr := c.Param("offset")
+	limitStr := c.Param("limit")
+	sort := c.Param("sort")
 
-	if err := c.ShouldBindJSON(&body); err != nil {
-		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{
-			"error":   err.Error(),
-			"message": "Malformed or invalid JSON",
-		})
-		return
-	}
-
-	if !slices.Contains([]string{"likes", "newest", "oldest"}, body.SortBy) {
+	offset, err := strconv.Atoi(offsetStr)
+	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid sortBy value. Expected one of likes, newest, oldest, got " + body.SortBy + " instead",
+			"error":   err.Error(),
+			"message": "Invalid offset value provided (expected an int)",
 		})
 		return
 	}
 
-	postRecords := make([]*core.BlogPost, body.Limit)
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error":   err.Error(),
+			"message": "Invalid offset value provided (expected an int)",
+		})
+		return
+	}
+
+	if !slices.Contains(sortByOptions, sort) {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid sort option. Expected one of " + strings.Join(sortByOptions, ", "),
+		})
+		return
+	}
+
+	postRecords := make([]*core.BlogPost, limit)
 
 	orderClause := clause.OrderByColumn{
 		Desc: true,
@@ -44,7 +60,7 @@ func (h *Handler) posts(c *gin.Context) {
 		},
 	}
 
-	if body.SortBy != "likes" {
+	if sort != "likes" {
 		orderClause = clause.OrderByColumn{
 			Desc: false,
 			Column: clause.Column{
@@ -53,7 +69,7 @@ func (h *Handler) posts(c *gin.Context) {
 		}
 	}
 
-	result := h.Db.Order(orderClause).Offset(int(body.Offset)).Limit(int(body.Limit)).Find(&postRecords)
+	result := h.Db.Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords)
 
 	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
 		h.Log.Error("Error while getting post records from database", zap.Error(result.Error))
