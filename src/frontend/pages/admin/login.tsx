@@ -1,5 +1,12 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
+import axios from "axios"
+
+interface LoginResponse {
+    token?: string
+    error?: string
+    message?: string
+}
 
 const Login = () => {
     const [login,setLogin] = useState("")
@@ -9,17 +16,28 @@ const Login = () => {
 
 
     async function loginHandler(){
-        const formData = new FormData()
-        formData.append("username",login)
-        formData.append("password",password)
-        const request = await fetch("http://localhost:2333/api/admin/login", {
-            method: "POST",
-            body: formData
+        // const formData = new FormData()
+        // formData.append("username",login)
+        // formData.append("password",password)
+
+        // const request = await axios.post("http://localhost:2333/admin/login", {
+        //     //method: "POST",
+        //     headers: {
+        //         "Content-Type": "application/json",  // Informujemy serwer, że przesyłamy dane w formacie JSON
+        //     },
+        //     body: JSON.stringify({
+        //         "username" : login,
+        //         "password" : password
+        //     })
+        // })
+        const request = await axios.post("http://localhost:2333/admin/login" , {
+            "username" : login,
+            "password" : password
         })
       
-        const response  = await request.json()       //TODO idk what data type is 
+        const response : LoginResponse  = await request.data    //TODO idk what data type is 
 
-        if(request.ok && response.token != undefined) {
+        if(request.status === 200 && response.token != undefined) {
             localStorage.setItem("token",response.token)
             navigate("/admin/dashboard")
         }

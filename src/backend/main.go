@@ -50,11 +50,11 @@ func setupRouter(db *core.Database, testing bool) *gin.Engine {
 
 	if !testing {
 		router.Use(middleware.RateLimiterMiddleware(middleware.NewRateLimiter(5, 10)))
-		router.Use(middleware.BodySizeLimiterMiddleware(middleware.NewSizeLimiter(1 << 20)))
+		//router.Use(middleware.BodySizeLimiterMiddleware(middleware.NewSizeLimiter(1 << 20)))
 
-		// TODO: set this up correctly
+		//TODO: set this up correctly
 		router.Use(cors.New(cors.Config{
-			AllowOrigins:           []string{"*localhost*"},
+			AllowOrigins:           []string{"*"},
 			AllowMethods:           []string{"HEAD", "POST", "DELETE", "PATCH", "GET"},
 			AllowHeaders:           []string{"Origin", "Content-Type", "Authorization"},
 			AllowFiles:             false,
