@@ -12,27 +12,28 @@ const Blog = () => {
         let offset = 0
 
         async function getPosts(amount: number,  sortBy: "likes" | "newest" | "oldest") {
-                const request = await fetch("http://localhost:8080/api/blog/posts/1", {
+                const request = await fetch("http://localhost:2333/blog/post/2", {
                         method: "GET",
-                        body: JSON.stringify({
-                                limit: amount,
-                                offset: offset,
-                                sortBy: sortBy
-                        })
+                        // body: JSON.stringify({
+                        //         limit: amount,
+                        //         offset: offset,
+                        //         sortBy: sortBy
+                        // })
                 })
 
 
-                const data: BlogPostDataBodyJson[] = await request.json()
+                const response: BlogPostDataBodyJson = await request.json()
 
-                console.log(data[0].Title)
+                console.log(response)
+                console.log(request.ok)
         }
 
     return(
         <div>
             <h1>Blog</h1>
-            <input onClick={() => getPosts(6, "likes")}>
-                
-            </input>
+            <button onClick={() => getPosts(6, "likes")}>
+                asfasfs
+            </button>
         </div>
     )
 }

@@ -1,17 +1,27 @@
-import { useState } from 'react'
+import { useState ,useEffect} from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { Buffer } from "buffer"
 import Footer from './components/footer'
 import Navbar from './components/navbar'
 import About from "./pages/about"
-import Admin from './pages/admin'
+import Admin from './pages/admin/admin'
 import PostCreating from './pages/admin/dashboardPages/postCreating'
 import Blog from "./pages/blog"
-import Dashboard from './pages/dashboard'
+import Dashboard from './pages/admin/dashboard'
 import Gallery from "./pages/gallery"
-import Login from './pages/login'
+import Login from './pages/admin/login'
 import Mainpage from "./pages/mainpage"
 import Pricing from "./pages/pricing"
+import Unauthorized from './pages/errorPages/unauthorized'
+const decode = (str: string):string => Buffer.from(str, 'base64').toString('binary');
 
+
+interface JwtPayload {
+    iat: number
+    exp: number
+    admin: boolean
+    user_id: string
+} 
 
 function App() {
   const [mainpageFirstHeader,setMainpageFirstHeader] = useState("")
@@ -19,15 +29,52 @@ function App() {
     setMainpageFirstHeader(newMessage)
   }
 
+  const [isAuthorized,setIsAuthorized] = useState(false)
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+
+    if (token === null) {
+        console.debug("Token is invalid")
+        setIsAuthorized(false)
+        return
+    }
+
+    // 0: Header | 1: Payload | 2: Signature
+    const tokenSplit = token.split(".")
+
+    if (!tokenSplit?.[1]) {
+        console.error("Malformed token")
+        setIsAuthorized(false)
+        return
+    }
+
+    const stringPayload = decode(tokenSplit[1])
+    const payload: JwtPayload = JSON.parse(stringPayload)
+    const now = Date.now() / 1000
+
+    if (now >= payload.exp) {
+        console.debug("Token expired, redirecting to login page...")
+        setIsAuthorized(false)
+        return
+    }
+
+    setIsAuthorized(true)
+})
+
+
+ 
+
   return (
     <div className='relative min-h-screen'>
       <BrowserRouter>
       <Navbar/>
       <Routes>
-        <Route path='/admin' element ={<Admin/>}/>
-        <Route path="/admin/dashboard" element={<Dashboard  mainpageFirstHeader={mainpageFirstHeader} changeMainpageFirstHeader={changeMainpageFirstHeader}/>}/>
+        <Route path='/admin' element ={<Admin isAuthorized={isAuthorized}/>} />
+        <Route path="/admin/dashboard" element={isAuthorized ? 
+          <Dashboard  mainpageFirstHeader={mainpageFirstHeader} changeMainpageFirstHeader={changeMainpageFirstHeader}/> : 
+          <Unauthorized/>} />
         <Route path="/admin/login" element={<Login/>}/>
-        <Route path='/admin/dashboard/create-post' element={<PostCreating/>}/>
+        <Route path='/admin/dashboard/create-post' element={isAuthorized ? <PostCreating/> : <Unauthorized/>}/>
         <Route path="/" element={<Mainpage mainpageFirstHeader={mainpageFirstHeader}/>}/>
         <Route path="/gallery" element={<Gallery/>}/>
         <Route path="/about" element={<About/>}/>
