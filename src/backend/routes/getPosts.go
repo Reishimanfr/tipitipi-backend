@@ -88,7 +88,7 @@ func (h *Handler) posts(c *gin.Context) {
 	}
 
 	if len(postRecords) < 1 {
-		c.AbortWithStatusJSON(http.StatusNoContent, gin.H{
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
 			"error": "Post not found",
 		})
 		return

@@ -47,16 +47,19 @@ func stopServer() {
 
 func setupRouter(db *core.Database, testing bool) *gin.Engine {
 	router := gin.Default()
+	router.RedirectTrailingSlash = false
 
 	if !testing {
 		router.Use(middleware.RateLimiterMiddleware(middleware.NewRateLimiter(5, 10)))
-
+		router.Use(middleware.FileSizeLimiterMiddleware(30 << 20))
+		// TODO: implement limiter
 
 		//TODO: set this up correctly
 		router.Use(cors.New(cors.Config{
-			AllowOrigins:           []string{"*"},
+			AllowOrigins:           []string{"http://localhost:5173"},
 			AllowMethods:           []string{"HEAD", "POST", "DELETE", "PATCH", "GET"},
-			AllowHeaders:           []string{"Origin", "Content-Type", "Authorization"},
+			AllowHeaders:           []string{"Origin", "Content-Type", "Authorization", "Access-Control-Allow-Origin"},
+			AllowCredentials:       true,
 			AllowFiles:             false,
 			AllowWebSockets:        false,
 			AllowBrowserExtensions: false,

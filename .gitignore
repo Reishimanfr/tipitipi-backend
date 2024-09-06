@@ -27,4 +27,7 @@ dist-ssr
 *.sqlite
 *.db
 
+# Saved files
+src/backend/assets/*
+
 .env
