@@ -2,12 +2,12 @@ package routes
 
 import (
 	"bash06/strona-fundacja/src/backend/core"
+	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"go.uber.org/zap"
-	"gorm.io/gorm"
 )
 
 func (h *Handler) delete(c *gin.Context) {
@@ -21,33 +21,58 @@ func (h *Handler) delete(c *gin.Context) {
 		return
 	}
 
-	postRecord := new(core.BlogPost)
+	post := new(core.BlogPost)
 
-	result := h.Db.Where("id = ?", id).First(&postRecord)
-
-	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
-		h.Log.Error("Error while searching for a post record", zap.Error(err))
+	if err := h.Db.Preload("Images").Where("id = ?", id).First(post).Error; err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   result.Error.Error(),
-			"message": "Error while looking for record in database",
+			"error":   err.Error(),
+			"message": "Error while fetching post record",
 		})
 		return
 	}
 
-	if postRecord == nil {
-		c.AbortWithStatus(http.StatusNotFound)
-		return
-	}
+	tx := h.Db.Begin()
 
-	result = h.Db.Delete(core.BlogPost{ID: id})
-	if result.Error != nil {
-		h.Log.Error("Error while deleting record from database", zap.Error(err))
+	if err := tx.Delete(core.BlogPost{ID: id}).Error; err != nil {
+		tx.Rollback()
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   result.Error.Error(),
-			"message": "Error while deleting record from database",
+			"error":   err.Error(),
+			"message": "Error while deleting post record from database",
 		})
 		return
 	}
 
-	c.Status(http.StatusOK)
+	if err := tx.Where("blog_post_id = ?", post.ID).Delete(&core.ImageRecord{}).Error; err != nil {
+		tx.Rollback()
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error":   err.Error(),
+			"message": "Error while deleting image records for post",
+		})
+		return
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error":   err.Error(),
+			"message": "Committing transaction failed",
+		})
+		return
+	}
+
+	fmt.Println(post.Images)
+
+	for _, oldImage := range post.Images {
+		fmt.Println(oldImage.Path)
+		if err := os.Remove(oldImage.Path); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"error":   err.Error(),
+				"message": "Error while removing post image",
+			})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Post and its images deleted successfully",
+	})
 }

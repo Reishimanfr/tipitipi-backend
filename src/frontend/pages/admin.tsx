@@ -1,14 +1,5 @@
 import { useState } from "react"
 
-interface BlogPostDataBodyJson {
-    Content: string
-    Created_At: string 
-    Edited_At: string
-    ID: number
-    Images: any[]
-    Title: string
-}
-
 const Admin = (props : any) => {
     const BORDER_CSS = "border"
 
@@ -23,14 +14,13 @@ const Admin = (props : any) => {
         formData.append("title",title)
         formData.append("content",content)
         formData.append("images","")
-        const request = await fetch("http://localhost:2333/api/blog/create", {
+        const response = await fetch("http://localhost:2333/blog/post/", {
             method: "POST",
             body: formData
     })
     
-    const data: BlogPostDataBodyJson = await request.json()
-
-    console.log(data.Title)
+    const data = await response.json()
+    console.log(data)
 
         // console.log("Post")
         // console.log("tytuł : " + title)
