@@ -90,7 +90,7 @@ function Navbar() {
 
   return (
     <div className={`sticky top-0 h-20 bg-black w-full transition-transform duration-300 transform ${show ? 'translate-y-0' : '-translate-y-full'}`}>
-
+      <div>
         <Link to="/">
           <img
             src={logoSmall}
@@ -104,7 +104,7 @@ function Navbar() {
         >
           {toggleMenuVisibility(menuVisible)}
         </button>
-
+        </div>
       {RenderMobileMenu(menuVisible, shouldRender, setShouldRender)}
     </div>
     //wyświetla navlinks , jeżeli urządzneie jest male pojawia sie przycisk ktory zmienia stan menu , wyswietla lub nie , props definiuje
