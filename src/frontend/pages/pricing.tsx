@@ -1,6 +1,6 @@
 const Pricing = () => {
     return(
-        <div>
+        <div className="globalCss">
             <h1>Pricing</h1>
             <h2>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque in massa massa. Aliquam id ligula at turpis fringilla cursus varius vel eros. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. In neque quam, iaculis at turpis quis, rutrum venenatis eros. Donec suscipit urna sed dolor vulputate, iaculis laoreet nibh fermentum. Etiam quis diam libero. Nam vitae ipsum nisl. Aliquam ipsum odio, condimentum vitae dictum eget, congue quis ligula.
 

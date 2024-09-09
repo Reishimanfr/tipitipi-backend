@@ -75,7 +75,8 @@ function App() {
           <Unauthorized/>} />
         <Route path="/admin/login" element={<Login/>}/>
         <Route path='/admin/dashboard/create-post' element={isAuthorized ? <PostCreating/> : <Unauthorized/>}/>
-        <Route path="/" element={<Mainpage mainpageFirstHeader={mainpageFirstHeader}/>}/>
+        {/* <Route path="/" element={<Mainpage mainpageFirstHeader={mainpageFirstHeader}/>}/> */}
+        <Route path="/" element={<Mainpage/>}/>
         <Route path="/gallery" element={<Gallery/>}/>
         <Route path="/about" element={<About/>}/>
         <Route path="/pricing" element={<Pricing/>}/>
