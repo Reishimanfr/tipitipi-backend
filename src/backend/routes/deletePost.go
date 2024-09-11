@@ -23,7 +23,7 @@ func (h *Handler) delete(c *gin.Context) {
 
 	post := new(core.BlogPost)
 
-	if err := h.Db.Preload("Images").Where("id = ?", id).First(post).Error; err != nil {
+	if err := h.Db.Preload("Attachments").Where("id = ?", id).First(&post).Error; err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
 			"message": "Error while fetching post record",
@@ -37,16 +37,16 @@ func (h *Handler) delete(c *gin.Context) {
 		tx.Rollback()
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": "Error while deleting post record from database",
+			"message": "Error while deleting post record from database. Transaction rolled back",
 		})
 		return
 	}
 
-	if err := tx.Where("blog_post_id = ?", post.ID).Delete(&core.ImageRecord{}).Error; err != nil {
+	if err := tx.Where("blog_post_id = ?", post.ID).Delete(&core.AttachmentRecord{}).Error; err != nil {
 		tx.Rollback()
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": "Error while deleting image records for post",
+			"message": "Error while deleting image records for post. Transaction rolled back",
 		})
 		return
 	}
@@ -59,20 +59,19 @@ func (h *Handler) delete(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(post.Images)
+	fmt.Println(post.Attachments)
 
-	for _, oldImage := range post.Images {
-		fmt.Println(oldImage.Path)
-		if err := os.Remove(oldImage.Path); err != nil {
+	for _, old := range post.Attachments {
+		if err := os.Remove(old.Path); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error":   err.Error(),
-				"message": "Error while removing post image",
+				"message": "Error while deleting one of the attachments from assets",
 			})
 			return
 		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": "Post and its images deleted successfully",
+		"message": "Post and its attachments deleted successfully",
 	})
 }

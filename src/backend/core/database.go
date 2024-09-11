@@ -3,6 +3,7 @@ package core
 import (
 	"errors"
 	"os"
+	"path"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -10,10 +11,11 @@ import (
 )
 
 var (
-	path = "../../database.sqlite"
+	Exec, _ = os.Executable()
+	Path    = path.Join(Exec, "../database.sqlite")
 )
 
-type ImageRecord struct {
+type AttachmentRecord struct {
 	ID         int `gorm:"primaryKey,autoIncrement"`
 	Filename   string
 	Path       string
@@ -21,12 +23,12 @@ type ImageRecord struct {
 }
 
 type BlogPost struct {
-	ID         int `gorm:"primaryKey,autoIncrement"`
-	Created_At int64
-	Edited_At  int64
-	Title      string `gorm:"unique"`
-	Content    string
-	Images     []ImageRecord `gorm:"foreignKey:BlogPostID"`
+	ID          int `gorm:"primaryKey,autoIncrement"`
+	Created_At  int64
+	Edited_At   int64
+	Title       string `gorm:"unique"`
+	Content     string
+	Attachments []AttachmentRecord `gorm:"foreignKey:BlogPostID"`
 }
 
 type AdminUser struct {
@@ -42,8 +44,8 @@ type Database struct {
 }
 
 func (d *Database) Init() Database {
-	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		file, err := os.Create(path)
+	if _, err := os.Stat(Path); errors.Is(err, os.ErrNotExist) {
+		file, err := os.Create(Path)
 
 		if err != nil {
 			panic(err)
@@ -61,16 +63,16 @@ func (d *Database) Init() Database {
 	var db *gorm.DB
 
 	if d.Memory {
-		db, err = gorm.Open(sqlite.Open("../../test.db"), gormConfig)
+		db, err = gorm.Open(sqlite.Open("sqlite::memory"), gormConfig)
 	} else {
-		db, err = gorm.Open(sqlite.Open(path), gormConfig)
+		db, err = gorm.Open(sqlite.Open(Path), gormConfig)
 	}
 
 	if err != nil {
 		panic(err)
 	}
 
-	db.AutoMigrate(&BlogPost{}, &AdminUser{}, &ImageRecord{})
+	db.AutoMigrate(&BlogPost{}, &AdminUser{}, &AttachmentRecord{})
 	d.DB = db
 
 	return *d

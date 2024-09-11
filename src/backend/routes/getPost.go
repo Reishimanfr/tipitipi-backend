@@ -26,7 +26,7 @@ func (h *Handler) post(c *gin.Context) {
 	result := new(gorm.DB)
 
 	if images {
-		result = h.Db.Preload("Images").Where("id = ?", id).First(&postRecord)
+		result = h.Db.Preload("Attachments").Where("id = ?", id).First(&postRecord)
 	} else {
 		result = h.Db.Where("id = ?", id).First(&postRecord)
 	}

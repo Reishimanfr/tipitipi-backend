@@ -73,7 +73,7 @@ func (h *Handler) posts(c *gin.Context) {
 	result := new(gorm.DB)
 
 	if images == "true" {
-		result = h.Db.Preload("Images").Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords)
+		result = h.Db.Preload("Attachments").Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords)
 	} else {
 		result = h.Db.Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords)
 	}

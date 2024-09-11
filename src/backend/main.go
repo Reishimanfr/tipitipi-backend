@@ -51,10 +51,8 @@ func setupRouter(db *core.Database, testing bool) *gin.Engine {
 
 	if !testing {
 		router.Use(middleware.RateLimiterMiddleware(middleware.NewRateLimiter(5, 10)))
-		router.Use(middleware.FileSizeLimiterMiddleware(30 << 20))
-		// TODO: implement limiter
+		router.Use(middleware.FileSizeLimiterMiddleware(3000000000))
 
-		//TODO: set this up correctly
 		router.Use(cors.New(cors.Config{
 			AllowOrigins:           []string{"http://localhost:5173"},
 			AllowMethods:           []string{"HEAD", "POST", "DELETE", "PATCH", "GET"},
@@ -107,6 +105,8 @@ func main() {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
 	<-quit
+
+	stopServer()
 
 	log.Warn("Gracefully shutting down backend server...")
 }
