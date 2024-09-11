@@ -7,5 +7,5 @@ import (
 )
 
 func (h *Handler) Heartbeat(c *gin.Context) {
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, gin.H{"message": "Hello world!"})
 }

@@ -32,18 +32,10 @@ func (h *Handler) edit(c *gin.Context) {
 		return
 	}
 
-	titleFields := form.Value["title"]
-	contentFields := form.Value["content"]
+	title := c.PostForm("title")
+	content := c.PostForm("content")
 	files := form.File["files[]"]
 
-	if len(titleFields) <= 0 {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": "Expected a title, but got nothing",
-		})
-		return
-	}
-
-	title := titleFields[0]
 	if title == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error": "Expected a title, but got nothing",
@@ -51,14 +43,6 @@ func (h *Handler) edit(c *gin.Context) {
 		return
 	}
 
-	if len(contentFields) <= 0 {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error": "Expected some content, but got nothing",
-		})
-		return
-	}
-
-	content := contentFields[0]
 	if content == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error": "Expected a title, but got nothing",
@@ -66,7 +50,7 @@ func (h *Handler) edit(c *gin.Context) {
 		return
 	}
 
-	processedFiles := make([]core.ImageRecord, 0, len(files))
+	processedFiles := make([]core.AttachmentRecord, 0, len(files))
 	seenNames := make(map[string]struct{}, len(files))
 
 	curPath, err := os.Getwd()
@@ -86,15 +70,8 @@ func (h *Handler) edit(c *gin.Context) {
 			return
 		}
 
-		if file.Size > ATTACHMENT_SIZE_LIMIT {
-			c.AbortWithStatusJSON(http.StatusRequestEntityTooLarge, gin.H{
-				"error": fmt.Sprintf("Attachment %v is too large (limit: %v bytes, got %v)", file.Filename, ATTACHMENT_SIZE_LIMIT, file.Size),
-			})
-			return
-		}
-
 		seenNames[file.Filename] = struct{}{}
-		processedFiles = append(processedFiles, core.ImageRecord{
+		processedFiles = append(processedFiles, core.AttachmentRecord{
 			Filename:   file.Filename,
 			Path:       filepath.Join(curPath, "../backend/assets", file.Filename),
 			BlogPostID: id,
@@ -110,7 +87,7 @@ func (h *Handler) edit(c *gin.Context) {
 		return
 	}
 
-	for _, oldImage := range existingPost.Images {
+	for _, oldImage := range existingPost.Attachments {
 		if err := os.Remove(oldImage.Path); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":   err.Error(),
@@ -129,11 +106,11 @@ func (h *Handler) edit(c *gin.Context) {
 	}
 
 	updatedPost := core.BlogPost{
-		ID:        id,
-		Edited_At: time.Now().Unix(),
-		Title:     title,
-		Content:   content,
-		Images:    processedFiles,
+		ID:          id,
+		Edited_At:   time.Now().Unix(),
+		Title:       title,
+		Content:     content,
+		Attachments: processedFiles,
 	}
 
 	tx := h.Db.Begin()
@@ -147,7 +124,7 @@ func (h *Handler) edit(c *gin.Context) {
 		return
 	}
 
-	var oldImages []core.ImageRecord
+	var oldImages []core.AttachmentRecord
 	if err := tx.Where("blog_post_id = ?", id).Find(&oldImages).Error; err != nil {
 		tx.Rollback()
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -170,7 +147,7 @@ func (h *Handler) edit(c *gin.Context) {
 		}
 	}
 
-	if err := tx.Where("blog_post_id = ?", id).Delete(&core.ImageRecord{}).Error; err != nil {
+	if err := tx.Where("blog_post_id = ?", id).Delete(&core.AttachmentRecord{}).Error; err != nil {
 		tx.Rollback()
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
@@ -179,7 +156,7 @@ func (h *Handler) edit(c *gin.Context) {
 		return
 	}
 
-	if err := tx.Create(&updatedPost.Images).Error; err != nil {
+	if err := tx.Create(&updatedPost.Attachments).Error; err != nil {
 		tx.Rollback()
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
