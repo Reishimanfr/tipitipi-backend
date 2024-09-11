@@ -1,154 +1,146 @@
-## Public endpoints (no authorization header)
-* HEAD `/heartbeat` -> Checks if the server is alive
-* POST `/admin/login` -> Logs in and returns a JWT token
-* GET  `/blog/post/:id` -> Gets a post at a specified ID
-* GET  `/blog/posts` -> Gets posts in batch
+# Meaning of glyphs
+* ⚙️ -> Uses URL queries
+* 🔒 -> Requires JWT auth
+* 💠 -> Uses JSON for requests
+* 📝 -> Uses multipart form for requests
 
-## Example requests and responses
-### `HEAD /heartbeat`
-Request:
-```ts
-await fetch("http://localhost:2333/heartbeat", {
-  method: "HEAD"
-})
-```
-Codes:
-| Code | Meaning |
-| ---- | -------- |
-| 200  | Server is alive |
+> [!WARNING]
+> Endpoints using `images` instead of `attachments` as a query parameter in URLs is subject to change, this is an error
 
-### `POST /admin/login`
-Request:
-```ts
-await fetch("http://localhost:2333/admin/login", {
-  method: "POST",
-  body: JSON.stringify({
-      username: "admin",
-      password: "amazing_password"
-  })
-})
-```
-Response:
+<details>
+<summary>Managing blog posts</summary>
+
+## ⚙️ `GET /blog/post/:id`
+> Returns the blog post under the specified ID<br>
+### Example response
 ```json
+// If something goes wrong:
 {
-  "token": "JWT token",
-  "error?": "Direct error if something went wrong",
-  "message?": "A more human readable error"
+  "message": "An easier to understand error message",
+  "error": "The actual error message"
+}
+
+// If the request is successful
+// /blog/post/1
+// (Get the post under ID=1 without attachments)
+{
+  "ID": 1,
+  "Created_At": 123456789,
+  "Edited_At": 123456789,
+  "Title": "Some title",
+  "Content": "<p>Some content as HTML code</p>",
+  "Attachments": null
+}
+
+// Example response with images=true
+// If there are no attachments the array will just be an empty one
+// /blog/post/1?images=true
+// (Get the post under ID=1 with attachments)
+{
+  ...
+  "Attachments": [
+      {
+          "ID": 1,
+          "Filename": "test-image.png",
+          "Path": "path/to/test-image.png",
+          "BlogPostID": 1
+      }
+      ...
+  ]
 }
 ```
-Codes:
-| Code | Meaning |
-| ---- | -------- |
-| 200  | Everything went okay |
-| 422  | The JSON data was malformed or invalid |
-| 401  | Invalid credentials were provided |
-| 500  | Something went wrong within the backend server |
 
-### `GET /blog/post/:id`
-Request:
-```ts
-await fetch("http://localhost:2333/blog/posts", {
-  method: "GET",
-  body: JSON.stringify({
-      sortBy: "likes/newest/oldest",
-      limit: 5,
-      offset: 0
-  })
-})
-```
-Response:
+## ⚙️ `GET /blog/posts`
+> Returns multiple blog posts<br>
+### Example responses
 ```json
+// If something goes wrong
+{
+  "message": "An easier to understand error message",
+  "error": "The actual error message"
+}
+
+// If the request is successful
+// /blog/posts?offset=0&limit=3&sort=oldest
+// (Get the first 3 posts counting from the first one and sort by oldest to newest)
 [
   {
     "ID": 1,
-    "Title": "Some title",
-    "Content": "Some content",
-    "Created_At": 1234567890, // Unix timestamp
-    "Edited_At": 1234567890, // Unix timestamp
-    "Images": [
-      { "ID": 1, "Path": "/some/path/to/the/image", "Placement": "left/center/right" },
-      ...
-    ]
-  }
+    "Created_At": 1726070770,
+    "Edited_At": 1726070770,
+    "Title": "Some test title",
+    "Content": "<p>Some content as HTML code</p>",
+    "Attachments": null
+  },
+  {
+    "ID": 2,
+    "Created_At": 1726070834,
+    "Edited_At": 1726070834,
+    "Title": "Some other test title",
+    "Content": "<p>Some content as HTML code</p>",
+    "Attachments": null
+  },
   ...
 ]
+
+// If images is set to true the request will look the same as for GET /blog/post/:id just that it's in an array of objects
 ```
 
-### `GET /blog/post/:id`
-Request:
-```ts
-await fetch("http://localhost:2333/blog/post/3", {
-  method: "GET"
-})
-```
-Response:
+## 🔒 `DELETE /blog/post/:id`
+> Deletes a post under some ID<br>
+### Example responses
 ```json
+// If something goes wrong during the request
 {
-	"ID": 1,
-	"Title": "Some title",
-	"Content": "Some content",
-	"Created_At": 1725014085,
-	"Edited_At": 1725014085,
-	"Images": [
-      { "ID": 1, "Path": "/some/path/to/the/image", "Placement": "left/center/right" },
-      ...
-    ]
+  "message": "An easier to understand error message",
+  "error": "The actual error message"
+}
+
+// If the request is successful
+// /blog/post/1
+// (Deletes the post under ID=1)
+{
+  "message": "Post and its attachments deleted successfully",
 }
 ```
+> [!TIP]
+> The success message will not change. It will always be the one shown here
 
-## Protected endpoints (required JWT authentication
-* DELETE `/blog/post/:id` -> Deletes a selected post
-* POST `/blog/post`       -> Creates a new post
-* PATCH `/blog/post/:id`  -> Updates an existing post
-* PATCH `/admin/account`  -> Changes admin credentials (username and password)
+## 
 
-### `DELETE /blog/post/:id`
-Request:
-```ts
-await fetch("http://localhost:2333/blog/post/3", {
-  method: "DELETE",
-  headers: {
-    Authorization: "JWT token here"
-  }
-})
-```
-Codes:
-| Code | Meaning |
-| ---- | -------- |
-| 200  | Record deleted successfully |
-| 400  | Request was invalid (for example ID was a string) |
-| 401  | Authorization failed (likely due to an invalid JWT token) |
-| 403  | User doesn't have permission to do this action | 
-| 404  | Post record under that ID wasn't found |
 
-### `POST /blog/post`
-Request:
-```ts
-await fetch("http://localhost:2333/blog/post/3", {
-  method: "POST",
-  headers: {
-    Authorization: "JWT token here"
-  },
-  body: JSON.stringify({
-    "ID": 1,
-    "Title": "Some title",
-    "Content": "Some content",
-    "Images": [
-      { "ID": 1, "Path": "/some/path/to/the/image", "Placement": "left/center/right" },
-      ...
-    ]
-  })
-})
+## 🔒 📝 `PATCH /blog/post/:id`
+> Updates a post under some ID with new data<br>
+### Example responses
+> [!TIP]
+> Updating blog posts works the same way as creating them, you just have to pass in the blog post struct with stuff changed
+```json
+// If something goes wrong during the request
+{
+  "message": "An easier to understand error message",
+  "error": "The actual error message"      
+}
+
+// If everything goes well the response will look the same as it does when GETing posts but you don't have to set images=true to get the attachments (if you send any)
+// /blog/post/1
 ```
-Response:
+
+## 🔒 📝 `POST /blog/post`
+> Creates a new blog post<br>
+### Example responses
+```json
+// If something goes wrong during the request
+{
+  "message": "An easier to understand error message",
+  "error": "The actual error message"      
+}
+
+// If the request is successful
+// /blog/post
+{
+        "message": "Post added successfully"
+}
 ```
-(The same data you provided + Created_At and Edited_At in unix)
-```
-Codes:
-| Code | Meaning |
-| ---- | -------- |
-| 200  | Post was created successfully |
-| 400  | Request was invalid (for example title was missing) |
-| 401  | Authorization failed (likely due to an invalid JWT token) |
-| 403  | User doesn't have permission to do this action | 
-| 409  | Post with this title already exists, conflict! |
+> [!TIP]
+> The successful message will also always stay the same here.
+</details>
