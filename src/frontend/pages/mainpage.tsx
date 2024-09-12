@@ -1,5 +1,7 @@
 import background_example from "../assets/example_background.jpg";
+import landscapeImage from "../assets/images.jpg"
 import Image_Text from "../components/image_text";
+import Text_Component from "../components/text_component";
 const Mainpage = () => {
   return (
     <div className="globalCss">
@@ -15,14 +17,15 @@ const Mainpage = () => {
                     sagittis vel sapien."
         orientation="left"
       />
+      <Text_Component/>
       <Image_Text
-        image={background_example}
+        image={landscapeImage}
         header="Jakiś nagłówek"
         paragraph="Lorem ipsum dolor sit amet, consectetur adipiscing 
                     elit. Suspendisse tellus lectus, pharetra a aliquet sed, 
                     sagittis vel sapien."
         orientation="right"
-      />
+      /> <Text_Component/>
     </div>
   );
 };

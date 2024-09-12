@@ -3,7 +3,7 @@ const Image_Text = (props: any) => {
     // TODO justify center nie dziala i blok tekstowy jest za duzy
     <div className="flex items-stretch justify-center pb-[5%]">
       <div id="imageContainer" className="w-[50%] h-fit">
-        <img src={props.image} className="float-right"></img>
+        <img src={props.image} className="float-right max-w-[100%]"></img>
       </div>
       <div className="bg-blue-500 w-[50%] ">
         <div className="p-[5%]">
