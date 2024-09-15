@@ -16,13 +16,20 @@ const Login = () => {
 
 
     async function loginHandler(){
+        console.log(login)
+        console.log(password)
         const formData = new FormData()
         formData.append("username",login)
         formData.append("password",password)
 
         const response = await fetch("http://localhost:2333/admin/login", {
             method: "POST",
-            body: formData
+            body: JSON.stringify({
+                username: login,
+                password: password
+            }) 
+
+            
         })
         // const request = await axios.post("http://localhost:2333/admin/login" , {
         //     "username" : login,
@@ -36,9 +43,9 @@ const Login = () => {
             navigate("/admin/dashboard")
         }
         else{
-            console.log("something went wrong: " , data.error)
+            localStorage.setItem("token", "bad")
+            alert("something went wrong: " +  data.error)
         }
-        
     }
 
     return(

@@ -2,91 +2,83 @@ import { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
-//import axios from "axios";
-
-
 
 interface BlogPostDataBodyJson {
-  Content: string
-  Created_At: string 
-  Edited_At: string
-  ID: number
-  Images: any[]
-  Title: string
-  error?:  string
+  Content: string;
+  Created_At: string;
+  Edited_At: string;
+  ID: number;
+  Images: any[];
+  Title: string;
+  error?: string;
 }
-
 
 export default function PostCreating() {
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState("Tytuł posta");
   const [content, setContent] = useState("Treść posta");
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   function validateDataForm() {
-    console.log(content)
-    if(title === "") {
-        alert("Podano pusty tytuł")
+    if (title === "") {
+      alert("Podano pusty tytuł");
 
-        return false
+      return false;
     }
-    if(content === "") {
-        alert("Podano pustą treść")
-        return false
+    if (content === "") {
+      alert("Podano pustą treść");
+      return false;
     }
-    const confirm = window.confirm("Czy jesteś pewien że chcesz opublikować ten post?")
-    if(!confirm){
-        return false;
+    const confirm = window.confirm(
+      "Czy jesteś pewien że chcesz opublikować ten post?"
+    );
+    if (!confirm) {
+      return false;
     }
-    return true
-}
+    return true;
+  }
+
 
   async function addPost() {
-    if (!validateDataForm()) {return}
-    console.log(typeof content)
+    if (!validateDataForm()) {
+      return;
+    }
+    const boundary = (Math.random() + 1).toString(36).substring(2)
+    const formData = `--${boundary}
+Content-Disposition: form-data; name="title"
 
-    // const formData = new FormData()
-    // formData.append("title",title)
-    // formData.append("content",content)
-    //formData.append("images","")
+${title}
+--${boundary}
+Content-Disposition: form-data; name="content"
 
-    const token = localStorage.getItem("token")
+${content}
+--${boundary}--`;
+
+    const token = localStorage.getItem("token");
     if (!token) {
-        alert("Token is invalid, redirecting to login page...")
-        navigate("/admin/login")
-        return
+      alert("Token is invalid, redirecting to login page...");
+      navigate("/admin/login");
+      return;
     }
 
-    const request = await fetch("http://localhost:2333/blog/post", {
-        method: "POST",
-        headers: {Authorization: token},
-        body: JSON.stringify({
-          "Title": title,
-          "Content": content,
-          "Images": ['']
-        })
-
-    })
-    // const request = await axios.post("http://localhost:2333/blog/post",{
-    //     headers: {Authorization: token},
-    //     body: {
-    //       "Title": title,
-    //       "Content": content,
-    //       "Images": []
-    //     }
-    // })
+    const response = await fetch("http://localhost:2333/blog/post/", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": `multipart/form-data; boundary=${boundary}`
+      },
+      body: formData,
+    });
 
 
-    if(request.ok){
-        alert("Opublikowano post")
-        window.location.reload();
-        
+    if (response.status === 200) {
+      alert("Opublikowano post");
+      window.location.reload();
+    } else {
+      console.log(response);
+      const data: BlogPostDataBodyJson = await response.json();
+      alert("Błąd: " + data.error);
     }
-    else {
-        const response: BlogPostDataBodyJson = await request.json()
-        alert("Błąd: " + response.error)
-    }
-}
-
+  }
 
   return (
     <div>
@@ -94,6 +86,7 @@ export default function PostCreating() {
       <input
         type="text"
         name="title"
+        value={title}
         className="border"
         onChange={(event) => setTitle(event.target.value)}
       />
@@ -122,8 +115,11 @@ export default function PostCreating() {
             ["clean"],
           ],
         }}
-      /><br></br>
-      <button className={"border w-40"} onClick={() => addPost()}>Postuj</button>
+      />
+      <br></br>
+      <button className={"border w-40"} onClick={() => addPost()}>
+        Postuj
+      </button>
     </div>
   );
 }

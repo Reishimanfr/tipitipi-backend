@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 const Admin = (props : any) => {
     const navigate = useNavigate()
-      
+      console.log("I AM AUTHORIZED ADMIN: " + props.isAuthorized)
     useEffect(() => {
         if(props.isAuthorized){
             navigate("/admin/dashboard")
@@ -12,7 +12,7 @@ const Admin = (props : any) => {
         else {
             navigate("/admin/login")
         }
-    }, []);
+    });
    
     
   
