@@ -1,18 +1,18 @@
-import { useState ,useEffect} from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { Buffer } from "buffer"
+import { useEffect, useState } from 'react'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Footer from './components/footer'
 import Navbar from './components/navbar'
 import About from "./pages/about"
 import Admin from './pages/admin/admin'
-import PostCreating from './pages/admin/dashboardPages/postCreating'
-import Blog from "./pages/blog"
 import Dashboard from './pages/admin/dashboard'
-import Gallery from "./pages/gallery"
+import PostCreating from './pages/admin/dashboardPages/postCreating'
 import Login from './pages/admin/login'
+import Blog from "./pages/blog"
+import Unauthorized from './pages/errorPages/unauthorized'
+import Gallery from "./pages/gallery"
 import Mainpage from "./pages/mainpage"
 import Pricing from "./pages/pricing"
-import Unauthorized from './pages/errorPages/unauthorized'
 const decode = (str: string):string => Buffer.from(str, 'base64').toString('binary');
 
 
