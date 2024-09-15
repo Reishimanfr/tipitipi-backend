@@ -103,10 +103,16 @@
   "message": "Post and its attachments deleted successfully",
 }
 ```
+> [!TIP]
+> The success message will not change. It will always be the one shown here
+
+## 
+
 
 ## 🔒 📝 `PATCH /blog/post/:id`
 > Updates a post under some ID with new data<br>
 ### Example responses
+> [!TIP]
 > Updating blog posts works the same way as creating them, you just have to pass in the blog post struct with stuff changed
 ```json
 // If something goes wrong during the request
@@ -135,10 +141,6 @@
         "message": "Post added successfully"
 }
 ```
-### Accepted request mutltipart values:
-```
-title   -> Title of the post
-content -> HTML code of the post
-files[] -> Used for attachment uploads
-```
+> [!TIP]
+> The successful message will also always stay the same here.
 </details>

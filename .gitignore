@@ -31,3 +31,4 @@ dist-ssr
 src/backend/assets/*
 
 .env
+assets

@@ -30,7 +30,6 @@ func NewHandler(cfg *Config, db *core.Database) {
 		public.POST("/admin/login", h.AdminLogin)
 		public.GET("/blog/post/:id", h.post)
 		public.GET("/blog/posts", h.posts)
-		// public.GET("/blog/post/:id/attachments", h.getPostAttachments)
 	}
 
 	protected := cfg.Router.Group("/")
@@ -41,13 +40,12 @@ func NewHandler(cfg *Config, db *core.Database) {
 			blog.DELETE("/:id", h.delete)
 			blog.POST("/", h.create)
 			blog.PATCH("/:id", h.edit)
-			// blog.POST("/:id/attachments", h.uploadPostAttachments)
-			// blog.PATCH("/:id/attachments", h.updatePostAttachments)
 		}
 
 		admin := protected.Group("/admin")
 		{
 			admin.PATCH("/account", h.changePassword)
+			admin.POST("/validate", h.validateJWT)
 		}
 	}
 }

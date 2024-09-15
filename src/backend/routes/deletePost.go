@@ -2,7 +2,6 @@ package routes
 
 import (
 	"bash06/strona-fundacja/src/backend/core"
-	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -58,8 +57,6 @@ func (h *Handler) delete(c *gin.Context) {
 		})
 		return
 	}
-
-	fmt.Println(post.Attachments)
 
 	for _, old := range post.Attachments {
 		if err := os.Remove(old.Path); err != nil {

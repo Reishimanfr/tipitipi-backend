@@ -62,6 +62,7 @@ func (d *Database) Init() Database {
 
 	var db *gorm.DB
 
+	// Mainly used for testing
 	if d.Memory {
 		db, err = gorm.Open(sqlite.Open("sqlite::memory"), gormConfig)
 	} else {

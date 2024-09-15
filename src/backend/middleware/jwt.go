@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -24,15 +25,31 @@ func GenerateJWT(userID string, admin bool) (string, error) {
 
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString := c.GetHeader("Authorization")
-
-		if tokenString == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-				"error": "Authorization header is missing",
+		auth := c.Request.Header.Get("Authorization")
+		if auth == "" {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error": "Missing authorization header",
 			})
-			c.Abort()
 			return
 		}
+
+		if !strings.HasPrefix(auth, "Bearer") {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error": "Expected a bearer token, but got something else",
+			})
+			return
+		}
+
+		authSplit := strings.Split(auth, " ")
+
+		if len(authSplit) < 2 {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+				"error": "Missing JWT token in authorization header",
+			})
+			return
+		}
+
+		tokenString := authSplit[1]
 
 		token, err := jwt.Parse(tokenString, func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
