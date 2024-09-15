@@ -43,7 +43,7 @@ const Login = () => {
             navigate("/admin/dashboard")
         }
         else{
-            localStorage.setItem("token", "")
+            localStorage.setItem("token", "bad")
             alert("something went wrong: " +  data.error)
         }
     }

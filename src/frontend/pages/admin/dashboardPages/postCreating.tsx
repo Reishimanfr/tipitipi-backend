@@ -2,92 +2,83 @@ import { useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
-//import axios from "axios";
-
-
 
 interface BlogPostDataBodyJson {
-  Content: string
-  Created_At: string 
-  Edited_At: string
-  ID: number
-  Images: any[]
-  Title: string
-  error?:  string
+  Content: string;
+  Created_At: string;
+  Edited_At: string;
+  ID: number;
+  Images: any[];
+  Title: string;
+  error?: string;
 }
-
 
 export default function PostCreating() {
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState("Tytuł posta");
   const [content, setContent] = useState("Treść posta");
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   function validateDataForm() {
-    if(title === "") {
-        alert("Podano pusty tytuł")
+    if (title === "") {
+      alert("Podano pusty tytuł");
 
-        return false
+      return false;
     }
-    if(content === "") {
-        alert("Podano pustą treść")
-        return false
+    if (content === "") {
+      alert("Podano pustą treść");
+      return false;
     }
-    const confirm = window.confirm("Czy jesteś pewien że chcesz opublikować ten post?")
-    if(!confirm){
-        return false;
+    const confirm = window.confirm(
+      "Czy jesteś pewien że chcesz opublikować ten post?"
+    );
+    if (!confirm) {
+      return false;
     }
-    return true
-}
-function createRandomBoundary() {
-  return "------------qwe-----"
-}
+    return true;
+  }
+
 
   async function addPost() {
-    if (!validateDataForm()) {return}
-    // const formData = new FormData()
-    // formData.append("title",title)
-    // formData.append("content",content)
-    // formData.append("files[]","")
-    const boundary = createRandomBoundary()
-    const formData = `
-    ${boundary}
-    Content-Disposition: form-data; name="title"
+    if (!validateDataForm()) {
+      return;
+    }
+    const boundary = (Math.random() + 1).toString(36).substring(2)
+    const formData = `--${boundary}
+Content-Disposition: form-data; name="title"
 
-    ${title}
-    ${boundary}
-    Content-Disposition: form-data; name="content"
+${title}
+--${boundary}
+Content-Disposition: form-data; name="content"
 
-    ${content}
-    ${boundary}
-    `
+${content}
+--${boundary}--`;
 
-    const token = localStorage.getItem("token")
+    const token = localStorage.getItem("token");
     if (!token) {
-        alert("Token is invalid, redirecting to login page...")
-        navigate("/admin/login")
-        return
+      alert("Token is invalid, redirecting to login page...");
+      navigate("/admin/login");
+      return;
     }
 
-    const request = await fetch("http://localhost:2333/blog/post", {
-        method: "POST",
-        headers: {
-          Authorization:token , 
-          contentType: `multipart/form-data; boundary=${boundary}`},
-        body: formData
-        })
+    const response = await fetch("http://localhost:2333/blog/post/", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": `multipart/form-data; boundary=${boundary}`
+      },
+      body: formData,
+    });
 
 
-    if(request.ok){
-        alert("Opublikowano post")
-        window.location.reload();
-        
+    if (response.status === 200) {
+      alert("Opublikowano post");
+      window.location.reload();
+    } else {
+      // console.log(response);
+      // const data: BlogPostDataBodyJson = await response.json();
+      alert("Błąd: ");
     }
-    else {
-        const response: BlogPostDataBodyJson = await request.json()
-        alert("Błąd: " + response.error)
-    }
-}
-
+  }
 
   return (
     <div>
@@ -123,8 +114,11 @@ function createRandomBoundary() {
             ["clean"],
           ],
         }}
-      /><br></br>
-      <button className={"border w-40"} onClick={() => addPost()}>Postuj</button>
+      />
+      <br></br>
+      <button className={"border w-40"} onClick={() => addPost()}>
+        Postuj
+      </button>
     </div>
   );
 }
