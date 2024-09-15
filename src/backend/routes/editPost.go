@@ -2,7 +2,6 @@ package routes
 
 import (
 	"bash06/strona-fundacja/src/backend/core"
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -133,8 +132,6 @@ func (h *Handler) edit(c *gin.Context) {
 		})
 		return
 	}
-
-	fmt.Println(oldImages)
 
 	for _, img := range oldImages {
 		if err := os.Remove(img.Path); err != nil {
