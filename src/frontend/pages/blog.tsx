@@ -13,7 +13,7 @@ const Blog = () => {
 
         async function getPosts(amount: number,  sortBy: "likes" | "newest" | "oldest") {
                 const request = await fetch("http://localhost:2333/blog/post/2", {
-                        method: "GET",
+                        method: "GET"
                         // body: JSON.stringify({
                         //         limit: amount,
                         //         offset: offset,

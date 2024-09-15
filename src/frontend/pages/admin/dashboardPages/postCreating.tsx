@@ -23,7 +23,6 @@ export default function PostCreating() {
   const navigate = useNavigate()
 
   function validateDataForm() {
-    console.log(content)
     if(title === "") {
         alert("Podano pusty tytuł")
 
@@ -39,15 +38,28 @@ export default function PostCreating() {
     }
     return true
 }
+function createRandomBoundary() {
+  return "------------qwe-----"
+}
 
   async function addPost() {
     if (!validateDataForm()) {return}
-    console.log(typeof content)
-
     // const formData = new FormData()
     // formData.append("title",title)
     // formData.append("content",content)
-    //formData.append("images","")
+    // formData.append("files[]","")
+    const boundary = createRandomBoundary()
+    const formData = `
+    ${boundary}
+    Content-Disposition: form-data; name="title"
+
+    ${title}
+    ${boundary}
+    Content-Disposition: form-data; name="content"
+
+    ${content}
+    ${boundary}
+    `
 
     const token = localStorage.getItem("token")
     if (!token) {
@@ -58,22 +70,11 @@ export default function PostCreating() {
 
     const request = await fetch("http://localhost:2333/blog/post", {
         method: "POST",
-        headers: {Authorization: token},
-        body: JSON.stringify({
-          "Title": title,
-          "Content": content,
-          "Images": ['']
+        headers: {
+          Authorization:token , 
+          contentType: `multipart/form-data; boundary=${boundary}`},
+        body: formData
         })
-
-    })
-    // const request = await axios.post("http://localhost:2333/blog/post",{
-    //     headers: {Authorization: token},
-    //     body: {
-    //       "Title": title,
-    //       "Content": content,
-    //       "Images": []
-    //     }
-    // })
 
 
     if(request.ok){

@@ -1,0 +1,14 @@
+import { Navigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
+
+const ProtectedRoute = ({ isAuthorized, children }) => {
+    const navigate = useNavigate()
+  if (!isAuthorized) {
+    // Jeśli użytkownik nie jest autoryzowany, przekieruj na stronę logowania
+    navigate("/admin/login")
+  }
+  // Jeśli użytkownik jest autoryzowany, pokaż chronioną stronę
+  return children;
+};
+
+export default ProtectedRoute;
