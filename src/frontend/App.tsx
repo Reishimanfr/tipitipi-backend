@@ -37,7 +37,8 @@ function App() {
         setIsAuthorized(false)
         return
     }
-
+    validateToken(token)
+    console.log("isAuthorized: " + isAuthorized)
   //OLD AUTH
     // 0: Header | 1: Payload | 2: Signature
     // const tokenSplit = token.split(".")
@@ -54,18 +55,15 @@ function App() {
     //     setIsAuthorized(false)
     //     return
     // }
-
-    validateToken(token)
-    console.log("isAuthorized: " + isAuthorized)
-} )
-// async function validateToken(token : string) {
-//   const response = await fetch("http://localhost:2333/admin/validate", {
-//     method: "POST",
-//     headers: {Authorization: `Bearer ${token}`}
-//     })
-//     if(!response.ok){return}
-//     setIsAuthorized(response.ok)
-// }
+} , [])
+// // async function validateToken(token : string) {
+// //   const response = await fetch("http://localhost:2333/admin/validate", {
+// //     method: "POST",
+// //     headers: {Authorization: `Bearer ${token}`}
+// //     })
+// //     if(!response.ok){return}
+// //     setIsAuthorized(response.ok)
+// // }
 
 async function validateToken(token :string) {
   try {
@@ -92,8 +90,8 @@ async function validateToken(token :string) {
         <Route path="/admin/dashboard" element={isAuthorized ? 
           <Dashboard  mainpageFirstHeader={mainpageFirstHeader} changeMainpageFirstHeader={changeMainpageFirstHeader}/> : 
           <Unauthorized/>} />
-        <Route path="/admin/login" element={<Login/>}/>
         <Route path='/admin/dashboard/create-post' element={isAuthorized ? <PostCreating/> : <Unauthorized/>}/>
+        <Route path="/admin/login" element={<Login/>}/>
         {/* <Route path="/" element={ath='/admin/dashboard/creat<Mainpage mainpageFirstHeader={mainpageFirstHeader}/>}/> */}
         <Route path="/" element={<Mainpage/>}/>
         <Route path="/gallery" element={<Gallery/>}/>

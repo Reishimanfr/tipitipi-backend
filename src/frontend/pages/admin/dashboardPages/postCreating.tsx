@@ -74,9 +74,9 @@ ${content}
       alert("Opublikowano post");
       window.location.reload();
     } else {
-      // console.log(response);
-      // const data: BlogPostDataBodyJson = await response.json();
-      alert("Błąd: ");
+      console.log(response);
+      const data: BlogPostDataBodyJson = await response.json();
+      alert("Błąd: " + data.error);
     }
   }
 
@@ -86,6 +86,7 @@ ${content}
       <input
         type="text"
         name="title"
+        value={title}
         className="border"
         onChange={(event) => setTitle(event.target.value)}
       />
