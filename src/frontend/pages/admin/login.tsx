@@ -20,26 +20,23 @@ const Login = () => {
         formData.append("username",login)
         formData.append("password",password)
 
-        const request = await fetch("http://localhost:2333/admin/login", {
+        const response = await fetch("http://localhost:2333/admin/login", {
             method: "POST",
-            body: JSON.stringify({
-                "username" : login,
-                "password" : password
-            })
+            body: formData
         })
         // const request = await axios.post("http://localhost:2333/admin/login" , {
         //     "username" : login,
         //     "password" : password
         // })
       
-        const response : LoginResponse  = await request.json()    //TODO idk what data type is 
+        const data : LoginResponse  = await response.json()    //TODO idk what data type is 
 
-        if(request.status === 200 && response.token != undefined) {
-            localStorage.setItem("token",response.token)
+        if(response.status === 200 && data.token != undefined) {
+            localStorage.setItem("token",data.token)
             navigate("/admin/dashboard")
         }
         else{
-            console.log("something went wrong: " , response.error)
+            console.log("something went wrong: " , data.error)
         }
         
     }

@@ -23,6 +23,7 @@ export default function PostCreating() {
   const navigate = useNavigate()
 
   function validateDataForm() {
+    console.log(content)
     if(title === "") {
         alert("Podano pusty tytuł")
 

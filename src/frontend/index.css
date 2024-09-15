@@ -1,3 +1,8 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+div.globalCss {
+    margin-left: 7.5%;
+    margin-right: 7.5%;
+}
