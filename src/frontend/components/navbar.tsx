@@ -61,6 +61,8 @@ function RenderMobileMenu(
 function Navbar() {
   const [menuVisible, setMenuVisible] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [show, setShow] = useState(true);
   //u góry mamy state od tego że menu dla urzadzen mobilnych ma byc wyswietlane
 
   const handleResize = () => {
@@ -70,16 +72,24 @@ function Navbar() {
     }
   };
 
+  const handleScroll = () => {
+    if (typeof window !== 'undefined') {
+      setShow(window.scrollY < lastScrollY)
+      setLastScrollY(window.scrollY);
+    }
+  };
 
   useEffect(() => {
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  });
-
-  //ustawia menuVisible na fałsz kiedy okno jest duże , żeby nie było 2 duplikatów i 2 navbarow , po prostu idiotoodpornosc
+    window.addEventListener("scroll" , handleScroll);
+    return () => {
+      window.removeEventListener("resize", handleResize) 
+      window.removeEventListener("scroll" , handleScroll)
+      }
+  },[lastScrollY]);
 
   return (
-    <div className="w-full h-20 bg-black sticky ">
+    <div className={`sticky top-0 h-20 bg-black w-full transition-transform duration-300 transform ${show ? 'translate-y-0' : '-translate-y-full'}`}>
       <div>
         <Link to="/">
           <img
@@ -94,7 +104,7 @@ function Navbar() {
         >
           {toggleMenuVisibility(menuVisible)}
         </button>
-      </div>
+        </div>
       {RenderMobileMenu(menuVisible, shouldRender, setShouldRender)}
     </div>
     //wyświetla navlinks , jeżeli urządzneie jest male pojawia sie przycisk ktory zmienia stan menu , wyswietla lub nie , props definiuje

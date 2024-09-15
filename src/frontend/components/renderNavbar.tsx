@@ -3,11 +3,11 @@ import { Link } from "react-router-dom"
 
 // const mobile_css = "text-white"
 
-const MOBILE_CSS = "mt-6 clear-right float-right no-underline text-white text-xl mr-2.5 bg-black-700 font-sans hover:border border-black-700 hover:bg-white hover:text-black" as const
+const MOBILE_CSS = "mt-6 clear-right float-right no-underline text-white text-xl mr-2.5 bg-black-700 font-sans hover:duration-500 hover:bg-gray-300 hover:text-black" as const
 const DESKTOP_CSS = "float-right no-underline text-white text-3xl mr-2.5 bg-black-700 font-sans hover:duration-500  hover:bg-white hover:text-black" as const
 
 const DIV_MOBILE_CSS = "w-fit p-5 h-screen float-right top-20 bg-black" as const
-const DIV_DESKTOP_CSS = "w-full h-20 flex-wrap bg-black top-20 p-2.5 text-right" as const
+const DIV_DESKTOP_CSS = "w-full h-20 flex-wrap bg-black top-20 p-5 text-right" as const
 
 function getUrls(mobile: boolean) {
     const divCss = mobile ? MOBILE_CSS : DESKTOP_CSS
