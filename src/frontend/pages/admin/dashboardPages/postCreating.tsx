@@ -37,6 +37,9 @@ export default function PostCreating() {
     return true;
   }
 
+  // function extractPicturesFromContent() {
+  //   const index : number = content.search()
+  // }
 
   async function addPost() {
     if (!validateDataForm()) {
