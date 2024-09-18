@@ -29,7 +29,6 @@ function App() {
 
   const [isAuthorized,setIsAuthorized] = useState(false)
   useEffect(() => {
-    console.log("checking authorization")
     const token = localStorage.getItem("token")
 
     if (token === null) {
@@ -38,7 +37,6 @@ function App() {
         return
     }
     validateToken(token)
-    console.log("isAuthorized: " + isAuthorized)
   //OLD AUTH
     // 0: Header | 1: Payload | 2: Signature
     // const tokenSplit = token.split(".")
@@ -82,7 +80,7 @@ async function validateToken(token :string) {
  
 
   return (
-    <div className='relative min-h-screen'>
+    <div className='relative min-h-screen pb-20'>
       <BrowserRouter>
       <Navbar/>
       <Routes>
