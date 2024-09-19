@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
+import { DeltaStatic } from "quill";
 import "react-quill/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
 
@@ -16,6 +17,8 @@ interface BlogPostDataBodyJson {
 export default function PostCreating() {
   const [title, setTitle] = useState("Tytuł posta");
   const [content, setContent] = useState("Treść posta");
+  const [base64Images, setBase64Images] = useState<Array<string>>([]);
+  const [delta, setDelta] = useState<DeltaStatic>();
   const navigate = useNavigate();
 
   function validateDataForm() {
@@ -24,28 +27,33 @@ export default function PostCreating() {
 
       return false;
     }
-    if (content === "") {
+    if (content === "<p><br></p>") {
       alert("Podano pustą treść");
       return false;
     }
     const confirm = window.confirm(
       "Czy jesteś pewien że chcesz opublikować ten post?"
     );
-    if (!confirm) {
-      return false;
-    }
-    return true;
+    return confirm;
   }
 
-  // function extractPicturesFromContent() {
-  //   const index : number = content.search()
-  // }
-
+  function extractPicturesFromContent() {
+    if (delta && delta.ops) {
+      delta.map((op) => {
+        if (op.insert && typeof op.insert === "object" && op.insert.image) {
+          setBase64Images((prevImages) => [...prevImages, op.insert.image]);
+        }
+      });
+      console.log(JSON.stringify(delta));
+    }
+  }
   async function addPost() {
     if (!validateDataForm()) {
       return;
     }
-    const boundary = (Math.random() + 1).toString(36).substring(2)
+    extractPicturesFromContent();
+
+    const boundary = (Math.random() + 1).toString(36).substring(2);
     const formData = `--${boundary}
 Content-Disposition: form-data; name="title"
 
@@ -67,11 +75,10 @@ ${content}
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": `multipart/form-data; boundary=${boundary}`
+        "Content-Type": `multipart/form-data; boundary=${boundary}`,
       },
       body: formData,
     });
-
 
     if (response.status === 200) {
       alert("Opublikowano post");
@@ -100,7 +107,10 @@ ${content}
       <ReactQuill
         theme="snow"
         value={content}
-        onChange={setContent}
+        onChange={(content, delta, source, editor) => {
+          setContent(content); // Ustawienie treści jako HTML
+          setDelta(editor.getContents()); // Ustawienie stanu Delta jako Delta
+        }}
         //style={{ minHeight: "500px" }}
         modules={{
           toolbar: [

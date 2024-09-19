@@ -1,5 +1,6 @@
 import Post from "../components/post";
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 
 interface BlogPostDataBodyJson {
   Content: string;
@@ -52,7 +53,6 @@ const Blog = () => {
       const clientHeight = window.innerHeight;
 
       if (scrollTop + clientHeight >= scrollHeight && isMore) {
-        console.log("Scrolled to bottom");
         if(offset + 6> posts.length) {
           setIsMore(false)
         }
@@ -78,7 +78,7 @@ const Blog = () => {
       <h1 className="text-3xl mt-5">Blog</h1>
       {posts ? (
         posts.map((post) => {
-          return <Post id={post.ID} key={post.ID} title={post.Title} content={post.Content} date={post.Edited_At}/>;
+          return <Link to={`/blog/${post.ID}`}><Post id={post.ID} key={post.ID} title={post.Title} content={post.Content} date={post.Edited_At}/></Link>;
         })
       ) : (
         <div>No post found</div>
