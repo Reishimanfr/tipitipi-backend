@@ -15,21 +15,23 @@ const PostPage = () => {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    const url = window.location.href.split("/");
+    const ID = url[url.length - 1]
+
     async function fetchPost() {
       try {
-        const response = await fetch("http://localhost:2333/blog/post/1", {
+        const response = await fetch(`http://localhost:2333/blog/post/${ID}`, {
           method: "GET"
         });
 
         if (!response.ok) {
-          throw new Error("Network response was not ok");
+          throw new Error(response.statusText);
         }
 
         const data: BlogPostDataBodyJson = await response.json();
         setPost(data);
-        console.log(data)
       } catch (error) {
-        alert("Błąd: " + error);
+        alert(error);
       } finally {
         setLoading(false);
       }
@@ -41,10 +43,10 @@ const PostPage = () => {
     return <div>Loading</div>;
   }
   return (
-    <div>
+    <div className="globalCss">
       <h1>Post Page</h1>
       {post ? (
-        <Post title={post.Title} content={post.Content} />
+        <Post title={post.Title} content={post.Content} date={post.Edited_At} id={post.ID}/>
       ) : (
         <div>No post found</div>
       )}

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
@@ -12,19 +12,13 @@ interface BlogPostDataBodyJson {
   Title: string;
   error?: string;
 }
-
-export default function PostCreating() {
-  const [title, setTitle] = useState("Tytuł posta");
-  const [content, setContent] = useState("Treść posta");
-  const navigate = useNavigate();
-
-  function validateDataForm() {
+function validateDataForm(title:string , content:string) :boolean {
     if (title === "") {
       alert("Podano pusty tytuł");
 
       return false;
     }
-    if (content === "") {
+    if (content === "<p><br></p>") {
       alert("Podano pustą treść");
       return false;
     }
@@ -36,25 +30,114 @@ export default function PostCreating() {
     }
     return true;
   }
+  function makeFilename(length : number) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return result;
+}
 
-  // function extractPicturesFromContent() {
-  //   const index : number = content.search()
-  // }
 
+  function base64ToBlob(base64: string): Blob | null{
+    //mimetype is first part of base64 variable , that matches given regexp in match function
+    let mimeType : RegExpMatchArray | null | string= base64.split(',')[0].match(/image\/jpeg|image\/png|image\/gif|image\/jpg/)
+    //base64content is second part of base64 variable , that has last two chars trimmed
+    let base64content = base64.split(',')[1]
+    base64content = base64content.substring(0, base64content.length - 2);
+
+    if(!mimeType) {
+        console.error("Mimetype of image is null")
+        return null;
+    }
+    mimeType = mimeType[0]
+    const byteString = atob(base64content);
+  
+    // Tworzymy tablicę bajtów
+    const byteNumbers = new Array(byteString.length);
+    for (let i = 0; i < byteString.length; i++) {
+      byteNumbers[i] = byteString.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: mimeType });
+  }
+  
+  function blobToString(b: Blob): Promise<string> {
+    return new Promise((res, rej) => {
+      const reader = new FileReader()
+      reader.onload = () => res(reader.result as string)
+      reader.onerror = () => rej(reader.error)
+      reader.readAsText(b)
+    })
+  }
+
+export default function PostCreating() {
+  const [title, setTitle] = useState("Tytuł posta");
+  const [content, setContent] = useState("Treść posta");
+  const navigate = useNavigate();
+
+  function extractImagesFromContent() {
+    const images : string[] = []
+    let i = -1
+    const regexp = /<img\s+src="data:image\/(jpeg|png|gif);base64,([A-Za-z0-9+/=]+)"\s*\/?>/g
+
+    const contentWithoutImages = content.replace(regexp , (match) => {
+        images.push(match);
+        i++
+        return `{{${i}}}`
+    })
+    //setContent(contentWithoutImages)
+    //TODO content to nie contentWithoutImages bo setContent jest async??
+    return {images: images , contentWithoutImages : contentWithoutImages}
+  }
+  
   async function addPost() {
-    if (!validateDataForm()) {
+    if (!validateDataForm(title,content)) {
       return;
     }
+
+    const base64images : string[] = extractImagesFromContent().images
+    //console.log(base64images[0].split(",")[1])
+    //console.log(base64ToBlob(base64images[0]))
+
+    // const blobArray : Blob[] = []
+    // base64images.forEach(image => {
+    //     const blob = base64ToBlob(image)
+    //     if(!blob) {
+    //         return
+    //     }  
+    //     blobArray.push(blob)
+    // })
+
+console.log(extractImagesFromContent().contentWithoutImages)
     const boundary = (Math.random() + 1).toString(36).substring(2)
-    const formData = `--${boundary}
+    let formData = `--${boundary}
 Content-Disposition: form-data; name="title"
 
 ${title}
 --${boundary}
 Content-Disposition: form-data; name="content"
 
-${content}
---${boundary}--`;
+${extractImagesFromContent().contentWithoutImages}
+--${boundary}`;
+base64images.forEach(image => {
+    const blob = base64ToBlob(image)
+    if(!blob) {
+        return
+    } 
+    formData += `
+Content-Disposition: form-data; name="files[]"; filename="${makeFilename(10)}"
+Content-Type: ${blob.type}    
+
+${blobToString(blob)}
+--${boundary}--`
+})
+console.log(formData)
+
 
     const token = localStorage.getItem("token");
     if (!token) {
@@ -77,7 +160,6 @@ ${content}
       alert("Opublikowano post");
       window.location.reload();
     } else {
-      console.log(response);
       const data: BlogPostDataBodyJson = await response.json();
       alert("Błąd: " + data.error);
     }
