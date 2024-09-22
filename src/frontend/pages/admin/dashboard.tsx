@@ -1,14 +1,35 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
+import validateToken from "../../components/validate"
+import Unauthorized from "../errorPages/unauthorized"
 
 
 
 const Dashboard = (props : any) => {
-    const BORDER_CSS = "border"
 
+    const BORDER_CSS = "border"
     //edycja tekstu na stronie
     const [mainpageFirstHeader , setMainpageFirstHeader] = useState(props.mainpageFirstHeader)  //tworzymy stan lokalny ktorego poczatkowym stanem jest to co widzą wszyscy , czyli state z app.tsx
 
+
+    const [loading ,setLoading] = useState(true)
+    const [isAuthorized , setIsAuthorized] = useState(false) 
+    useEffect(() => {
+        const ValidateAuthorization = async () => {
+            setIsAuthorized(await validateToken(setLoading))
+        }
+        ValidateAuthorization()
+    },[])
+    if(loading) {
+        return(<div>
+            Loading
+        </div>)
+    }
+    if(!isAuthorized) {
+        return <Unauthorized/>
+    }
+
+    
     return(
         <>
         <div>

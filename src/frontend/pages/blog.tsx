@@ -42,8 +42,7 @@ const Blog = () => {
       }
     }
     fetchPost();
-  }, [offset]);
-
+  }, [offset,sortBy]);
 
 
   useEffect(() => {
@@ -76,6 +75,13 @@ const Blog = () => {
   return (
     <div className="globalCss">
       <h1 className="text-3xl mt-5">Blog</h1>
+
+      <label htmlFor="sorting">Sortowanie</label>
+      <select name="sorts" id="sorting" onChange={(e) => setSortBy(e.target.value as "newest" | "oldest" | "likes")}>
+        <option value="newest">Najnowsze</option>
+        <option value="oldest">Najstarsze</option>
+        <option value="likes">Najwięcej polubień</option>
+      </select>
       {posts ? (
         posts.map((post) => {
           return <Link to={`/blog/${post.ID}`}><Post id={post.ID} key={post.ID} title={post.Title} content={post.Content} date={post.Edited_At}/></Link>;
