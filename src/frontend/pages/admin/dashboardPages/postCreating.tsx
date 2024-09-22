@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { useNavigate } from "react-router-dom";
+import Unauthorized from "../../errorPages/unauthorized";
+import validateToken from "../../../components/validate";
 
 interface BlogPostDataBodyJson {
   Content: string;
@@ -134,7 +136,7 @@ export default function PostCreating() {
     }
 
     const formData = buildMultipart(title,content)
-    
+
     const token = localStorage.getItem("token");
     if (!token) {
       alert("Token is invalid, redirecting to login page...");
@@ -160,6 +162,27 @@ export default function PostCreating() {
       alert("Błąd: " + data.error);
     }
   }
+
+
+
+
+  const [loading ,setLoading] = useState(true)
+  const [isAuthorized , setIsAuthorized] = useState(false) 
+  useEffect(() => {
+      const ValidateAuthorization = async () => {
+          setIsAuthorized(await validateToken(setLoading))
+      }
+      ValidateAuthorization()
+  },[])
+  if(loading) {
+      return(<div>
+          Loading
+      </div>)
+  }
+  if(!isAuthorized) {
+      return <Unauthorized/>
+  }
+
 
   return (
     <div>

@@ -22,29 +22,29 @@ function App() {
   }
 
   const [isAuthorized,setIsAuthorized] = useState(false)
-  useEffect(() => {
-    const token = localStorage.getItem("token")
+//   useEffect(() => {
+//     const token = localStorage.getItem("token")
 
-    if (token === null) {
-        console.debug("Token is invalid")
-        setIsAuthorized(false)
-        return
-    }
-    validateToken(token)
-})
+//     if (token === null) {
+//         console.debug("Token is invalid")
+//         setIsAuthorized(false)
+//         return
+//     }
+//     validateToken(token)
+// })
 
-async function validateToken(token :string) {
-  try {
-    const response = await fetch("http://localhost:2333/admin/validate", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    setIsAuthorized(response.ok);
-  } catch (error) {
-    console.error("Token validation failed", error);
-    setIsAuthorized(false);
-  }
-}
+// async function validateToken(token :string) {
+//   try {
+//     const response = await fetch("http://localhost:2333/admin/validate", {
+//       method: "POST",
+//       headers: { Authorization: `Bearer ${token}` }
+//     });
+//     setIsAuthorized(response.ok);
+//   } catch (error) {
+//     console.error("Token validation failed", error);
+//     setIsAuthorized(false);
+//   }
+// }
 
 
  
@@ -54,11 +54,15 @@ async function validateToken(token :string) {
       <BrowserRouter>
       <Navbar/>
       <Routes>
-        <Route path='/admin' element ={<Admin isAuthorized={isAuthorized}/>} />
-        <Route path="/admin/dashboard" element={isAuthorized ? 
+        {/* <Route path='/admin' element ={<Admin isAuthorized={isAuthorized}/>} /> */}
+        <Route path='/admin' element ={<Admin/>} />
+        {/* <Route path="/admin/dashboard" element={isAuthorized ? 
           <Dashboard  mainpageFirstHeader={mainpageFirstHeader} changeMainpageFirstHeader={changeMainpageFirstHeader}/> : 
-          <Unauthorized/>} />
-        <Route path='/admin/dashboard/create-post' element={isAuthorized ? <PostCreating/> : <Unauthorized/>}/>
+          <Unauthorized/>} /> */}
+
+        <Route path="/admin/dashboard" element ={<Dashboard mainpageFirstHeader={mainpageFirstHeader} changeMainpageFirstHeader={changeMainpageFirstHeader}/>}/>
+        {/* <Route path='/admin/dashboard/create-post' element={isAuthorized ? <PostCreating/> : <Unauthorized/>}/> */}
+        <Route path='/admin/dashboard/create-post' element={<PostCreating/>}/> 
         <Route path="/admin/login" element={<Login/>}/>
         {/* <Route path="/" element={ath='/admin/dashboard/creat<Mainpage mainpageFirstHeader={mainpageFirstHeader}/>}/> */}
         <Route path="/" element={<Mainpage/>}/>
