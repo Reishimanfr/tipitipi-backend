@@ -74,13 +74,7 @@ function validateDataForm(title:string , content:string) :boolean {
       reader.readAsText(b)
     })
   }
-
-export default function PostCreating() {
-  const [title, setTitle] = useState("Tytuł posta");
-  const [content, setContent] = useState("Treść posta");
-  const navigate = useNavigate();
-
-  function extractImagesFromContent() {
+  function extractImagesFromContent(content:string) {
     const images : string[] = []
     let i = -1
     const regexp = /<img\s+src="data:image\/(jpeg|png|gif);base64,([A-Za-z0-9+/=]+)"\s*\/?>/g
@@ -90,55 +84,57 @@ export default function PostCreating() {
         i++
         return `{{${i}}}`
     })
-    //setContent(contentWithoutImages)
-    //TODO content to nie contentWithoutImages bo setContent jest async??
     return {images: images , contentWithoutImages : contentWithoutImages}
   }
-  
-  async function addPost() {
-    if (!validateDataForm(title,content)) {
-      return;
-    }
 
-    const base64images : string[] = extractImagesFromContent().images
-    //console.log(base64images[0].split(",")[1])
-    //console.log(base64ToBlob(base64images[0]))
+function buildMultipart(title : string , content :string ) {
+  const extractedData = extractImagesFromContent(content)
+  const base64images : string[] = extractedData.images
 
-    // const blobArray : Blob[] = []
-    // base64images.forEach(image => {
-    //     const blob = base64ToBlob(image)
-    //     if(!blob) {
-    //         return
-    //     }  
-    //     blobArray.push(blob)
-    // })
-
-console.log(extractImagesFromContent().contentWithoutImages)
-    const boundary = (Math.random() + 1).toString(36).substring(2)
-    let formData = `--${boundary}
+  const boundary = (Math.random() + 1).toString(36).substring(2)
+  let formData = `--${boundary}
 Content-Disposition: form-data; name="title"
 
 ${title}
 --${boundary}
 Content-Disposition: form-data; name="content"
 
-${extractImagesFromContent().contentWithoutImages}
+${extractedData.contentWithoutImages}
 --${boundary}`;
-base64images.forEach(image => {
-    const blob = base64ToBlob(image)
-    if(!blob) {
-        return
-    } 
-    formData += `
+base64images.forEach((image,index) => {
+  const blob = base64ToBlob(image)
+  let multipartClose = ""
+  if(!blob) {
+      return
+  } 
+  if(index == base64images.length - 1) {
+    multipartClose = "--"
+  }
+  formData += `
 Content-Disposition: form-data; name="files[]"; filename="${makeFilename(10)}"
 Content-Type: ${blob.type}    
 
 ${blobToString(blob)}
---${boundary}--`
+--${boundary}${multipartClose}`
 })
-console.log(formData)
 
+return {body : formData, boundary : boundary}
+}
 
+export default function PostCreating() {
+  const [title, setTitle] = useState("Tytuł posta");
+  const [content, setContent] = useState("Treść posta");
+  const navigate = useNavigate();
+
+ 
+  
+  async function addPost() {
+    if (!validateDataForm(title,content)) {
+      return;
+    }
+
+    const formData = buildMultipart(title,content)
+    
     const token = localStorage.getItem("token");
     if (!token) {
       alert("Token is invalid, redirecting to login page...");
@@ -150,9 +146,9 @@ console.log(formData)
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
-        "Content-Type": `multipart/form-data; boundary=${boundary}`
+        "Content-Type": `multipart/form-data; boundary=${formData.boundary}`
       },
-      body: formData,
+      body: formData.body,
     });
 
 
