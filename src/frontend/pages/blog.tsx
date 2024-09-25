@@ -7,7 +7,6 @@ interface BlogPostDataBodyJson {
   Created_At: string;
   Edited_At: string;
   ID: number;
-  Images: string;
   Title: string;
 }
 
@@ -84,7 +83,7 @@ const Blog = () => {
       </select>
       {posts ? (
         posts.map((post) => {
-          return <Link to={`/blog/${post.ID}`}><Post id={post.ID} key={post.ID} title={post.Title} content={post.Content} date={post.Edited_At}/></Link>;
+          return <Link key={post.ID} to={`/blog/${post.ID}`}><Post id={post.ID} title={post.Title} content={post.Content} date={post.Edited_At}/></Link>;
         })
       ) : (
         <div>No post found</div>

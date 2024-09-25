@@ -14,6 +14,7 @@ import Mainpage from "./pages/mainpage"
 import Pricing from "./pages/pricing"
 import Unauthorized from './pages/errorPages/unauthorized'
 import PostPage from './pages/postPage'
+import PostEditing from './pages/admin/dashboardPages/postEditing'
 
 function App() {
   const [mainpageFirstHeader,setMainpageFirstHeader] = useState("")
@@ -63,6 +64,7 @@ function App() {
         <Route path="/admin/dashboard" element ={<Dashboard mainpageFirstHeader={mainpageFirstHeader} changeMainpageFirstHeader={changeMainpageFirstHeader}/>}/>
         {/* <Route path='/admin/dashboard/create-post' element={isAuthorized ? <PostCreating/> : <Unauthorized/>}/> */}
         <Route path='/admin/dashboard/create-post' element={<PostCreating/>}/> 
+        <Route path='/admin/dashboard/edit-post' element={<PostEditing/>}/>
         <Route path="/admin/login" element={<Login/>}/>
         {/* <Route path="/" element={ath='/admin/dashboard/creat<Mainpage mainpageFirstHeader={mainpageFirstHeader}/>}/> */}
         <Route path="/" element={<Mainpage/>}/>

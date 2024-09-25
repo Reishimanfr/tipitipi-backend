@@ -47,7 +47,8 @@ const Dashboard = (props : any) => {
 
 
             <div>
-                <Link to="/admin/dashboard/create-post"><button>Dodawanie postów</button></Link>
+                <Link to="/admin/dashboard/create-post"><button>Dodawanie postów</button></Link><br></br>
+                <Link to="/admin/dashboard/edit-post"><button>Edycja postów</button></Link>
             </div>
         </>
     )
