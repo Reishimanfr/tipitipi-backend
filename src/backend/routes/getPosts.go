@@ -25,7 +25,8 @@ func (h *Handler) posts(c *gin.Context) {
 	offsetStr := c.DefaultQuery("offset", "0")
 	limitStr := c.DefaultQuery("limit", "5")
 	sort := c.DefaultQuery("sort", "newest")
-	images := c.DefaultQuery("images", "false")
+	atts := c.DefaultQuery("attachments", "false") == "true"
+	partial := c.DefaultQuery("partial", "false") == "true"
 
 	offset, err := strconv.Atoi(offsetStr)
 	if err != nil {
@@ -40,7 +41,7 @@ func (h *Handler) posts(c *gin.Context) {
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error":   err.Error(),
-			"message": "Invalid offset value provided (expected an int)",
+			"message": "Invalid limit value provided (expected an int)",
 		})
 		return
 	}
@@ -72,7 +73,9 @@ func (h *Handler) posts(c *gin.Context) {
 
 	result := new(gorm.DB)
 
-	if images == "true" {
+	if partial {
+		result = h.Db.Select([]string{"created_at", "title", "id"}).Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords)
+	} else if atts {
 		result = h.Db.Preload("Attachments").Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords)
 	} else {
 		result = h.Db.Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords)

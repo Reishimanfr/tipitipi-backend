@@ -51,7 +51,7 @@ func setupRouter(db *core.Database, testing bool) *gin.Engine {
 
 	if !testing {
 		router.Use(middleware.RateLimiterMiddleware(middleware.NewRateLimiter(5, 10)))
-		router.Use(middleware.FileSizeLimiterMiddleware(3000000000))
+		router.Use(middleware.FileSizeLimiterMiddleware(3000000000)) // TODO: fix this
 
 		router.Use(cors.New(cors.Config{
 			AllowOrigins:           []string{"http://localhost:5173"},

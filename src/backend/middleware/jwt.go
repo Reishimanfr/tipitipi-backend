@@ -62,7 +62,6 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid token",
 			})
-			c.Abort()
 			return
 		}
 
@@ -71,7 +70,6 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
 				"error": "Forbidden",
 			})
-			c.Abort()
 			return
 		}
 

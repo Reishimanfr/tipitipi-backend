@@ -72,7 +72,7 @@ func (h *Handler) edit(c *gin.Context) {
 		seenNames[file.Filename] = struct{}{}
 		processedFiles = append(processedFiles, core.AttachmentRecord{
 			Filename:   file.Filename,
-			Path:       filepath.Join(curPath, "../backend/assets", file.Filename),
+			Path:       filepath.Join(curPath, "../backend/assets", stringId, file.Filename),
 			BlogPostID: id,
 		})
 	}

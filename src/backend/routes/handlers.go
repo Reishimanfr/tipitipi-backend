@@ -42,6 +42,11 @@ func NewHandler(cfg *Config, db *core.Database) {
 			blog.PATCH("/:id", h.edit)
 		}
 
+		gallery := protected.Group("/gallery")
+		{
+			gallery.POST("/", h.postGallery)
+		}
+
 		admin := protected.Group("/admin")
 		{
 			admin.PATCH("/account", h.changePassword)

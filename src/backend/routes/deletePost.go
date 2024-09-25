@@ -2,11 +2,14 @@ package routes
 
 import (
 	"bash06/strona-fundacja/src/backend/core"
+	"fmt"
 	"net/http"
 	"os"
+	"path"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 func (h *Handler) delete(c *gin.Context) {
@@ -23,6 +26,13 @@ func (h *Handler) delete(c *gin.Context) {
 	post := new(core.BlogPost)
 
 	if err := h.Db.Preload("Attachments").Where("id = ?", id).First(&post).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+				"error": "Record not found",
+			})
+			return
+		}
+
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
 			"message": "Error while fetching post record",
@@ -58,14 +68,23 @@ func (h *Handler) delete(c *gin.Context) {
 		return
 	}
 
-	for _, old := range post.Attachments {
-		if err := os.Remove(old.Path); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error":   err.Error(),
-				"message": "Error while deleting one of the attachments from assets",
-			})
-			return
-		}
+	curDir, err := os.Getwd()
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error":   err.Error(),
+			"message": "Error while getting the current work directory",
+		})
+		return
+	}
+
+	attDirectory := path.Join(curDir, "../assets", fmt.Sprintf("%v", post.ID))
+
+	err = os.RemoveAll(attDirectory)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error":   err.Error(),
+			"message": "Error while deleting attachments related to the deleted post",
+		})
 	}
 
 	c.JSON(http.StatusOK, gin.H{

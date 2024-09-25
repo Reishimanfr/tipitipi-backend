@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -54,6 +56,7 @@ func (h *Handler) create(c *gin.Context) {
 
 	var nextID int
 	h.Db.Model(&core.BlogPost{}).Select("COALESCE(MAX(id), 0) + 1").Scan(&nextID)
+	idString := strconv.Itoa(nextID)
 
 	curPath, err := os.Getwd()
 	if err != nil {
@@ -66,12 +69,12 @@ func (h *Handler) create(c *gin.Context) {
 
 	for idx, file := range files {
 		extension := filepath.Ext(file.Filename)
-		filename := fmt.Sprintf("%v-%v%v", nextID, idx+1, extension)
+		filename := fmt.Sprintf("%v%v", idx+1, extension)
 		files[idx].Filename = filename
 
 		processedFiles = append(processedFiles, core.AttachmentRecord{
 			Filename:   filename,
-			Path:       filepath.Join(curPath, "../backend/assets", filename),
+			Path:       filepath.Join(curPath, "../backend/assets", idString, filename),
 			BlogPostID: nextID,
 		})
 	}
@@ -94,16 +97,28 @@ func (h *Handler) create(c *gin.Context) {
 	}
 
 	for _, file := range files {
-		if err := c.SaveUploadedFile(file, "assets/"+file.Filename); err != nil {
+		filePath := path.Join(curPath, "assets", idString, file.Filename)
+
+		if err := c.SaveUploadedFile(file, filePath); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":   err.Error(),
 				"message": "Error while downloading attached file",
 			})
 			return
 		}
+
+		// TODO: finish thumbnails
+		// go func() {
+		// 	err := core.MakeThumbnail(filePath, 100, 100)
+		// 	if err != nil {
+		// 		fmt.Printf("\nError while doing shit: %v", err)
+		// 	}
+		// }()
+
 	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Post added successfully",
 	})
+
 }

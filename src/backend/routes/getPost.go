@@ -13,7 +13,7 @@ import (
 func (h *Handler) post(c *gin.Context) {
 	stringId := c.Param("id")
 	id, err := strconv.Atoi(stringId)
-	images := c.Query("images") == "true"
+	atts := c.Query("attachments") == "true"
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -25,7 +25,7 @@ func (h *Handler) post(c *gin.Context) {
 	postRecord := new(core.BlogPost)
 	result := new(gorm.DB)
 
-	if images {
+	if atts {
 		result = h.Db.Preload("Attachments").Where("id = ?", id).First(&postRecord)
 	} else {
 		result = h.Db.Where("id = ?", id).First(&postRecord)
