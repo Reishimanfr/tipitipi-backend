@@ -27,43 +27,41 @@ interface BlogPostDataBodyJson {
 }
 
 const PostEditing = () => {
-  const [selectedPostIndex, setSelectedPostIndex] = useState<number>();
+  const [selectedPost, setSelectedPost] = useState<BlogPostDataBodyJson>();
   const [posts, setPosts] = useState<Array<BlogPostDataBodyJson>>([]);
-  const [loading, setLoading] = useState(true);
-  const [isAuthorized, setIsAuthorized] = useState(false);
-
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
-
-  //TODO bugged , doesnt delete but it did???? cannot pick newest posts because site crashes
-  
   async function deletePost() {
     const token = getToken();
-    if (!selectedPostIndex) {
+    if (!selectedPost) {
       alert("Nie znaleziono posta");
       return;
     }
     if (!window.confirm("Czy jesteś pewien że chcesz usunąć ten post?")) {
       return;
     }
-    const selectedPost = posts[selectedPostIndex];
-    const response = await fetch(
-      `http://localhost:2333/blog/post/${selectedPost.ID}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    try {
+      const response = await fetch(
+        `http://localhost:2333/blog/post/${selectedPost.ID}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    if (response.status === 200) {
-      alert("Usunięto post");
-      window.location.reload();
-    } else {
-      const data: BlogPostDataBodyJson = await response.json();
-      alert("Błąd: " + data.error);
+      if (response.status === 200) {
+        alert("Usunięto post");
+        window.location.reload();
+      } else {
+        const data: BlogPostDataBodyJson = await response.json();
+        alert("Błąd: " + data.error);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Wystąpił błąd: " + error);
     }
   }
   async function editPost() {
@@ -72,51 +70,53 @@ const PostEditing = () => {
     }
     const formData = buildMultipart(title, content);
     const token = getToken();
-    if (!selectedPostIndex) {
+    if (!selectedPost) {
       alert("Nie znaleziono posta");
       return;
     }
-    const selectedPost = posts[selectedPostIndex];
-    if (title == selectedPost.Title || content == selectedPost.Content) {
+    if (title == selectedPost.Title && content == selectedPost.Content) {
       alert("Nie dokonano żadnych zmian");
       return;
     }
 
-    const response = await fetch(
-      `http://localhost:2333/blog/post/${selectedPost.ID}`,
-      {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      }
-    );
+    try {
+      const response = await fetch(
+        `http://localhost:2333/blog/post/${selectedPost.ID}`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
 
-    if (response.status === 200) {
-      alert("Edytowano post");
-      window.location.reload();
-    } else {
-      const data: BlogPostDataBodyJson = await response.json();
-      alert("Błąd: " + data.error);
+      if (response.status === 200) {
+        alert("Edytowano post");
+        window.location.reload();
+      } else {
+        const data: BlogPostDataBodyJson = await response.json();
+        alert("Błąd: " + data.error);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Wystąpił błąd: " + error);
     }
   }
 
-  useEffect(() => {
-    const fetchPostsEffect = async () => {
-      if (isAuthorized && posts.length == 0) {
-        await fetchPosts(setPosts);
-      }
-    };
-    fetchPostsEffect();
-  }, [isAuthorized]);
+  const [loading, setLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+;
 
   useEffect(() => {
-    if (selectedPostIndex) {
-      setTitle(posts[selectedPostIndex].Title);
-      setContent(posts[selectedPostIndex].Content);
+    if (selectedPost) {
+      setTitle(selectedPost.Title);
+      setContent(selectedPost.Content);
     }
-  }, [selectedPostIndex]);
+  }, [selectedPost]);
+
+
+
 
   useEffect(() => {
     const ValidateAuthorization = async () => {
@@ -124,6 +124,14 @@ const PostEditing = () => {
     };
     ValidateAuthorization();
   }, []);
+  useEffect(() => {
+    const fetchPostsEffect = async () => {
+      if (isAuthorized && posts.length == 0) {
+        await fetchPosts(setPosts);
+      }
+    };
+    fetchPostsEffect();
+  }, [isAuthorized])
   if (loading) {
     return <div>Loading</div>;
   }
@@ -132,18 +140,18 @@ const PostEditing = () => {
   }
   return (
     <div className="globalCss">
-      <div>
-        <label>Proszę wybrać post</label>
+      <div className="my-[1%]">
+        <label className="text-xl">Proszę wybrać post</label>
         <br></br>
         <select
           name="posts"
-          onChange={(e) => setSelectedPostIndex(parseInt(e.target.value) - 1)}
+          onChange={(e) => setSelectedPost(posts[parseInt(e.target.value)])}
         >
-          <option value="">Wybierz posta</option>
+          <option value="">--post--</option>
           {posts ? (
-            posts.map((post) => {
+            posts.map((post, index) => {
               return (
-                <option key={post.ID} value={post.ID}>
+                <option key={post.ID} value={index}>
                   {post.ID + " , " + post.Title}
                 </option>
               );
@@ -154,7 +162,7 @@ const PostEditing = () => {
         </select>
       </div>
 
-      {selectedPostIndex !== undefined && posts[selectedPostIndex] ? (
+      {selectedPost !== undefined ? (
         <div>
           <QuillBody
             title={title}
@@ -165,7 +173,7 @@ const PostEditing = () => {
           />
           <br></br>
           <button
-            className="border w-40 bg-red-500 text-white"
+            className="border w-40 text-white shadow-lg bg-red-500 hover:bg-red-600 hover:duration-300"
             onClick={() => deletePost()}
           >
             Usuń tego posta

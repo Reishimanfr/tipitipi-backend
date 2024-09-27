@@ -35,6 +35,7 @@ export default function PostCreating() {
 
     const token = getToken()
 
+    try{
     const response = await fetch("http://localhost:2333/blog/post/", {
       method: "POST",
       headers: {
@@ -50,6 +51,10 @@ export default function PostCreating() {
       const data: BlogPostDataBodyJson = await response.json();
       alert("Błąd: " + data.error);
     }
+  } catch (error){
+    console.error(error)
+    alert("Wystąpił błąd: " + error)
+  }
   }
 
   const [loading, setLoading] = useState(true);
@@ -68,6 +73,9 @@ export default function PostCreating() {
   }
 
   return (
-    <QuillBody title={title} setTitle={setTitle} content={content} setContent={setContent} handlerPost={addPost}/>
+    <div className="mt-[1%] globalCss">
+      <QuillBody title={title} setTitle={setTitle} content={content} setContent={setContent} handlerPost={addPost}/>
+    </div>
+    
   );
 }

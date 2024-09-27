@@ -1,13 +1,21 @@
 import Post from "../components/post";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+
+interface BlogAttachments {
+  ID: number;
+  BlogPostID: number;
+  Path: string;
+  Filename: string;
+}
 
 interface BlogPostDataBodyJson {
   Content: string;
   Created_At: string;
   Edited_At: string;
   ID: number;
+  Attachments: BlogAttachments[];
   Title: string;
+  error?: string;
 }
 
 const Blog = () => {
@@ -83,7 +91,7 @@ const Blog = () => {
       </select>
       {posts ? (
         posts.map((post) => {
-          return <Link key={post.ID} to={`/blog/${post.ID}`}><Post id={post.ID} title={post.Title} content={post.Content} date={post.Edited_At}/></Link>;
+          return <div className="mt-[3%]"><Post id={post.ID} content={post.Content} title={post.Title} date={post.Edited_At} willBeUsedManyTimes={true} attachments={post.Attachments}/></div>;
         })
       ) : (
         <div>No post found</div>

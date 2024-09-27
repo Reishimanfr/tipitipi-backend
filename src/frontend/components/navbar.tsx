@@ -99,7 +99,7 @@ function Navbar() {
           <img
             src={logoSmall}
             alt="logo"
-            className="w-auto h-16 float-left ml-[5%] mt-[1vh]"
+            className="w-auto h-16 float-left ml-[5%] mt-[1vh] hover:animate-spin"
           ></img>
         </Link>
         <button

@@ -12,7 +12,7 @@ interface Props {
 const QuillBody = ({title,setTitle,content,setContent,handlerPost} : Props) => {
     return(
         <div>
-          <label htmlFor="title">Podaj nazwę posta: </label>
+          <label className="text-xl" htmlFor="title">Podaj nazwę posta: </label>
           <input
             type="text"
             name="title"
@@ -23,7 +23,7 @@ const QuillBody = ({title,setTitle,content,setContent,handlerPost} : Props) => {
           <br></br>
           <br></br>
 
-          <h1>Podaj treść posta:</h1>
+          <h1 className="text-xl">Podaj treść posta:</h1>
           <ReactQuill
             theme="snow"
             value={content}
@@ -47,7 +47,7 @@ const QuillBody = ({title,setTitle,content,setContent,handlerPost} : Props) => {
             }}
           />
           <br></br>
-          <button className={"border w-40"} onClick={() => handlerPost()}>
+          <button className={"border w-40 shadow-lg hover:bg-slate-100 hover:duration-300"} onClick={() => handlerPost()}>
             Postuj
           </button>
         </div>

@@ -54,10 +54,9 @@ const PostPage = () => {
     return <div>Loading</div>;
   }
   return (
-    <div className="globalCss">
-      <h1>Post Page</h1>
+    <div className="globalCss mt-[1%]">
       {post ? (
-        <Post title={post.Title} content={post.Content} date={post.Edited_At} id={post.ID} attachments={post.Attachments}/>
+        <Post title={post.Title} content={post.Content} date={post.Edited_At} id={post.ID} attachments={post.Attachments} willBeUsedManyTimes={false}/>
       ) : (
         <div>No post found</div>
       )}
