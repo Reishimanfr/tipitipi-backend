@@ -1,14 +1,23 @@
 import Post from "../components/post";
 import { useState, useEffect } from "react";
 
+
+interface BlogAttachments {
+  ID: number;
+  BlogPostID: number;
+  Path: string;
+  Filename: string;
+}
+
 interface BlogPostDataBodyJson {
   Content: string;
   Created_At: string;
   Edited_At: string;
   ID: number;
-  Images: string;
+  Attachments: BlogAttachments[];
   Title: string;
 }
+
 
 const PostPage = () => {
   const [post, setPost] = useState<BlogPostDataBodyJson | null>(null);
@@ -20,7 +29,7 @@ const PostPage = () => {
 
     async function fetchPost() {
       try {
-        const response = await fetch(`http://localhost:2333/blog/post/${ID}`, {
+        const response = await fetch(`http://localhost:2333/blog/post/${ID}?images=true`, {
           method: "GET"
         });
 
@@ -37,16 +46,17 @@ const PostPage = () => {
       }
     }
     fetchPost();
+  
   }, []);
+
 
   if (loading) {
     return <div>Loading</div>;
   }
   return (
-    <div className="globalCss">
-      <h1>Post Page</h1>
+    <div className="globalCss mt-[1%]">
       {post ? (
-        <Post title={post.Title} content={post.Content} date={post.Edited_At} id={post.ID}/>
+        <Post title={post.Title} content={post.Content} date={post.Edited_At} id={post.ID} attachments={post.Attachments} willBeUsedManyTimes={false}/>
       ) : (
         <div>No post found</div>
       )}

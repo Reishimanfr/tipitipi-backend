@@ -31,10 +31,6 @@ const Login = () => {
 
             
         })
-        // const request = await axios.post("http://localhost:2333/admin/login" , {
-        //     "username" : login,
-        //     "password" : password
-        // })
       
         const data : LoginResponse  = await response.json()    //TODO idk what data type is 
 

@@ -32,22 +32,24 @@ const Dashboard = (props : any) => {
     
     return(
         <>
-        <div>
-            {/* wyświetlamy to co widzi użytkownik */}
+        {/* <div>
+            wyświetlamy to co widzi użytkownik
             <h1>Pierwszy nagłówek strony głównej : {props.mainpageFirstHeader}</h1> 
 
-            {/* zmieniamy stan lokalny na to co wpisze admin */}
+            zmieniamy stan lokalny na to co wpisze admin
             <input className={BORDER_CSS} onChange={(event) => setMainpageFirstHeader(event.target.value)}></input><br></br>
 
-            {/* po wcisnieciu przycisku wywolywana jest funkcja podana w props , stan globalny dostaje wartosc lokalnego */}
+            po wcisnieciu przycisku wywolywana jest funkcja podana w props , stan globalny dostaje wartosc lokalnego
             <button className={BORDER_CSS+" w-40 ml-5"} onClick={() => props.changeMainpageFirstHeader(mainpageFirstHeader)}>fin</button>
             
             <hr></hr>
-        </div>
+        </div> */}
 
 
-            <div>
-                <Link to="/admin/dashboard/create-post"><button>Dodawanie postów</button></Link>
+            <div className="mt-[1%]">
+                <Link to="/admin/dashboard/create-post"><button className="border p-[0.5%] ml-[1%] mb-[1%] border-gray-900 hover:bg-gray-900 hover:text-white hover:duration-300 rounded-md">Dodawanie postów</button></Link><br></br>
+                <Link to="/admin/dashboard/edit-post"><button className="border p-[0.5%] ml-[1%] mb-[1%] border-gray-900 hover:bg-gray-900 hover:text-white hover:duration-300 rounded-md">Edycja postów</button></Link><br></br>
+                <Link to="/admin/dashboard/change-credentials"><button className="border p-[0.5%] ml-[1%] mb-[1%] border-gray-900 hover:bg-gray-900 hover:text-white hover:duration-300 rounded-md">Zmień login/hasło</button></Link>
             </div>
         </>
     )
