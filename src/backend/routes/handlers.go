@@ -27,7 +27,7 @@ func NewHandler(cfg *Config, db *core.Database) {
 	{
 		public.HEAD("/heartbeat", h.Heartbeat)
 		public.POST("/admin/login", h.AdminLogin)
-		public.GET("/blog/post/:id", h.post)
+		public.GET("/blog/post/:id", h.getOne)
 		public.GET("/blog/posts", h.posts)
 	}
 
