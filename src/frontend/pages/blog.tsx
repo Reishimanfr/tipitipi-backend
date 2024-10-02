@@ -91,7 +91,8 @@ const Blog = () => {
       </select>
       {posts ? (
         posts.map((post) => {
-          return <div className="mt-[3%]"><Post id={post.ID} content={post.Content} title={post.Title} date={post.Edited_At} willBeUsedManyTimes={true} attachments={post.Attachments}/></div>;
+          return <div key={post.ID} className="mt-[3%]" ><Post id={post.ID} content={post.Content} title={post.Title} date={post.Edited_At} willBeUsedManyTimes={true} attachments={post.Attachments}/></div>;
+  
         })
       ) : (
         <div>No post found</div>

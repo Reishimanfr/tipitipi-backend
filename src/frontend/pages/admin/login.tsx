@@ -16,8 +16,6 @@ const Login = () => {
 
 
     async function loginHandler(){
-        console.log(login)
-        console.log(password)
         const formData = new FormData()
         formData.append("username",login)
         formData.append("password",password)
@@ -32,7 +30,7 @@ const Login = () => {
             
         })
       
-        const data : LoginResponse  = await response.json()    //TODO idk what data type is 
+        const data : LoginResponse  = await response.json()   
 
         if(response.status === 200 && data.token != undefined) {
             localStorage.setItem("token",data.token)
@@ -45,17 +43,20 @@ const Login = () => {
     }
 
     return(
-        <div>
-            <h1>Login</h1>
+        <div className="m-auto mt-[20vh] border-2 border-gray-800  text-center w-[25%] rounded-lg">
             <form>
-                <label htmlFor="login">Podaj login</label>
-                <input type="text" name="login" onChange={(event) => setLogin(event.target.value)}/><br></br>
-
-                <label htmlFor="password">Podaj Hasło</label>
-                <input type="text" name="password" onChange={(event) => setPassword(event.target.value)}/><br></br>
+                <div className="p-[5%]">
+                    <label className="text-xl font-semibold" htmlFor="login">Podaj login: </label>
+                    <input className="border-2 w-1/2" type="text" name="login" onChange={(event) => setLogin(event.target.value)}/><br></br>
+                </div>
                 
+                <div className="p-[3%]">
+                    <label className="text-xl font-semibold" htmlFor="password">Podaj Hasło: </label>
+                    <input className="border-2 w-1/2"  type="password" name="password" onChange={(event) => setPassword(event.target.value)}/><br></br>
+                </div>
+
             </form>
-            <button onClick={() => loginHandler()}>Zaloguj</button>
+            <button className={"m-[5%] p-[1%] border w-1/2 shadow-lg hover:bg-slate-100 hover:duration-300"} onClick={() => loginHandler()}>Zaloguj</button>
         </div>
     )
 }

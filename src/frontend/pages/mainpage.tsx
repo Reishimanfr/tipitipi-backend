@@ -1,7 +1,7 @@
 import background_example from "../assets/example_background.jpg";
-import landscapeImage from "../assets/landscape.jpg"
+import landscapeImage from "../assets/landscape.jpg";
 import Image_Text from "../components/image_text";
-import { useState , useEffect } from "react";
+import { useState, useEffect } from "react";
 import Post from "../components/post";
 
 interface BlogPostDataBodyJson {
@@ -12,7 +12,6 @@ interface BlogPostDataBodyJson {
   Title: string;
 }
 const Mainpage = () => {
-
   const [posts, setPosts] = useState<Array<BlogPostDataBodyJson>>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -40,8 +39,6 @@ const Mainpage = () => {
     fetchPost();
   }, []);
 
-
-
   if (loading) {
     return <div>Loading</div>;
   }
@@ -51,28 +48,38 @@ const Mainpage = () => {
             <Link to="/admin">Admin</Link>
             <h1 className="text-center">{props.mainpageFirstHeader}</h1> */}
 
-      <Image_Text
+        <Image_Text
         image={background_example}
         header="Jakiś nagłówek"
         paragraph="Lorem ipsum dolor sit amet, consectetur adipiscing 
                     elit. Suspendisse tellus lectus, pharetra a aliquet sed, 
                     sagittis vel sapien."
-        orientation="left"
+        leftSide={true}
       />
+      
 
-        <h1 className="text-3xl mb-[1%]">Oto kilka najnowszych postów</h1>
-        {posts ? (
+      <h1 className="text-3xl mb-[1%]">Oto kilka najnowszych postów</h1>
+      {posts ? (
         posts.map((post) => {
-          return<Post id={post.ID} content={post.Content} title={post.Title} date={post.Edited_At} willBeUsedManyTimes={true}/>;
+          return (
+            <Post
+              key={post.ID}
+              id={post.ID}
+              content={post.Content}
+              title={post.Title}
+              date={post.Edited_At}
+              willBeUsedManyTimes={true}
+            />
+          );
         })
       ) : (
         <div>No post found</div>
-      )}<br></br><br></br>
-<br></br>
-<br></br>
-<br></br>
-
-
+      )}
+      <br></br>
+      <br></br>
+      <br></br>
+      <br></br>
+      <br></br>
 
       <Image_Text
         image={landscapeImage}
@@ -88,7 +95,8 @@ const Mainpage = () => {
                     sagittis vel sapien.orem ipsum dolor sit amet, consectetur adipiscing 
                     elit. Suspendisse tellus lectus, pharetra a aliquet sed, 
                     sagittis vel sapien."
-        orientation="right"/>
+        leftSide={false}
+      />
     </div>
   );
 };
