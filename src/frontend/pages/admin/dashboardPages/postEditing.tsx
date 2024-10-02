@@ -26,6 +26,29 @@ interface BlogPostDataBodyJson {
   error?: string;
 }
 
+// async function fetchFileAsBlob(path: string): Promise<Blob> {
+//   const response = await fetch(path);
+  
+//   if (!response.ok) {
+//     throw new Error("Błąd podczas pobierania pliku");
+//   }
+
+//   const blob = await response.blob();
+//   return blob;
+// }
+
+// async function getBase64(path : string) {
+//   const file = await fetchFileAsBlob(path)
+//   var reader = new FileReader();
+//   reader.readAsDataURL(file);
+//   reader.onload = function () {
+//     console.log(reader.result);
+//   };
+//   reader.onerror = function (error) {
+//     console.log('Error: ', error);
+//   };
+// }
+
 const PostEditing = () => {
   const [selectedPost, setSelectedPost] = useState<BlogPostDataBodyJson>();
   const [posts, setPosts] = useState<Array<BlogPostDataBodyJson>>([]);
@@ -68,7 +91,7 @@ const PostEditing = () => {
     if (!validateDataForm(title, content)) {
       return;
     }
-    const formData = buildMultipart(title, content);
+  
     const token = getToken();
     if (!selectedPost) {
       alert("Nie znaleziono posta");
@@ -78,6 +101,7 @@ const PostEditing = () => {
       alert("Nie dokonano żadnych zmian");
       return;
     }
+    const formData = buildMultipart(title, content);
 
     try {
       const response = await fetch(

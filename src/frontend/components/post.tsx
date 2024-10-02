@@ -33,6 +33,12 @@ const Post = ({
       );
     });
   }
+  else {
+    if(content) {
+      content = content?.replace(/{{\d+}}/g, "")
+    }
+
+  }
   return (
     <div className=" mb-[1%] border-4 border-gray-800 rounded-lg">
       <h1 className="bg-gray-900 text-white pt-[1%] p-[1%] text-3xl">

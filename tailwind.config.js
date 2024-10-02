@@ -6,6 +6,8 @@ export default {
       animation: {
         'slide-in': 'slide-in 0.5s ease-in-out',
         'slide-out': 'slide-out 0.5s ease-in-out',
+        'slideInLeft': 'slideInFromLeft 1s ease-out',
+        'slideInRight': 'slideInFromRight 1s ease-out'
       },
       keyframes: {
         'slide-in': {
@@ -28,6 +30,14 @@ export default {
             //opacity: 0,
           },
         },
+        slideInFromLeft: {
+          '0%': { transform: 'translateX(-10%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        slideInFromRight: {
+          '0%': { transform: 'translateX(10%)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        }
       },
     },
   },

@@ -14,6 +14,7 @@ import Pricing from "./pages/pricing"
 import PostPage from './pages/postPage'
 import PostEditing from './pages/admin/dashboardPages/postEditing'
 import ChangeCredentials from './pages/admin/dashboardPages/changeCredentials'
+import PageNotFound from './pages/errorPages/page_not_found'
 
 function App() {
   const [mainpageFirstHeader,setMainpageFirstHeader] = useState("")
@@ -42,6 +43,7 @@ function App() {
         <Route path="/pricing" element={<Pricing/>}/>
         <Route path="/blog" element={<Blog/>}/>
         <Route path="/blog/:id" element={<PostPage/>}/>
+        <Route path='*' element={<PageNotFound/>}/>
       </Routes>
       <Footer/>
       </BrowserRouter>

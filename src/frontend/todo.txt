@@ -1,11 +1,6 @@
-zmiana hasla admina
-
 cennik // po zdobyciu info
 
-about jak poprawic 
+animacje tailwind // bardziej skomplikowane niz myslalem
 
-animacje tailwind
+filereader //jak update zadziala
 
-filereader
-
-{{}} placeholder zostaje w contencie w komponencie post

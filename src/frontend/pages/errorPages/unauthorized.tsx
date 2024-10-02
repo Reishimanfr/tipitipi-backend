@@ -1,7 +1,7 @@
 const Unauthorized = () => {
     return(
         <div>
-            <h1>Unauthorized access</h1>
+            <h1 className=" m-5 text-5xl font-bold">Unauthorized access</h1>
         </div>
     )
 }
