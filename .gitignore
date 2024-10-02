@@ -32,3 +32,6 @@ src/backend/assets/*
 
 .env
 assets
+
+.aws/config
+.aws/credentials

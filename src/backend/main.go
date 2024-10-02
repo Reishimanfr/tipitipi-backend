@@ -5,11 +5,16 @@ import (
 	"bash06/strona-fundacja/src/backend/middleware"
 	"bash06/strona-fundacja/src/backend/routes"
 	"context"
+	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -72,6 +77,28 @@ func setupRouter(db *core.Database, testing bool) *gin.Engine {
 }
 
 func main() {
+	s, err := session.NewSession(&aws.Config{
+		Region:           aws.String("waw"),
+		Endpoint:         aws.String("https://s3.waw.io.cloud.ovh.net/"),
+		S3ForcePathStyle: aws.Bool(true),
+	})
+
+	if err != nil {
+		log.Fatalf("Failed to create session: %v", err)
+	}
+
+	svc := s3.New(s)
+
+	result, err := svc.ListBuckets(nil)
+	if err != nil {
+		log.Fatalf("Unable to list buckets: %v", err)
+	}
+
+	fmt.Println("Buckets:")
+	for _, b := range result.Buckets {
+		fmt.Printf("* %s\n", aws.StringValue(b.Name))
+	}
+
 	log, loggerErr := core.InitLogger()
 
 	if loggerErr != nil {

@@ -25,10 +25,9 @@ func NewHandler(cfg *Config, db *core.Database) {
 
 	public := cfg.Router.Group("/")
 	{
-		public.HEAD("/heartbeat", h.Heartbeat)
-		public.POST("/admin/login", h.AdminLogin)
+		public.POST("/admin/login", h.auth)
 		public.GET("/blog/post/:id", h.getOne)
-		public.GET("/blog/posts", h.posts)
+		public.GET("/blog/posts", h.getMany)
 	}
 
 	protected := cfg.Router.Group("/")
@@ -36,9 +35,9 @@ func NewHandler(cfg *Config, db *core.Database) {
 	{
 		blog := protected.Group("/blog/post")
 		{
-			blog.DELETE("/:id", h.delete)
+			blog.DELETE("/:id", h.deleteOne)
 			blog.POST("/", h.create)
-			blog.PATCH("/:id", h.edit)
+			blog.PATCH("/:id", h.editOne)
 		}
 
 		gallery := protected.Group("/gallery")
@@ -49,7 +48,7 @@ func NewHandler(cfg *Config, db *core.Database) {
 
 		admin := protected.Group("/admin")
 		{
-			admin.PATCH("/account", h.changePassword)
+			admin.PATCH("/update", h.updateCreds)
 			admin.POST("/validate", h.validateJWT)
 		}
 	}
