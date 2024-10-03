@@ -27,11 +27,4 @@ dist-ssr
 *.sqlite
 *.db
 
-# Saved files
-src/backend/assets/*
-
-.env
-assets
-
-.aws/config
-.aws/credentials
+src/backend/backend
