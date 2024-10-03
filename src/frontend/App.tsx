@@ -1,20 +1,29 @@
-import { useState} from 'react'
+import { useState } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Footer from './components/footer'
 import Navbar from './components/navbar'
 import About from "./pages/about"
 import Admin from './pages/admin/admin'
-import PostCreating from './pages/admin/dashboardPages/postCreating'
-import Blog from "./pages/blog"
 import Dashboard from './pages/admin/dashboard'
-import Gallery from "./pages/gallery"
-import Login from './pages/admin/login'
-import Mainpage from "./pages/mainpage"
-import Pricing from "./pages/pricing"
-import PostPage from './pages/postPage'
-import PostEditing from './pages/admin/dashboardPages/postEditing'
 import ChangeCredentials from './pages/admin/dashboardPages/changeCredentials'
+import PostCreating from './pages/admin/dashboardPages/postCreating'
+import PostEditing from './pages/admin/dashboardPages/postEditing'
+import Login from './pages/admin/login'
+import Blog from "./pages/blog"
 import PageNotFound from './pages/errorPages/page_not_found'
+import Gallery from "./pages/gallery"
+import Mainpage from "./pages/mainpage"
+import PostPage from './pages/postPage'
+import Pricing from "./pages/pricing"
+const decode = (str: string):string => Buffer.from(str, 'base64').toString('binary');
+
+
+interface JwtPayload {
+    iat: number
+    exp: number
+    admin: boolean
+    user_id: string
+} 
 
 function App() {
   const [mainpageFirstHeader,setMainpageFirstHeader] = useState("")

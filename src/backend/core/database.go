@@ -15,24 +15,30 @@ var (
 	Path    = path.Join(Exec, "../database.sqlite")
 )
 
+type GalleryRecord struct {
+	ID      int    `gorm:"primaryKey;autoIncrement" json:"id"`
+	AltText string `json:"alt_text,omitempty"`
+	Path    string `json:"path"`
+}
+
 type AttachmentRecord struct {
-	ID         int `gorm:"primaryKey,autoIncrement"`
-	Filename   string
-	Path       string
-	BlogPostID int `gorm:"index"`
+	ID         int    `gorm:"primaryKey;autoIncrement" json:"id"`
+	URL        string `json:"url"`
+	Filename   string `json:"filename"`
+	BlogPostID int    `gorm:"index" json:"-"`
 }
 
 type BlogPost struct {
-	ID          int `gorm:"primaryKey,autoIncrement"`
-	Created_At  int64
-	Edited_At   int64
-	Title       string `gorm:"unique"`
-	Content     string
-	Attachments []AttachmentRecord `gorm:"foreignKey:BlogPostID"`
+	ID          int                `gorm:"primaryKey;autoIncrement" json:"id"`
+	Created_At  int64              `json:"created_at,omitempty"`
+	Edited_At   int64              `json:"edited_at,omitempty"`
+	Title       string             `gorm:"unique" json:"title,omitempty"`
+	Content     string             `json:"content,omitempty"`
+	Attachments []AttachmentRecord `gorm:"foreignKey:BlogPostID" json:"attachments,omitempty"`
 }
 
 type AdminUser struct {
-	ID       int `gorm:"primaryKey,autoIncrement:false"`
+	ID       int `gorm:"primaryKey;autoIncrement:false"`
 	Username string
 	Hash     string
 	Salt     string
@@ -40,7 +46,6 @@ type AdminUser struct {
 
 type Database struct {
 	*gorm.DB
-	Memory bool
 }
 
 func (d *Database) Init() Database {
@@ -63,11 +68,7 @@ func (d *Database) Init() Database {
 	var db *gorm.DB
 
 	// Mainly used for testing
-	if d.Memory {
-		db, err = gorm.Open(sqlite.Open("sqlite::memory"), gormConfig)
-	} else {
-		db, err = gorm.Open(sqlite.Open(Path), gormConfig)
-	}
+	db, err = gorm.Open(sqlite.Open(Path), gormConfig)
 
 	if err != nil {
 		panic(err)
