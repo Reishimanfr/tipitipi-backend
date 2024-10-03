@@ -17,8 +17,8 @@ var (
 
 type GalleryRecord struct {
 	ID      int    `gorm:"primaryKey;autoIncrement" json:"id"`
-	AltText string `json:"alt_text,omitempty"`
-	Path    string `json:"path"`
+	AltText string `json:"alt_text"`
+	URL     string `json:"url"`
 }
 
 type AttachmentRecord struct {
@@ -30,10 +30,10 @@ type AttachmentRecord struct {
 
 type BlogPost struct {
 	ID          int                `gorm:"primaryKey;autoIncrement" json:"id"`
-	Created_At  int64              `json:"created_at,omitempty"`
-	Edited_At   int64              `json:"edited_at,omitempty"`
-	Title       string             `gorm:"unique" json:"title,omitempty"`
-	Content     string             `json:"content,omitempty"`
+	Created_At  int64              `json:"created_at"`
+	Edited_At   int64              `json:"edited_at"`
+	Title       string             `gorm:"unique" json:"title"`
+	Content     string             `json:"content"`
 	Attachments []AttachmentRecord `gorm:"foreignKey:BlogPostID" json:"attachments,omitempty"`
 }
 
@@ -67,14 +67,13 @@ func (d *Database) Init() Database {
 
 	var db *gorm.DB
 
-	// Mainly used for testing
 	db, err = gorm.Open(sqlite.Open(Path), gormConfig)
 
 	if err != nil {
 		panic(err)
 	}
 
-	db.AutoMigrate(&BlogPost{}, &AdminUser{}, &AttachmentRecord{})
+	db.AutoMigrate(&BlogPost{}, &AdminUser{}, &AttachmentRecord{}, &GalleryRecord{})
 	d.DB = db
 
 	return *d

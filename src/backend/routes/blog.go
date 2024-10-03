@@ -46,29 +46,12 @@ const (
 	ok_post_create_success     = "Post created successfully"
 )
 
-func getMimeType(fileName string) string {
-	ext := filepath.Ext(fileName)
-
-	switch ext {
-	case ".png":
-		return "image/png"
-	case ".jpg", ".jpeg":
-		return "image/jpeg"
-	case ".webp":
-		return "image/webp"
-	case ".mp4":
-		return "video/mp4"
-	default:
-		return "application/octet-stream"
-	}
-}
-
 // blog/post/:id
 // Returns a single post under some ID
 func (h *Handler) getOne(c *gin.Context) {
 	stringId := c.Param("id")
 	id, err := strconv.Atoi(stringId)
-	atts := c.Query("attachments") == "true"
+	attach := c.Query("attachments") == "true"
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -81,7 +64,7 @@ func (h *Handler) getOne(c *gin.Context) {
 	postRecord := new(core.BlogPost)
 	result := new(gorm.DB)
 
-	if atts {
+	if attach {
 		result = h.Db.Preload("Attachments").Where("id = ?", id).First(&postRecord)
 	} else {
 		result = h.Db.Where("id = ?", id).First(&postRecord)
@@ -113,7 +96,7 @@ func (h *Handler) getMany(c *gin.Context) {
 	offsetStr := c.DefaultQuery("offset", "0")
 	limitStr := c.DefaultQuery("limit", "5")
 	sort := strings.ToLower(c.DefaultQuery("sort", "newest"))
-	atts := c.DefaultQuery("attachments", "false") == "true"
+	attach := c.DefaultQuery("attachments", "false") == "true"
 	partial := c.DefaultQuery("partial", "false") == "true"
 
 	offset, err := strconv.Atoi(offsetStr)
@@ -180,7 +163,7 @@ func (h *Handler) getMany(c *gin.Context) {
 
 	if partial {
 		result = h.Db.Select([]string{"created_at", "title", "id"}).Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords)
-	} else if atts {
+	} else if attach {
 		result = h.Db.Preload("Attachments").Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords)
 	} else {
 		result = h.Db.Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords)
@@ -282,11 +265,12 @@ func (h *Handler) createOne(c *gin.Context) {
 
 				ext := filepath.Ext(fileHeader.Filename)
 				altFilename := fmt.Sprintf("%v-%v%v", nextID, i, ext)
-				mime := getMimeType(fileHeader.Filename)
+				mime := core.GetMIMEType(fileHeader.Filename)
 
 				url, err := h.Ovh.AddObject(buffer, os.Getenv("AWS_BLOG_BUCKET_NAME"), altFilename, mime)
 				if err != nil {
 					errors <- fmt.Errorf("failed to upload file %s: %v", fileHeader.Filename, err)
+					return
 				}
 
 				h.Db.Create(&core.AttachmentRecord{
@@ -367,6 +351,16 @@ func (h *Handler) deleteOne(c *gin.Context) {
 		return
 	}
 
+	if err := tx.Model(&core.AttachmentRecord{}).Delete("blog_post_id = ?", post.ID).Error; err != nil {
+		tx.Rollback()
+
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error":   err.Error(),
+			"message": err_sql_query,
+		})
+		return
+	}
+
 	if err := tx.Commit().Error; err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
@@ -381,8 +375,6 @@ func (h *Handler) deleteOne(c *gin.Context) {
 		for _, at := range post.Attachments {
 			bucketKeys = append(bucketKeys, at.Filename)
 		}
-
-		fmt.Println(bucketKeys)
 
 		err := h.Ovh.DeleteObjectsBulk(os.Getenv("AWS_BLOG_BUCKET_NAME"), bucketKeys)
 		if err != nil {

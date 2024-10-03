@@ -26,5 +26,3 @@ dist-ssr
 # Database files
 *.sqlite
 *.db
-
-src/backend/backend

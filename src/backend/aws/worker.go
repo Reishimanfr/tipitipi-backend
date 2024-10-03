@@ -26,6 +26,9 @@ func NewWorker(accessKey, secretKey, region, endpoint string) (*Worker, error) {
 
 	s3Client := s3.New(s)
 
+	// TODO: implement checking if required buckets exist
+	// result, err := s3Client.ListBuckets(nil)
+
 	return &Worker{
 		Session: s,
 		S3:      s3Client,
