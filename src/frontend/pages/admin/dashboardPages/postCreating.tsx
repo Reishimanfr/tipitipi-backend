@@ -1,129 +1,81 @@
-import { useState } from "react";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
-import { useNavigate } from "react-router-dom";
-//import axios from "axios";
+import { useEffect, useState } from "react";
+import Unauthorized from "../../errorPages/unauthorized";
+import validateToken from "../../../components/validate";
+import { validateDataForm , buildMultipart, getToken } from "./postManipulatingFunctions";
+import QuillBody from "../../../components/quillBody";
 
-
+interface BlogAttachments {
+  ID: number;
+  BlogPostID: number;
+  Path: string;
+  Filename: string;
+}
 
 interface BlogPostDataBodyJson {
-  Content: string
-  Created_At: string 
-  Edited_At: string
-  ID: number
-  Images: any[]
-  Title: string
-  error?:  string
+  Content: string;
+  Created_At: string;
+  Edited_At: string;
+  ID: number;
+  Attachments: BlogAttachments[];
+  Title: string;
+  error?: string;
 }
 
 
 export default function PostCreating() {
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState("Tytuł posta");
   const [content, setContent] = useState("Treść posta");
-  const navigate = useNavigate()
-
-  function validateDataForm() {
-    console.log(content)
-    if(title === "") {
-        alert("Podano pusty tytuł")
-
-        return false
-    }
-    if(content === "") {
-        alert("Podano pustą treść")
-        return false
-    }
-    const confirm = window.confirm("Czy jesteś pewien że chcesz opublikować ten post?")
-    if(!confirm){
-        return false;
-    }
-    return true
-}
 
   async function addPost() {
-    if (!validateDataForm()) {return}
-    console.log(typeof content)
-
-    // const formData = new FormData()
-    // formData.append("title",title)
-    // formData.append("content",content)
-    //formData.append("images","")
-
-    const token = localStorage.getItem("token")
-    if (!token) {
-        alert("Token is invalid, redirecting to login page...")
-        navigate("/admin/login")
-        return
+    if (!validateDataForm(title, content)) {
+      return;
     }
 
-    const request = await fetch("http://localhost:2333/blog/post", {
-        method: "POST",
-        headers: {Authorization: token},
-        body: JSON.stringify({
-          "Title": title,
-          "Content": content,
-          "Images": ['']
-        })
+    const formData = buildMultipart(title, content);
 
-    })
-    // const request = await axios.post("http://localhost:2333/blog/post",{
-    //     headers: {Authorization: token},
-    //     body: {
-    //       "Title": title,
-    //       "Content": content,
-    //       "Images": []
-    //     }
-    // })
+    const token = getToken()
 
+    try{
+    const response = await fetch("http://localhost:2333/blog/post/", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      body: formData,
+    });
 
-    if(request.ok){
-        alert("Opublikowano post")
-        window.location.reload();
-        
+    if (response.status === 200) {
+      alert("Opublikowano post");
+      window.location.reload();
+    } else {
+      const data: BlogPostDataBodyJson = await response.json();
+      alert("Błąd: " + data.error);
     }
-    else {
-        const response: BlogPostDataBodyJson = await request.json()
-        alert("Błąd: " + response.error)
-    }
-}
+  } catch (error){
+    console.error(error)
+    alert("Wystąpił błąd: " + error)
+  }
+  }
 
+  const [loading, setLoading] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  useEffect(() => {
+    const ValidateAuthorization = async () => {
+      setIsAuthorized(await validateToken(setLoading));
+    };
+    ValidateAuthorization();
+  }, []);
+  if (loading) {
+    return <div>Loading</div>;
+  }
+  if (!isAuthorized) {
+    return <Unauthorized />;
+  }
 
   return (
-    <div>
-      <label htmlFor="title">Podaj nazwę posta: </label>
-      <input
-        type="text"
-        name="title"
-        className="border"
-        onChange={(event) => setTitle(event.target.value)}
-      />
-      <br></br>
-      <br></br>
-
-      <h1>Podaj treść posta:</h1>
-      <ReactQuill
-        theme="snow"
-        value={content}
-        onChange={setContent}
-        //style={{ minHeight: "500px" }}
-        modules={{
-          toolbar: [
-            ["bold", "italic", "underline"],
-            [{ align: [] }],
-
-            [{ list: "ordered" }, { list: "bullet" }],
-            [{ indent: "-1" }, { indent: "+1" }],
-
-            [{ size: ["small", false, "large", "huge"] }],
-            [{ header: [1, 2, 3, 4, 5, 6, false] }],
-            ["link", "image", "video"],
-            [{ color: [] }, { background: [] }],
-
-            ["clean"],
-          ],
-        }}
-      /><br></br>
-      <button className={"border w-40"} onClick={() => addPost()}>Postuj</button>
+    <div className="mt-[1%] globalCss">
+      <QuillBody title={title} setTitle={setTitle} content={content} setContent={setContent} handlerPost={addPost}/>
     </div>
+    
   );
 }

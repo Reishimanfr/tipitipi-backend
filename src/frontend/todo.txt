@@ -1,0 +1,6 @@
+cennik // po zdobyciu info
+
+animacje tailwind // bardziej skomplikowane niz myslalem
+
+filereader //jak update zadziala
+

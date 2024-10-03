@@ -80,13 +80,17 @@ function Navbar() {
   };
 
   useEffect(() => {
-    window.addEventListener("resize", handleResize);
     window.addEventListener("scroll" , handleScroll);
     return () => {
-      window.removeEventListener("resize", handleResize) 
       window.removeEventListener("scroll" , handleScroll)
       }
   },[lastScrollY]);
+  useEffect(() => {
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize)
+      }
+  });
 
   return (
     <div className={`sticky top-0 h-20 bg-black w-full transition-transform duration-300 transform ${show ? 'translate-y-0' : '-translate-y-full'}`}>
@@ -95,7 +99,7 @@ function Navbar() {
           <img
             src={logoSmall}
             alt="logo"
-            className="w-auto h-16 float-left ml-[5%] mt-[1vh]"
+            className="w-auto h-16 float-left ml-[5%] mt-[1vh] hover:animate-spin"
           ></img>
         </Link>
         <button

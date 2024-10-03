@@ -1,18 +1,28 @@
-const Image_Text = (props: any) => {
+interface Props {
+  image:string;
+  header:string;
+  paragraph:string;
+  leftSide: boolean;
+}
+
+
+const Image_Text = ({image,header,paragraph,leftSide} : Props) => {
+  const imageBlock  =  <div id="imageContainer" className="w-[50%]"><img src={image} className="w-full h-full object-cover"></img></div>;
+  const textBlock = <div className="bg-blue-500 w-[50%] flex">
+  <div className="p-[5%] self-center">
+    <h1 className="pb-[10%] text-5xl">{header}</h1>
+    <p className="mr-[15%] text-xl">{paragraph}</p>
+  </div>
+</div>;
+
   return (
-    // TODO justify center nie dziala i blok tekstowy jest za duzy
     <div className="flex items-stretch justify-center pb-[5%]">
-      <div id="imageContainer" className="w-[50%] h-fit">
-        <img src={props.image} className="float-right max-w-[100%]"></img>
-      </div>
-      <div className="bg-blue-500 w-[50%] ">
-        <div className="p-[5%]">
-          <h1 className="pb-[10%] text-3xl">{props.header}</h1>
-          <p className="mr-[15%] text-xl">{props.paragraph}</p>
-        </div>
-      </div>
+      {leftSide ? imageBlock: textBlock}
+      {leftSide ? textBlock : imageBlock}
     </div>
   );
 };
 
 export default Image_Text;
+
+

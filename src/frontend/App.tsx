@@ -1,17 +1,19 @@
-import { Buffer } from "buffer"
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Footer from './components/footer'
 import Navbar from './components/navbar'
 import About from "./pages/about"
 import Admin from './pages/admin/admin'
 import Dashboard from './pages/admin/dashboard'
+import ChangeCredentials from './pages/admin/dashboardPages/changeCredentials'
 import PostCreating from './pages/admin/dashboardPages/postCreating'
+import PostEditing from './pages/admin/dashboardPages/postEditing'
 import Login from './pages/admin/login'
 import Blog from "./pages/blog"
-import Unauthorized from './pages/errorPages/unauthorized'
+import PageNotFound from './pages/errorPages/page_not_found'
 import Gallery from "./pages/gallery"
 import Mainpage from "./pages/mainpage"
+import PostPage from './pages/postPage'
 import Pricing from "./pages/pricing"
 const decode = (str: string):string => Buffer.from(str, 'base64').toString('binary');
 
@@ -28,60 +30,29 @@ function App() {
   const changeMainpageFirstHeader = (newMessage : string) => {
     setMainpageFirstHeader(newMessage)
   }
-
-  const [isAuthorized,setIsAuthorized] = useState(false)
-  useEffect(() => {
-    const token = localStorage.getItem("token")
-
-    if (token === null) {
-        console.debug("Token is invalid")
-        setIsAuthorized(false)
-        return
-    }
-
-    // 0: Header | 1: Payload | 2: Signature
-    const tokenSplit = token.split(".")
-
-    if (!tokenSplit?.[1]) {
-        console.error("Malformed token")
-        setIsAuthorized(false)
-        return
-    }
-
-    const stringPayload = decode(tokenSplit[1])
-    const payload: JwtPayload = JSON.parse(stringPayload)
-    const now = Date.now() / 1000
-
-    if (now >= payload.exp) {
-        console.debug("Token expired, redirecting to login page...")
-        setIsAuthorized(false)
-        return
-    }
-
-    setIsAuthorized(true)
-})
-
-
  
 
   return (
-    <div className='relative min-h-screen'>
+    <div className='relative min-h-screen pb-20'>
       <BrowserRouter>
       <Navbar/>
       <Routes>
-        <Route path='/admin' element ={<Admin isAuthorized={isAuthorized}/>} />
-        <Route path="/admin/dashboard" element={isAuthorized ? 
+        <Route path='/admin' element ={<Admin/>} />
+        {/* <Route path="/admin/dashboard" element={isAuthorized ? 
           <Dashboard  mainpageFirstHeader={mainpageFirstHeader} changeMainpageFirstHeader={changeMainpageFirstHeader}/> : 
-          <Unauthorized/>} />
+          <Unauthorized/>} /> */}
+        <Route path="/admin/dashboard" element ={<Dashboard mainpageFirstHeader={mainpageFirstHeader} changeMainpageFirstHeader={changeMainpageFirstHeader}/>}/>
+        <Route path='/admin/dashboard/create-post' element={<PostCreating/>}/> 
+        <Route path='/admin/dashboard/edit-post' element={<PostEditing/>}/>
+        <Route path='/admin/dashboard/change-credentials' element={<ChangeCredentials/>}/>
         <Route path="/admin/login" element={<Login/>}/>
-        {/* <Route path='/admin/dashboard/create-post' element={isAuthorized ? <PostCreating/> : <Unauthorized/>}/> */}
-        <Route path='/admin/dashboard/create-post' element={<PostCreating/>}/>
-        {/* <Route path="/" element={<Mainpage mainpageFirstHeader={mainpageFirstHeader}/>}/> */}
         <Route path="/" element={<Mainpage/>}/>
         <Route path="/gallery" element={<Gallery/>}/>
         <Route path="/about" element={<About/>}/>
         <Route path="/pricing" element={<Pricing/>}/>
         <Route path="/blog" element={<Blog/>}/>
+        <Route path="/blog/:id" element={<PostPage/>}/>
+        <Route path='*' element={<PageNotFound/>}/>
       </Routes>
       <Footer/>
       </BrowserRouter>
