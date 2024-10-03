@@ -1,6 +1,7 @@
 package routes
 
 import (
+	ovh "bash06/strona-fundacja/src/backend/aws"
 	"bash06/strona-fundacja/src/backend/core"
 
 	"github.com/gin-gonic/gin"
@@ -11,17 +12,19 @@ type Handler struct {
 	Db  core.Database
 	Log *zap.Logger
 	A   core.Argon2idHash
+	Ovh *ovh.Worker
 }
 
 type Config struct {
 	Router *gin.Engine
 }
 
-func NewHandler(cfg *Config, db *core.Database) {
+func NewHandler(cfg *Config, db *core.Database, worker *ovh.Worker) {
 	h := &Handler{}
 	h.Db = *db
 	h.Log = core.GetLogger()
 	h.A = *core.NewArgon2idHash(1, 32, 64*1024, 32, 256)
+	h.Ovh = worker
 
 	public := cfg.Router.Group("/")
 	{
@@ -36,20 +39,19 @@ func NewHandler(cfg *Config, db *core.Database) {
 		blog := protected.Group("/blog/post")
 		{
 			blog.DELETE("/:id", h.deleteOne)
-			blog.POST("/", h.create)
+			blog.POST("/", h.createOne)
 			blog.PATCH("/:id", h.editOne)
 		}
 
-		gallery := protected.Group("/gallery")
-		{
-			gallery.POST("/", h.createGallery)
-			gallery.DELETE("/:id", h.deleteGallery)
-		}
+		// gallery := protected.Group("/gallery")
+		// {
+		// gallery.POST("/", h.createGallery)
+		// gallery.DELETE("/:id", h.deleteGallery)
+		// }
 
 		admin := protected.Group("/admin")
 		{
 			admin.PATCH("/update", h.updateCreds)
-			admin.POST("/validate", h.validateJWT)
 		}
 	}
 }

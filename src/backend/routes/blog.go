@@ -2,12 +2,18 @@ package routes
 
 import (
 	"bash06/strona-fundacja/src/backend/core"
+	"bytes"
+	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -34,9 +40,28 @@ const (
 	err_multipart_parse        = "Failed to parse multipart form"
 	err_multipart_no_title     = "No post title provided"
 	err_multipart_no_content   = "No post content provided"
-	err_attach_delete          = "Failed to delete attachments"
-	ok_post_and_attach_delete  = "Post and it's attachments deleted successfully"
+	err_attach_delete          = "Failed to delete files"
+	err_aws_upload_failed      = "Some files failed to upload to S3"
+	ok_post_and_attach_delete  = "Post and it's files deleted successfully"
+	ok_post_create_success     = "Post created successfully"
 )
+
+func getMimeType(fileName string) string {
+	ext := filepath.Ext(fileName)
+
+	switch ext {
+	case ".png":
+		return "image/png"
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".webp":
+		return "image/webp"
+	case ".mp4":
+		return "video/mp4"
+	default:
+		return "application/octet-stream"
+	}
+}
 
 // blog/post/:id
 // Returns a single post under some ID
@@ -184,7 +209,7 @@ func (h *Handler) getMany(c *gin.Context) {
 // /blog/post
 // Creates a single blog post
 func (h *Handler) createOne(c *gin.Context) {
-	_, err := c.MultipartForm()
+	err := c.Request.ParseMultipartForm(50 << 20)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
@@ -223,6 +248,79 @@ func (h *Handler) createOne(c *gin.Context) {
 		return
 	}
 
+	var nextID int
+	h.Db.Model(&core.BlogPost{}).Select("COALESCE(MAX(id), 0) + 1").Scan(&nextID)
+
+	form := c.Request.MultipartForm
+	files := form.File["files[]"]
+
+	// todo: rewrite this to use multipart uploads within AWS' library
+	if len(files) > 0 {
+		var wg sync.WaitGroup
+		errors := make(chan error, len(files))
+
+		for i, fileHeader := range files {
+			wg.Add(1)
+
+			go func(fileHeader *multipart.FileHeader, nextId int) {
+				defer wg.Done()
+
+				file, err := fileHeader.Open()
+				if err != nil {
+					errors <- fmt.Errorf("failed to open file %s: %v", fileHeader.Filename, err)
+					return
+				}
+
+				defer file.Close()
+
+				buffer := new(bytes.Buffer)
+
+				if _, err := io.Copy(buffer, file); err != nil {
+					errors <- fmt.Errorf("failed to read file %s: %v", fileHeader.Filename, err)
+					return
+				}
+
+				ext := filepath.Ext(fileHeader.Filename)
+				altFilename := fmt.Sprintf("%v-%v%v", nextID, i, ext)
+				mime := getMimeType(fileHeader.Filename)
+
+				url, err := h.Ovh.AddObject(buffer, os.Getenv("AWS_BLOG_BUCKET_NAME"), altFilename, mime)
+				if err != nil {
+					errors <- fmt.Errorf("failed to upload file %s: %v", fileHeader.Filename, err)
+				}
+
+				h.Db.Create(&core.AttachmentRecord{
+					BlogPostID: nextID,
+					URL:        url,
+					Filename:   altFilename,
+				})
+			}(fileHeader, nextID)
+		}
+
+		wg.Wait()
+		close(errors)
+
+		for err := range errors {
+			if err != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+					"error":   err.Error(),
+					"message": err_aws_upload_failed,
+				})
+				return
+			}
+		}
+	}
+
+	h.Db.Create(&core.BlogPost{
+		Created_At: time.Now().Unix(),
+		Edited_At:  time.Now().Unix(),
+		Title:      title,
+		Content:    content,
+	})
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": ok_post_create_success,
+	})
 }
 
 // blog/post/:id
@@ -257,30 +355,9 @@ func (h *Handler) deleteOne(c *gin.Context) {
 		return
 	}
 
-	// It's better to check if we can even get the current working
-	// directory before attempting to complete a transaction so we
-	// don't leave leftover files from posts that no longer exist
-	currentDir, err := os.Getwd()
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   err.Error(),
-			"message": err_getwd_failed,
-		})
-	}
-
 	tx := h.Db.Begin()
 
-	if err := tx.Delete("id = ?", post.ID).Error; err != nil {
-		tx.Rollback()
-
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   err.Error(),
-			"message": err_sql_query,
-		})
-		return
-	}
-
-	if err := tx.Where("blog_post_id = ?", post.ID).Delete(&core.AttachmentRecord{}).Error; err != nil {
+	if err := tx.Model(&core.BlogPost{}).Delete("id = ?", id).Error; err != nil {
 		tx.Rollback()
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -298,17 +375,23 @@ func (h *Handler) deleteOne(c *gin.Context) {
 		return
 	}
 
-	// We can use the string id since we already checked if it's a
-	// valid integer
-	attDirectory := path.Join(currentDir, "../assets", stringId)
+	if len(post.Attachments) > 0 {
+		bucketKeys := make([]string, len(post.Attachments))
 
-	err = os.RemoveAll(attDirectory)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   err.Error(),
-			"message": err_attach_delete,
-		})
-		return
+		for _, at := range post.Attachments {
+			bucketKeys = append(bucketKeys, at.Filename)
+		}
+
+		fmt.Println(bucketKeys)
+
+		err := h.Ovh.DeleteObjectsBulk(os.Getenv("AWS_BLOG_BUCKET_NAME"), bucketKeys)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"error":   err.Error(),
+				"message": err_attach_delete,
+			})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -320,36 +403,39 @@ func (h *Handler) deleteOne(c *gin.Context) {
 // blog/post/:id
 // Edits a post under the specified ID
 func (h *Handler) editOne(c *gin.Context) {
-	stringId := c.Param("id")
-	id, err := strconv.Atoi(stringId)
+	c.AbortWithStatusJSON(http.StatusNotImplemented, gin.H{
+		"error": "Endpoint not implemented yet!",
+	})
+	// stringId := c.Param("id")
+	// id, err := strconv.Atoi(stringId)
 
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   err_post_id_invalid,
-			"message": nil,
-		})
-		return
-	}
+	// if err != nil {
+	// 	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+	// 		"error":   err_post_id_invalid,
+	// 		"message": nil,
+	// 	})
+	// 	return
+	// }
 
-	post := new(core.BlogPost)
+	// post := new(core.BlogPost)
 
-	if err := h.Db.Where("id = ?", id).First(&post).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-				"error":   err_post_not_found,
-				"message": nil,
-			})
-			return
-		}
+	// if err := h.Db.Where("id = ?", id).First(&post).Error; err != nil {
+	// 	if err == gorm.ErrRecordNotFound {
+	// 		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+	// 			"error":   err_post_not_found,
+	// 			"message": nil,
+	// 		})
+	// 		return
+	// 	}
 
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"error":   err_post_not_found,
-			"message": nil,
-		})
-		return
-	}
+	// 	c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+	// 		"error":   err_post_not_found,
+	// 		"message": nil,
+	// 	})
+	// 	return
+	// }
 
-	// form, err := c.MultipartForm()
+	// err = c.Request.ParseMultipartForm(50 << 20)
 	// if err != nil {
 	// 	c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 	// 		"error":   err.Error(),
@@ -358,25 +444,31 @@ func (h *Handler) editOne(c *gin.Context) {
 	// 	return
 	// }
 
-	title := c.PostForm("title")
-	content := c.PostForm("content")
-	// rawFiles := form.File["files[]"]
+	// title := strings.Trim(c.PostForm("title"), "")
+	// content := strings.Trim(c.PostForm("content"), "")
 
-	if strings.Trim(title, "") == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   err_multipart_no_title,
-			"message": nil,
-		})
-		return
-	}
+	// if title == "" {
+	// 	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+	// 		"error":   err_multipart_no_title,
+	// 		"message": nil,
+	// 	})
+	// 	return
+	// }
 
-	if strings.Trim(content, "") == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   err_multipart_no_content,
-			"message": nil,
-		})
-		return
-	}
+	// if content == "" {
+	// 	c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+	// 		"error":   err_multipart_no_content,
+	// 		"message": nil,
+	// 	})
+	// 	return
+	// }
+
+	// form := c.Request.MultipartForm
+	// files := form.File["files[]"]
+
+	// if len(files) > 0 {
+
+	// }
 
 	// if len(rawFiles) > 0 {
 	// 	files := make([]*core.AttachmentRecord, 0, len(rawFiles))

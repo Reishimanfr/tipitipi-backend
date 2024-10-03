@@ -23,9 +23,9 @@ type GalleryRecord struct {
 
 type AttachmentRecord struct {
 	ID         int    `gorm:"primaryKey;autoIncrement" json:"id"`
+	URL        string `json:"url"`
 	Filename   string `json:"filename"`
-	Path       string `json:"path"`
-	BlogPostID int    `gorm:"index" json:"blog_post_id"`
+	BlogPostID int    `gorm:"index" json:"-"`
 }
 
 type BlogPost struct {
@@ -46,7 +46,6 @@ type AdminUser struct {
 
 type Database struct {
 	*gorm.DB
-	Memory bool
 }
 
 func (d *Database) Init() Database {
@@ -69,11 +68,7 @@ func (d *Database) Init() Database {
 	var db *gorm.DB
 
 	// Mainly used for testing
-	if d.Memory {
-		db, err = gorm.Open(sqlite.Open("sqlite::memory"), gormConfig)
-	} else {
-		db, err = gorm.Open(sqlite.Open(Path), gormConfig)
-	}
+	db, err = gorm.Open(sqlite.Open(Path), gormConfig)
 
 	if err != nil {
 		panic(err)
