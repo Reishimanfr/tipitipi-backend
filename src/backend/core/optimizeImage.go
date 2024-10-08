@@ -1,22 +1,16 @@
 package core
 
 import (
-	"bytes"
-
 	"github.com/h2non/bimg"
 	_ "golang.org/x/image/draw"
 )
 
-// TODO: make this work lol
-func OptimizeImage(buffer []byte, quality int) (*bytes.Buffer, error) {
-	converted, err := bimg.NewImage(buffer).Convert(bimg.WEBP)
-	if err != nil {
-		return nil, err
+func OptimizeAttachment(b []byte, quality int) ([]byte, error) {
+	options := bimg.Options{
+		Quality:  quality,
+		Lossless: false,
+		Type:     bimg.WEBP,
 	}
 
-	processed, err := bimg.NewImage(converted).Process(bimg.Options{
-		Quality: quality,
-	})
-
-	return bytes.NewBuffer(processed), err
+	return bimg.NewImage(b).Process(options)
 }

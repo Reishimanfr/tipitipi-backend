@@ -19,6 +19,49 @@ const (
 	ok_image_upload_success = "Gallery images uploaded successfully"
 )
 
+func (h *Handler) processUpload(f *multipart.FileHeader, errors chan error) {
+	go func(fHeader *multipart.FileHeader) {
+		f, err := fHeader.Open()
+		if err != nil {
+			errors <- err
+			return
+		}
+
+		defer f.Close()
+		buffer := new(bytes.Buffer)
+
+		if _, err := io.Copy(buffer, f); err != nil {
+			errors <- err
+			return
+		}
+
+		key := core.RandomFilename(10)
+		mime := fHeader.Header.Get("Content-Type")
+
+		if !strings.HasPrefix(mime, "image/") {
+			errors <- fmt.Errorf("file %s is not an image", fHeader.Filename)
+			return
+		}
+
+		optimizedBuf, err := core.OptimizeAttachment(buffer.Bytes(), 75)
+		if err != nil {
+			errors <- fmt.Errorf("failed to optimize file %s: %v", fHeader.Filename, err)
+			return
+		}
+
+		url, err := h.Ovh.AddObject(os.Getenv("AWS_GALLERY_BUCKET_NAME"), key, optimizedBuf)
+		if err != nil {
+			errors <- fmt.Errorf("failed to upload %s to S3: %v", fHeader.Filename, err)
+			return
+		}
+
+		h.Db.Create(&core.GalleryRecord{
+			URL:     *url,
+			AltText: "", // TODO
+		})
+	}(f)
+}
+
 func (h *Handler) uploadToGallery(c *gin.Context) {
 	err := c.Request.ParseMultipartForm(50 << 20)
 	if err != nil {
@@ -46,49 +89,9 @@ func (h *Handler) uploadToGallery(c *gin.Context) {
 	for _, img := range images {
 		wg.Add(1)
 
-		go func(fileHeader *multipart.FileHeader) {
+		go func(f *multipart.FileHeader) {
 			defer wg.Done()
-
-			file, err := fileHeader.Open()
-			if err != nil {
-				errors <- fmt.Errorf("failed to open file %s: %v", fileHeader.Filename, err)
-				return
-			}
-
-			defer file.Close()
-
-			buffer := new(bytes.Buffer)
-
-			if _, err := io.Copy(buffer, file); err != nil {
-				errors <- fmt.Errorf("failed to read file %s: %v", fileHeader.Filename, err)
-				return
-			}
-
-			filename := core.RandomFilename(10)
-			mime := core.GetMIMEType(fileHeader.Filename)
-
-			if !strings.HasPrefix(mime, "image/") {
-				errors <- fmt.Errorf("file %s is not an image", fileHeader.Filename)
-				return
-			}
-
-			optimizeBuf, err := core.OptimizeImage(buffer.Bytes(), 70)
-			if err != nil {
-				errors <- fmt.Errorf("failed to optimize file %s: %v", fileHeader.Filename, err)
-				return
-			}
-
-			url, err := h.Ovh.AddObject(optimizeBuf, os.Getenv("AWS_GALLERY_BUCKET_NAME"), filename, mime)
-			if err != nil {
-				errors <- fmt.Errorf("failed to upload file %s: %v", fileHeader.Filename, err)
-				return
-			}
-
-			// TODO: Implement alt text
-			h.Db.Create(&core.GalleryRecord{
-				URL:     url,
-				AltText: "",
-			})
+			h.processUpload(f, errors)
 		}(img)
 	}
 
