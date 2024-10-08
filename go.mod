@@ -3,6 +3,7 @@ module bash06/strona-fundacja
 go 1.23.0
 
 require (
+	github.com/aws/aws-sdk-go v1.55.5
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
@@ -13,7 +14,7 @@ require (
 )
 
 require (
-	github.com/aws/aws-sdk-go v1.55.5 // indirect
+	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 )
 
@@ -28,6 +29,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.22.0 // indirect
 	github.com/goccy/go-json v0.10.3 // indirect
+	github.com/h2non/bimg v1.1.9
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -42,7 +44,6 @@ require (
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/arch v0.9.0 // indirect
-	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0
 	golang.org/x/image v0.20.0
 	golang.org/x/net v0.28.0 // indirect
 	golang.org/x/sys v0.24.0 // indirect

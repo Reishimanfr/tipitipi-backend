@@ -43,14 +43,16 @@ func NewHandler(cfg *Config, db *core.Database, worker *ovh.Worker) {
 			blog.PATCH("/:id", h.editOne)
 		}
 
-		// gallery := protected.Group("/gallery")
-		// {
-		// gallery.POST("/", h.createGallery)
-		// gallery.DELETE("/:id", h.deleteGallery)
-		// }
+		gallery := protected.Group("/gallery")
+		{
+			gallery.POST("/", h.uploadToGallery)
+			gallery.DELETE("/:id", h.deleteFromGallery)
+			gallery.GET("/", h.getGallery)
+		}
 
 		admin := protected.Group("/admin")
 		{
+			admin.POST("/validate", h.validateJWT)
 			admin.PATCH("/update", h.updateCreds)
 		}
 	}
