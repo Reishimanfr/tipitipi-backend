@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 interface BlogAttachments {
-  ID: number;
-  BlogPostID: number;
-  Path: string;
-  Filename: string;
+  id: number;
+  url: string;
+  filename: string;
+  blog_post_id: number;
 }
 interface Props {
   id: number;
@@ -23,13 +23,14 @@ const Post = ({
   willBeUsedManyTimes,
 }: Props) => {
   if (attachments) {
+    console.log(attachments)
     attachments.forEach((attachment, index) => {
       if (!content) {
         return;
       }
       content = content.replace(
         `{{${index}}}`,
-        `<img src='${attachment.Path}'/>`
+        `<img src="http://localhost:2333/proxy?key=${attachment.filename}" alt="${attachment.filename}"/>`
       );
     });
   }

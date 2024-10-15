@@ -6,7 +6,7 @@ import Unauthorized from "../errorPages/unauthorized"
 
 
 
-const Dashboard = (props : any) => {
+const Dashboard = () => {
     const navigate = useNavigate()
     //const BORDER_CSS = "border"
     //edycja tekstu na stronie

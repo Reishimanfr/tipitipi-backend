@@ -5,11 +5,11 @@ import { useState, useEffect } from "react";
 import Post from "../components/post";
 
 interface BlogPostDataBodyJson {
-  Content: string;
-  Created_At: string;
-  Edited_At: string;
-  ID: number;
-  Title: string;
+  content: string;
+  created_at: string;
+  edited_at: string;
+  id: number;
+  title: string;
 }
 const Mainpage = () => {
   const [posts, setPosts] = useState<Array<BlogPostDataBodyJson>>([]);
@@ -60,14 +60,14 @@ const Mainpage = () => {
 
       <h1 className="text-3xl mb-[1%]">Oto kilka najnowszych postów</h1>
       {posts ? (
-        posts.map((post) => {
+        posts.map((post,index) => {
           return (
             <Post
-              key={post.ID}
-              id={post.ID}
-              content={post.Content}
-              title={post.Title}
-              date={post.Edited_At}
+              key={index}
+              id={post.id}
+              content={post.content}
+              title={post.title}
+              date={post.edited_at}
               willBeUsedManyTimes={true}
             />
           );

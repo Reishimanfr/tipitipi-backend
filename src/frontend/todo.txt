@@ -4,3 +4,4 @@ animacje tailwind // bardziej skomplikowane niz myslalem
 
 filereader //jak update zadziala
 
+ladowanie zdjecia w poscie

@@ -3,19 +3,20 @@ import { useState, useEffect } from "react";
 
 
 interface BlogAttachments {
-  ID: number;
-  BlogPostID: number;
-  Path: string;
-  Filename: string;
+  id: number;
+  url: string;
+  filename: string;
+  blog_post_id: number;
 }
 
 interface BlogPostDataBodyJson {
-  Content: string;
-  Created_At: string;
-  Edited_At: string;
-  ID: number;
-  Attachments: BlogAttachments[];
-  Title: string;
+  content: string;
+  created_at: string;
+  edited_at: string;
+  id: number;
+  attachments: BlogAttachments[];
+  title: string;
+  error?: string;
 }
 
 
@@ -29,7 +30,7 @@ const PostPage = () => {
 
     async function fetchPost() {
       try {
-        const response = await fetch(`http://localhost:2333/blog/post/${ID}?images=true`, {
+        const response = await fetch(`http://localhost:2333/blog/post/${ID}?attachments=true`, {
           method: "GET"
         });
 
@@ -50,13 +51,15 @@ const PostPage = () => {
   }, []);
 
 
+
+
   if (loading) {
     return <div>Loading</div>;
   }
   return (
     <div className="globalCss mt-[1%]">
       {post ? (
-        <Post title={post.Title} content={post.Content} date={post.Edited_At} id={post.ID} attachments={post.Attachments} willBeUsedManyTimes={false}/>
+        <Post title={post.title} content={post.content} date={post.edited_at} id={post.id} attachments={post.attachments} willBeUsedManyTimes={false}/>
       ) : (
         <div>No post found</div>
       )}

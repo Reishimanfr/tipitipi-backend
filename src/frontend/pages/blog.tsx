@@ -2,19 +2,19 @@ import Post from "../components/post";
 import { useState, useEffect } from "react";
 
 interface BlogAttachments {
-  ID: number;
-  BlogPostID: number;
-  Path: string;
-  Filename: string;
+  id: number;
+  url: string;
+  filename: string;
+  blog_post_id: number;
 }
 
 interface BlogPostDataBodyJson {
-  Content: string;
-  Created_At: string;
-  Edited_At: string;
-  ID: number;
-  Attachments: BlogAttachments[];
-  Title: string;
+  content: string;
+  created_at: string;
+  edited_at: string;
+  id: number;
+  attachments: BlogAttachments[];
+  title: string;
   error?: string;
 }
 
@@ -51,6 +51,10 @@ const Blog = () => {
     fetchPost();
   }, [offset,sortBy]);
 
+  useEffect(() => {
+    setPosts([])
+    setOffset(0)
+  },[sortBy])
 
   useEffect(() => {
     function handleScroll() {
@@ -68,13 +72,13 @@ const Blog = () => {
         
       }
     }
+   
 
     window.addEventListener("scroll" , handleScroll);
     return () => {
       window.removeEventListener("scroll" , handleScroll)
       }
   });
-
 
   if (loading) {
     return <div>Loading</div>;
@@ -90,9 +94,8 @@ const Blog = () => {
         <option value="likes">Najwięcej polubień</option>
       </select>
       {posts ? (
-        posts.map((post) => {
-          return <div key={post.ID} className="mt-[3%]" ><Post id={post.ID} content={post.Content} title={post.Title} date={post.Edited_At} willBeUsedManyTimes={true} attachments={post.Attachments}/></div>;
-  
+        posts.map((post,index) => {
+          return <div key={index} className="mt-[3%]" ><Post id={post.id} content={post.content} title={post.title} date={post.edited_at} willBeUsedManyTimes={true} attachments={post.attachments}/></div>;
         })
       ) : (
         <div>No post found</div>
