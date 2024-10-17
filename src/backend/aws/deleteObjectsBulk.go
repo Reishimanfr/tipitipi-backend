@@ -6,7 +6,7 @@ import (
 )
 
 func (w *Worker) DeleteObjectsBulk(bucket string, keys []string) error {
-	deleteObjects := make([]*s3.ObjectIdentifier, len(keys))
+	deleteObjects := []*s3.ObjectIdentifier{}
 
 	for _, key := range keys {
 		deleteObjects = append(deleteObjects, &s3.ObjectIdentifier{

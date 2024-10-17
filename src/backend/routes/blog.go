@@ -253,7 +253,7 @@ func (h *Handler) createOne(c *gin.Context) {
 	errors := make(chan error, len(files))
 
 	var nextPostId int
-	h.Db.Model(&core.BlogPost{}).Select("COALESCE(MAX(id), 0) + 1").Scan(&nextPostId)
+	h.Db.Model(&core.BlogPost{}).Select("COALESCE(MAX(id), 0)").Scan(&nextPostId)
 
 	for i, fHeader := range files {
 		wg.Add(1)
@@ -371,12 +371,12 @@ func (h *Handler) deleteOne(c *gin.Context) {
 	}
 
 	if len(post.Attachments) > 0 {
-		bucketKeys := make([]string, len(post.Attachments))
+		bucketKeys := []string{}
 
 		for _, at := range post.Attachments {
 			bucketKeys = append(bucketKeys, at.Filename)
 		}
-
+		fmt.Println(bucketKeys)
 		err := h.Ovh.DeleteObjectsBulk(os.Getenv("AWS_BLOG_BUCKET_NAME"), bucketKeys)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
