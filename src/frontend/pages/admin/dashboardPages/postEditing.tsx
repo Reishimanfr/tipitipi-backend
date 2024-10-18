@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
-import validateToken from "../../../components/validate";
+import validateToken from "../../../functions/validate";
 import Unauthorized from "../../errorPages/unauthorized";
 import {
   validateDataForm,
   buildMultipart,
-  getToken,
-  fetchPosts,
-} from "./postManipulatingFunctions";
+  getToken
+} from "../../../functions/postManipulatingFunctions";
 import QuillBody from "../../../components/quillBody";
 
 interface BlogAttachments {
@@ -48,6 +47,29 @@ interface BlogPostDataBodyJson {
 //     console.log('Error: ', error);
 //   };
 // }
+async function fetchPosts(
+  setPosts: React.Dispatch<React.SetStateAction<BlogPostDataBodyJson[]>>
+) {
+  try {
+    const response = await fetch(
+      `http://localhost:2333/blog/posts?limit=999&attachments=true`,
+      {
+        method: "GET",
+      }
+    );
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+
+    const data: Array<BlogPostDataBodyJson> = await response.json();
+    setPosts((prevPosts) => prevPosts?.concat(data));
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+
+
 
 const PostEditing = () => {
   const [selectedPost, setSelectedPost] = useState<BlogPostDataBodyJson>();
@@ -87,6 +109,8 @@ const PostEditing = () => {
       alert("Wystąpił błąd: " + error);
     }
   }
+
+
   async function editPost() {
     if (!validateDataForm(title, content)) {
       return;
@@ -135,12 +159,54 @@ const PostEditing = () => {
   useEffect(() => {
     if (selectedPost) {
       setTitle(selectedPost.title);
-      setContent(selectedPost.content);
+
+      if (selectedPost.attachments && selectedPost.content) {
+        let tempContent = selectedPost.content
+        selectedPost.attachments.forEach((attachment, index) => {
+          tempContent = tempContent.replace(
+            `{{${index}}}`,
+            `<img style="max-height:200px;" src="http://localhost:2333/proxy?key=${attachment.filename}" alt="${attachment.filename}"/>`
+          );
+          
+        });
+        setContent(tempContent)
+      }
+        else {
+          if(content) {
+            const tempContent = content?.replace(/{{\d+}}/g, "")
+            setContent(tempContent)
+          }
+      
+        }
+      // setContent(selectedPost.content);
     }
   }, [selectedPost]);
 
 
-
+  const test = () => {
+    if (selectedPost!.attachments && content) {
+      console.log(selectedPost!.attachments)
+      let tempContent = content
+      selectedPost!.attachments.forEach((attachment, index) => {
+        if (!tempContent) {
+          return;
+        }
+        tempContent = tempContent.replace(
+          `{{${index}}}`,
+          `<img style="max-height:200px;" src="http://localhost:2333/proxy?key=${attachment.filename}" alt="${attachment.filename}"/>`
+        );
+        
+      });
+      setContent(tempContent)
+    }
+    else {
+      if(content) {
+        const tempContent = content?.replace(/{{\d+}}/g, "")
+        setContent(tempContent)
+      }
+  
+    }
+  }
 
   useEffect(() => {
     const ValidateAuthorization = async () => {
@@ -208,6 +274,8 @@ const PostEditing = () => {
       ) : (
         <div></div>
       )}
+
+      <button onClick={test}>test</button>
     </div>
   );
 };

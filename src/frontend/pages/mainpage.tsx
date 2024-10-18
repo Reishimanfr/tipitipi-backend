@@ -31,7 +31,7 @@ const Mainpage = () => {
         const data: Array<BlogPostDataBodyJson> = await response.json();
         setPosts((prevPosts) => prevPosts?.concat(data));
       } catch (error) {
-        alert(error);
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -57,9 +57,9 @@ const Mainpage = () => {
         leftSide={true}
       />
       
-
-      <h1 className="text-3xl mb-[1%]">Oto kilka najnowszych postów</h1>
-      {posts ? (
+        {posts.length > 0 ? (<h1 className="text-3xl mb-[1%]">Oto kilka najnowszych postów</h1>) : (<div></div>)}
+      
+      {posts.length>0 ? (
         posts.map((post,index) => {
           return (
             <Post
@@ -73,7 +73,7 @@ const Mainpage = () => {
           );
         })
       ) : (
-        <div>No post found</div>
+        <div className="text-3xl mb-[1%]">Brak postów</div>
       )}
       <br></br>
       <br></br>

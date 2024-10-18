@@ -15,21 +15,13 @@ import Gallery from "./pages/gallery"
 import Mainpage from "./pages/mainpage"
 import PostPage from './pages/postPage'
 import Pricing from "./pages/pricing"
-const decode = (str: string):string => Buffer.from(str, 'base64').toString('binary');
-
-
-interface JwtPayload {
-    iat: number
-    exp: number
-    admin: boolean
-    user_id: string
-} 
+import GalleryAdd from './pages/admin/dashboardPages/galleryAdd'
 
 function App() {
-  const [mainpageFirstHeader,setMainpageFirstHeader] = useState("")
-  const changeMainpageFirstHeader = (newMessage : string) => {
-    setMainpageFirstHeader(newMessage)
-  }
+  // const [mainpageFirstHeader,setMainpageFirstHeader] = useState("")
+  // const changeMainpageFirstHeader = (newMessage : string) => {
+  //   setMainpageFirstHeader(newMessage)
+  // }
  
 
   return (
@@ -37,15 +29,20 @@ function App() {
       <BrowserRouter>
       <Navbar/>
       <Routes>
+        {/* admin pages */}
         <Route path='/admin' element ={<Admin/>} />
         {/* <Route path="/admin/dashboard" element={isAuthorized ? 
           <Dashboard  mainpageFirstHeader={mainpageFirstHeader} changeMainpageFirstHeader={changeMainpageFirstHeader}/> : 
           <Unauthorized/>} /> */}
-        <Route path="/admin/dashboard" element ={<Dashboard mainpageFirstHeader={mainpageFirstHeader} changeMainpageFirstHeader={changeMainpageFirstHeader}/>}/>
+        <Route path="/admin/dashboard" element ={<Dashboard />}/>
         <Route path='/admin/dashboard/create-post' element={<PostCreating/>}/> 
         <Route path='/admin/dashboard/edit-post' element={<PostEditing/>}/>
+        <Route path='/admin/dashboard/gallery-add' element={<GalleryAdd/>}/>
         <Route path='/admin/dashboard/change-credentials' element={<ChangeCredentials/>}/>
         <Route path="/admin/login" element={<Login/>}/>
+
+
+        {/* user pages */}
         <Route path="/" element={<Mainpage/>}/>
         <Route path="/gallery" element={<Gallery/>}/>
         <Route path="/about" element={<About/>}/>

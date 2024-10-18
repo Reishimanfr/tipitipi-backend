@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import validateToken from "../../components/validate"
+import validateToken from "../../functions/validate"
 import Unauthorized from "../errorPages/unauthorized"
 
 
@@ -11,7 +11,7 @@ const Dashboard = () => {
     //const BORDER_CSS = "border"
     //edycja tekstu na stronie
     //const [mainpageFirstHeader , setMainpageFirstHeader] = useState(props.mainpageFirstHeader)  //tworzymy stan lokalny ktorego poczatkowym stanem jest to co widzą wszyscy , czyli state z app.tsx
-
+    const buttonCSS = "border p-[0.5%] ml-[1%] mb-[1%] border-gray-900 hover:bg-gray-900 hover:text-white hover:duration-300 rounded-md"
     const Logout = () => {
         if(window.confirm("Czy napewno chcesz się wylogować?")) {
             alert("Wylogowano");
@@ -55,10 +55,11 @@ const Dashboard = () => {
 
 
             <div className="mt-[1%]">
-                <Link to="/admin/dashboard/create-post"><button className="border p-[0.5%] ml-[1%] mb-[1%] border-gray-900 hover:bg-gray-900 hover:text-white hover:duration-300 rounded-md">Dodawanie postów</button></Link><br></br>
-                <Link to="/admin/dashboard/edit-post"><button className="border p-[0.5%] ml-[1%] mb-[1%] border-gray-900 hover:bg-gray-900 hover:text-white hover:duration-300 rounded-md">Edycja postów</button></Link><br></br>
-                <Link to="/admin/dashboard/change-credentials"><button className="border p-[0.5%] ml-[1%] mb-[1%] border-gray-900 hover:bg-gray-900 hover:text-white hover:duration-300 rounded-md">Zmień login/hasło</button></Link>  <br></br>
-                <button onClick={() => Logout()} className="border p-[0.5%] ml-[1%] mb-[1%] border-gray-900 hover:bg-gray-900 hover:text-white hover:duration-300 rounded-md">Wyloguj się</button>
+                <Link to="/admin/dashboard/create-post"><button className={buttonCSS}>Dodawanie postów</button></Link><br></br>
+                <Link to="/admin/dashboard/edit-post"><button className={buttonCSS}>Edycja i usuwanie postów</button></Link><br></br>
+                <Link to="/admin/dashboard/gallery-add"><button className={buttonCSS}>Dodaj zdjęcia do galerii</button></Link> <br></br>
+                <Link to="/admin/dashboard/change-credentials"><button className={buttonCSS}>Zmień login/hasło</button></Link>  <br></br>
+                <button onClick={() => Logout()} className={buttonCSS}>Wyloguj się</button>
             </div>
         </>
     )

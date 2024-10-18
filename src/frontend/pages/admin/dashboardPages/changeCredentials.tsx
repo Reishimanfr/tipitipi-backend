@@ -1,7 +1,7 @@
 import { useState ,useEffect } from "react";
-import validateToken from "../../../components/validate";
+import validateToken from "../../../functions/validate";
 import Unauthorized from "../../errorPages/unauthorized";
-import { getToken } from "./postManipulatingFunctions";
+import { getToken } from "../../../functions/postManipulatingFunctions";
 import { useNavigate } from "react-router-dom";
 
 const validateAdminForm = (login : string , password : string) : boolean => {

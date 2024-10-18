@@ -2,6 +2,6 @@ cennik // po zdobyciu info
 
 animacje tailwind // bardziej skomplikowane niz myslalem
 
-filereader //jak update zadziala
+ladowanie zdjecia w poscie i buttony // css
 
-ladowanie zdjecia w poscie
+zdjecia nie po kolei się tenteguja // wina bazy danych

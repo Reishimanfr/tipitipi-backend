@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Unauthorized from "../../errorPages/unauthorized";
-import validateToken from "../../../components/validate";
-import { validateDataForm , buildMultipart, getToken } from "./postManipulatingFunctions";
+import validateToken from "../../../functions/validate";
+import { validateDataForm , buildMultipart, getToken } from "../../../functions/postManipulatingFunctions";
 import QuillBody from "../../../components/quillBody";
 
 interface BlogAttachments {

@@ -51,7 +51,7 @@ function base64ToBlob(base64: string): Blob | null {
   //mimetype is first part of base64 variable , that matches given regexp in match function
   let mimeType: RegExpMatchArray | null | string = base64
     .split(",")[0]
-    .match(/image\/(jpeg|png|gif)/);
+    .match(/image\/(webp|jpeg|png|gif)/);
   //base64content is second part of base64 variable , that has last two chars trimmed
   let base64content = base64.split(",")[1];
   base64content = base64content.substring(0, base64content.length - 2);
@@ -76,7 +76,7 @@ function extractImagesFromContent(content: string) {
   const images: string[] = [];
   let i = -1;
   const regexp =
-    /<img\s+src="data:image\/(jpeg|png|gif);base64,([A-Za-z0-9+/=]+)"\s*\/?>/g;
+    /<img\s+src="data:image\/(webp|jpeg|png|gif);base64,([A-Za-z0-9+/=]+)"\s*\/?>/g;
 
   const contentWithoutImages = content.replace(regexp, (match) => {
     images.push(match);
@@ -116,7 +116,7 @@ export function buildMultipart(title: string, content: string) {
 export function getToken(){
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Token is invalid, redirecting to login page...");
+      console.error("Token is invalid, redirecting to login page...");
       window.location.href = "/admin/login"
       return false;
     }
@@ -140,7 +140,7 @@ export async function fetchPosts(
       const data: Array<BlogPostDataBodyJson> = await response.json();
       setPosts((prevPosts) => prevPosts?.concat(data));
     } catch (error) {
-      alert(error);
+      console.error(error);
     }
   }
 
