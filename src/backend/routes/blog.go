@@ -22,28 +22,29 @@ import (
 )
 
 var (
-	sortOptions = []string{"newest", "oldest", "likes"}
+	sortOptions       = []string{"newest", "oldest", "likes"}
+	awsBlogBucketName = os.Getenv("AWS_BLOG_BUCKET_NAME")
 )
 
 const (
-	err_post_not_found         = "Post not found"
-	err_post_id_invalid        = "Invalid post ID provided"
-	err_post_exists            = "Post with this title already exists"
-	err_opt_offset_invalid     = "Offset value is not a valid integer"
-	err_opt_offset_too_small   = "Offset value must be at least 0"
-	err_opt_limit_invalid      = "Limit is not a valid integer"
-	err_opt_limit_too_small    = "Limit must be at least 1"
-	err_opt_sort_invalid       = "Invalid sort option provided"
-	err_sql_query              = "Error while executing SQL query"
-	err_sql_transaction_failed = "Failed to commit SQL transaction"
-	err_getwd_failed           = "Failed to get the current working directory"
-	err_multipart_parse        = "Failed to parse multipart form"
-	err_multipart_no_title     = "No post title provided"
-	err_multipart_no_content   = "No post content provided"
-	err_attach_delete          = "Failed to delete files"
-	err_aws_upload_failed      = "Some files failed to upload to S3"
-	ok_post_and_attach_delete  = "Post and it's files deleted successfully"
-	ok_post_create_success     = "Post created successfully"
+	errPostNotFound       = "Post not found"
+	errPostIdInvalid      = "Invalid post ID provided"
+	errPostDupName        = "Post with this title already exists"
+	errOptOffsetInv       = "Offset value is not a valid integer"
+	errOptOffsetSmall     = "Offset value must be at least 0"
+	errOptLimitInv        = "Limit is not a valid integer"
+	errOptLimitSmall      = "Limit must be at least 1"
+	errOptSortInv         = "Invalid sort option provided"
+	errSqlQuery           = "Error while executing SQL query"
+	errSqlTransaction     = "Failed to commit SQL transaction"
+	errGetwd              = "Failed to get the current working directory"
+	errMultipartParse     = "Failed to parse multipart form"
+	errMultipartNoTitle   = "No post title provided"
+	errMultipartNoContent = "No post content provided"
+	errAttachmentDelete   = "Failed to delete files"
+	errAwsUpload          = "Some files failed to upload to S3"
+	postDeletedOk         = "Post and it's files deleted successfully"
+	postCreatedOk         = "Post created successfully"
 )
 
 // blog/post/:id
@@ -55,7 +56,7 @@ func (h *Handler) getOne(c *gin.Context) {
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   err_post_id_invalid,
+			"error":   errPostIdInvalid,
 			"message": nil,
 		})
 		return
@@ -74,14 +75,14 @@ func (h *Handler) getOne(c *gin.Context) {
 		h.Log.Error("Error while searching for a post record", zap.Error(err))
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   result.Error.Error(),
-			"message": err_sql_query,
+			"message": errSqlQuery,
 		})
 		return
 	}
 
 	if postRecord == nil {
 		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"error":   err_post_not_found,
+			"error":   errPostNotFound,
 			"message": nil,
 		})
 		return
@@ -102,7 +103,7 @@ func (h *Handler) getMany(c *gin.Context) {
 	offset, err := strconv.Atoi(offsetStr)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   err_opt_offset_invalid,
+			"error":   errOptOffsetInv,
 			"message": nil,
 		})
 		return
@@ -110,7 +111,7 @@ func (h *Handler) getMany(c *gin.Context) {
 
 	if offset < 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   err_opt_offset_too_small,
+			"error":   errOptOffsetSmall,
 			"message": nil,
 		})
 		return
@@ -119,7 +120,7 @@ func (h *Handler) getMany(c *gin.Context) {
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   err_opt_limit_invalid,
+			"error":   errOptLimitInv,
 			"message": nil,
 		})
 		return
@@ -127,7 +128,7 @@ func (h *Handler) getMany(c *gin.Context) {
 
 	if limit < 1 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   err_opt_limit_too_small,
+			"error":   errOptLimitSmall,
 			"message": nil,
 		})
 		return
@@ -135,7 +136,7 @@ func (h *Handler) getMany(c *gin.Context) {
 
 	if !slices.Contains(sortOptions, sort) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   err_opt_sort_invalid,
+			"error":   errOptSortInv,
 			"message": nil,
 		})
 		return
@@ -173,14 +174,14 @@ func (h *Handler) getMany(c *gin.Context) {
 		h.Log.Error("Error while getting post records from database", zap.Error(result.Error))
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   result.Error.Error(),
-			"message": err_sql_query,
+			"message": errSqlQuery,
 		})
 		return
 	}
 
 	if len(postRecords) < 1 {
 		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"error":   err_post_not_found,
+			"error":   errPostNotFound,
 			"message": nil,
 		})
 		return
@@ -196,7 +197,7 @@ func (h *Handler) createOne(c *gin.Context) {
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": err_multipart_parse,
+			"message": errMultipartParse,
 		})
 		return
 	}
@@ -206,7 +207,7 @@ func (h *Handler) createOne(c *gin.Context) {
 
 	if title == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   err_multipart_no_title,
+			"error":   errMultipartNoTitle,
 			"message": nil,
 		})
 		return
@@ -214,7 +215,7 @@ func (h *Handler) createOne(c *gin.Context) {
 
 	if content == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   err_multipart_no_content,
+			"error":   errMultipartNoContent,
 			"message": nil,
 		})
 		return
@@ -225,7 +226,7 @@ func (h *Handler) createOne(c *gin.Context) {
 
 	if exists {
 		c.AbortWithStatusJSON(http.StatusConflict, gin.H{
-			"error":   err_post_exists,
+			"error":   errPostDupName,
 			"message": nil,
 		})
 		return
@@ -244,7 +245,7 @@ func (h *Handler) createOne(c *gin.Context) {
 	// Exit early if there are no files to be uploaded
 	if len(files) < 1 {
 		c.JSON(http.StatusOK, gin.H{
-			"message": ok_post_create_success,
+			"message": postCreatedOk,
 		})
 		return
 	}
@@ -253,7 +254,7 @@ func (h *Handler) createOne(c *gin.Context) {
 	errors := make(chan error, len(files))
 
 	var nextPostId int
-	h.Db.Model(&core.BlogPost{}).Select("COALESCE(MAX(id), 0) + 1").Scan(&nextPostId)
+	h.Db.Model(&core.BlogPost{}).Select("COALESCE(MAX(id), 0)").Scan(&nextPostId)
 
 	for i, fHeader := range files {
 		wg.Add(1)
@@ -261,17 +262,17 @@ func (h *Handler) createOne(c *gin.Context) {
 		go func(fHeader *multipart.FileHeader, i int) {
 			defer wg.Done()
 
-			mf, err := fHeader.Open()
+			f, err := fHeader.Open()
 			if err != nil {
 				errors <- err
 				return
 			}
 
-			defer mf.Close()
+			defer f.Close()
 
 			buffer := new(bytes.Buffer)
 
-			if _, err := io.Copy(buffer, mf); err != nil {
+			if _, err := io.Copy(buffer, f); err != nil {
 				errors <- err
 				return
 			}
@@ -280,7 +281,7 @@ func (h *Handler) createOne(c *gin.Context) {
 			key := fmt.Sprintf("%v-%v%v", nextPostId, i, ext)
 
 			// TODO: implement optimizing attachments based on the mimetype
-			url, err := h.Ovh.AddObject(os.Getenv("AWS_BLOG_BUCKET_NAME"), key, buffer.Bytes())
+			url, err := h.Ovh.AddObject(awsBlogBucketName, key, buffer.Bytes())
 			if err != nil {
 				errors <- err
 			}
@@ -301,7 +302,7 @@ func (h *Handler) createOne(c *gin.Context) {
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":   err.Error(),
-				"message": err_aws_upload_failed,
+				"message": errAwsUpload,
 			})
 			return
 		}
@@ -316,7 +317,7 @@ func (h *Handler) deleteOne(c *gin.Context) {
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   err_post_id_invalid,
+			"error":   errPostIdInvalid,
 			"message": nil,
 		})
 		return
@@ -327,14 +328,14 @@ func (h *Handler) deleteOne(c *gin.Context) {
 	if err := h.Db.Preload("Attachments").Where("id = ?", id).First(&post).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-				"error":   err_post_not_found,
+				"error":   errPostNotFound,
 				"message": nil,
 			})
 			return
 		}
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": err_sql_query,
+			"message": errSqlQuery,
 			"error":   err.Error(),
 		})
 		return
@@ -347,7 +348,7 @@ func (h *Handler) deleteOne(c *gin.Context) {
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": err_sql_query,
+			"message": errSqlQuery,
 		})
 		return
 	}
@@ -357,7 +358,7 @@ func (h *Handler) deleteOne(c *gin.Context) {
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": err_sql_query,
+			"message": errSqlQuery,
 		})
 		return
 	}
@@ -365,13 +366,13 @@ func (h *Handler) deleteOne(c *gin.Context) {
 	if err := tx.Commit().Error; err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": err_sql_transaction_failed,
+			"message": errSqlTransaction,
 		})
 		return
 	}
 
 	if len(post.Attachments) > 0 {
-		bucketKeys := make([]string, len(post.Attachments))
+		bucketKeys := []string{}
 
 		for _, at := range post.Attachments {
 			bucketKeys = append(bucketKeys, at.Filename)
@@ -381,14 +382,14 @@ func (h *Handler) deleteOne(c *gin.Context) {
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":   err.Error(),
-				"message": err_attach_delete,
+				"message": errAttachmentDelete,
 			})
 			return
 		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"message": ok_post_and_attach_delete,
+		"message": postDeletedOk,
 		"error":   nil,
 	})
 }

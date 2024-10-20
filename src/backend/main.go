@@ -11,6 +11,8 @@ import (
 	"os/signal"
 	"time"
 
+	_ "net/http/pprof"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
@@ -85,17 +87,16 @@ func main() {
 	}
 
 	router := gin.Default()
-	router.RedirectTrailingSlash = false
+	router.RedirectTrailingSlash = true
 
 	router.Use(middleware.RateLimiterMiddleware(middleware.NewRateLimiter(5, 10)))
-	router.Use(middleware.FileSizeLimiterMiddleware(3000000000)) // TODO: fix this
 
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:           []string{"http://localhost:5173"},
 		AllowMethods:           []string{"HEAD", "POST", "DELETE", "PATCH", "GET"},
-		AllowHeaders:           []string{"Origin", "Content-Type", "Authorization", "Access-Control-Allow-Origin"},
+		AllowHeaders:           []string{"*"},
 		AllowCredentials:       true,
 		AllowFiles:             false,
+		AllowAllOrigins:        true,
 		AllowWebSockets:        false,
 		AllowBrowserExtensions: false,
 	}))

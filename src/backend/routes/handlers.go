@@ -31,6 +31,7 @@ func NewHandler(cfg *Config, db *core.Database, worker *ovh.Worker) {
 		public.POST("/admin/login", h.auth)
 		public.GET("/blog/post/:id", h.getOne)
 		public.GET("/blog/posts", h.getMany)
+		public.GET("/proxy", h.proxy)
 	}
 
 	protected := cfg.Router.Group("/")
@@ -45,9 +46,39 @@ func NewHandler(cfg *Config, db *core.Database, worker *ovh.Worker) {
 
 		gallery := protected.Group("/gallery")
 		{
-			gallery.POST("/", h.uploadToGallery)
-			gallery.DELETE("/:id", h.deleteFromGallery)
-			gallery.GET("/", h.getGallery)
+			// Get info on all available gallery groups (like how many images they have)
+			gallery.GET("/groups/all/info", h.getInfoAllGroups)
+
+			// Get info on a specified gallery group
+			gallery.GET("/groups/:groupId/info", h.getInfoOnGroup)
+
+			// Get images from all gallery groups
+			// TESTING NEEDED
+			gallery.GET("/groups/all/images", h.getImagesAllGroups)
+
+			// Get image from a specified gallery group
+			// TESTING NEEDED
+			gallery.GET("/groups/:groupId/images", h.getImagesFromGroup)
+
+			// Initializes a new gallery group
+			// TESTING NEEDED
+			gallery.POST("/groups/:groupId/:name", h.createGalleryGroup)
+
+			// Post an image to a specified group
+			// TESTING NEEDED
+			gallery.POST("/groups/:groupId/images", h.postImageToGroup)
+
+			// Delete an image from a specified group
+			// TESTING NEEDED
+			gallery.DELETE("/groups/:groupId/images/:imageId", h.deleteImageFromGroup)
+
+			// Delete all images from a group (without deleting the group)
+			// TESTING NEEDED
+			gallery.DELETE("/groups/:groupId/images", h.deleteAllFromGroup)
+
+			// Delete an entire gallery group
+			// TESTING NEEDED
+			gallery.DELETE("/groups/:groupId/", h.deleteGroup)
 		}
 
 		admin := protected.Group("/admin")

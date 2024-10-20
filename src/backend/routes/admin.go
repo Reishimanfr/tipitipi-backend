@@ -44,7 +44,7 @@ func (h *Handler) auth(c *gin.Context) {
 
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":   err.Error(),
-				"message": err_sql_query,
+				"message": errSqlQuery,
 			})
 			return
 		}
@@ -148,7 +148,7 @@ func (h *Handler) updateCreds(c *gin.Context) {
 		h.Log.Error("Error while updating admin credentials", zap.Error(err))
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": err_sql_query,
+			"message": errSqlQuery,
 			"error":   err.Error(),
 		})
 		return

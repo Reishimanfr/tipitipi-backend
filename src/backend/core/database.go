@@ -1,7 +1,6 @@
 package core
 
 import (
-	"errors"
 	"os"
 	"path"
 
@@ -19,6 +18,13 @@ type GalleryRecord struct {
 	ID      int    `gorm:"primaryKey;autoIncrement" json:"id"`
 	AltText string `json:"alt_text"`
 	URL     string `json:"url"`
+	GroupID int    `gorm:"index" json:"group_id"`
+}
+
+type GalleryGroup struct {
+	ID     int             `gorm:"primaryKey" json:"id"`
+	Name   string          `gorm:"unique" json:"name"`
+	Images []GalleryRecord `gorm:"foreignKey:GroupID" json:"images,omitempty"`
 }
 
 type AttachmentRecord struct {
@@ -49,16 +55,6 @@ type Database struct {
 }
 
 func (d *Database) Init() Database {
-	if _, err := os.Stat(Path); errors.Is(err, os.ErrNotExist) {
-		file, err := os.Create(Path)
-
-		if err != nil {
-			panic(err)
-		}
-
-		defer file.Close()
-	}
-
 	gormConfig := &gorm.Config{}
 
 	if os.Getenv("DEV") != "true" {
@@ -73,7 +69,7 @@ func (d *Database) Init() Database {
 		panic(err)
 	}
 
-	db.AutoMigrate(&BlogPost{}, &AdminUser{}, &AttachmentRecord{}, &GalleryRecord{})
+	db.AutoMigrate(&BlogPost{}, &AdminUser{}, &AttachmentRecord{}, &GalleryRecord{}, &GalleryGroup{})
 	d.DB = db
 
 	return *d
