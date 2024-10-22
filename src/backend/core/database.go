@@ -18,13 +18,14 @@ type GalleryRecord struct {
 	ID      int    `gorm:"primaryKey;autoIncrement" json:"id"`
 	AltText string `json:"alt_text"`
 	URL     string `json:"url"`
+	Key     string `json:"key"` // AWS bucket key
 	GroupID int    `gorm:"index" json:"group_id"`
 }
 
 type GalleryGroup struct {
-	ID     int             `gorm:"primaryKey" json:"id"`
+	ID     int             `gorm:"primaryKey;autoIncrement" json:"id"`
 	Name   string          `gorm:"unique" json:"name"`
-	Images []GalleryRecord `gorm:"foreignKey:GroupID" json:"images,omitempty"`
+	Images []GalleryRecord `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"images,omitempty"`
 }
 
 type AttachmentRecord struct {

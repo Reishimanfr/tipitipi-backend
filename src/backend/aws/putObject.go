@@ -22,6 +22,8 @@ var (
 // Creates a new object in the S3 cluster in some bucket. Returns the URL to the file (assuming the file is meant to be public)
 // TODO: implement some function to compress images and mp4s if compress is set to true
 func (w *Worker) AddObject(bucket, key string, buffer []byte) (fileUrl *string, err error) {
+	return aws.String("TESTING"), nil
+
 	fileType := http.DetectContentType(buffer)
 
 	input := &s3.CreateMultipartUploadInput{

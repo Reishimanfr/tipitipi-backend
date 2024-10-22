@@ -54,7 +54,8 @@ func NewHandler(cfg *Config, db *core.Database, worker *ovh.Worker) {
 
 			// Get images from all gallery groups
 			// TESTING NEEDED
-			gallery.GET("/groups/all/images", h.getImagesAllGroups)
+			// @deprecated
+			// gallery.GET("/groups/all/images", h.getImagesAllGroups)
 
 			// Get image from a specified gallery group
 			// TESTING NEEDED
@@ -62,7 +63,7 @@ func NewHandler(cfg *Config, db *core.Database, worker *ovh.Worker) {
 
 			// Initializes a new gallery group
 			// TESTING NEEDED
-			gallery.POST("/groups/:groupId/:name", h.createGalleryGroup)
+			gallery.POST("/groups/new/:name", h.createGalleryGroup)
 
 			// Post an image to a specified group
 			// TESTING NEEDED
