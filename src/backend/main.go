@@ -1,25 +1,23 @@
 package main
 
 import (
-	ovh "bash06/strona-fundacja/src/backend/aws"
 	"bash06/strona-fundacja/src/backend/core"
-	"bash06/strona-fundacja/src/backend/middleware"
-	"bash06/strona-fundacja/src/backend/routes"
+	"bash06/strona-fundacja/src/backend/srv"
 	"context"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
-	_ "net/http/pprof"
-
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 var (
-	port   = "2333"
-	server *http.Server
+	port = "2333"
 )
 
 const (
@@ -78,45 +76,42 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	db := core.Database{}
-	db.Init()
+	serverConfig := &srv.ServerConfig{
+		Port:    port,
+		Testing: false,
+		HttpConfig: &http.Server{
+			ReadTimeout:    5 * time.Second,
+			WriteTimeout:   10 * time.Second,
+			IdleTimeout:    120 * time.Second,
+			MaxHeaderBytes: 1 << 20, // 1 MB
+		},
+		AwsConfig: &aws.Config{
+			Credentials:      credentials.NewStaticCredentials(accessKey, secretKey, ""),
+			Region:           aws.String(region),
+			Endpoint:         aws.String(endpoint),
+			S3ForcePathStyle: aws.Bool(true),
+		},
+		CorsConfig: &cors.Config{
+			AllowMethods:           []string{"HEAD", "POST", "DELETE", "PATCH", "GET"},
+			AllowHeaders:           []string{"*"},
+			AllowCredentials:       true,
+			AllowFiles:             false,
+			AllowAllOrigins:        true,
+			AllowWebSockets:        false,
+			AllowBrowserExtensions: false,
+		},
+	}
 
-	worker, err := ovh.NewWorker(accessKey, secretKey, region, endpoint)
+	server, err := srv.New(serverConfig)
 	if err != nil {
-		panic(err_aws_worker_init_failure)
+		log.Fatal("Failed to initialize server", zap.Error(err))
 	}
 
-	router := gin.Default()
-	router.RedirectTrailingSlash = true
-
-	router.Use(middleware.RateLimiterMiddleware(middleware.NewRateLimiter(5, 10)))
-
-	router.Use(cors.New(cors.Config{
-		AllowMethods:           []string{"HEAD", "POST", "DELETE", "PATCH", "GET"},
-		AllowHeaders:           []string{"*"},
-		AllowCredentials:       true,
-		AllowFiles:             false,
-		AllowAllOrigins:        true,
-		AllowWebSockets:        false,
-		AllowBrowserExtensions: false,
-	}))
-
-	routes.NewHandler(&routes.Config{
-		Router: router,
-	}, &db, worker)
-
-	server = &http.Server{
-		Addr:           ":" + port,
-		Handler:        router,
-		ReadTimeout:    5 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		IdleTimeout:    120 * time.Second,
-		MaxHeaderBytes: 1 << 20, // 1 MB
-	}
+	server.InitHandler()
 
 	go func() {
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			panic("Failed to start server: " + err.Error())
+		if err := server.Http.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal("Failed to start server", zap.Error(err))
 		}
 	}()
 
@@ -130,8 +125,8 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	if err := server.Shutdown(ctx); err != nil {
-		panic("Server forced to shutdown: " + err.Error())
+	if err := server.Http.Shutdown(ctx); err != nil {
+		log.Fatal("Server forced to shutdown", zap.Error(err))
 	}
 
 	log.Warn("Gracefully shutting down backend server...")

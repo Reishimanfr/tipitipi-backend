@@ -25,7 +25,7 @@ type GalleryRecord struct {
 type GalleryGroup struct {
 	ID     int             `gorm:"primaryKey;autoIncrement" json:"id"`
 	Name   string          `gorm:"unique" json:"name"`
-	Images []GalleryRecord `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"images,omitempty"`
+	Images []GalleryRecord `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"images"`
 }
 
 type AttachmentRecord struct {
@@ -38,9 +38,9 @@ type AttachmentRecord struct {
 type BlogPost struct {
 	ID          int                `gorm:"primaryKey;autoIncrement" json:"id"`
 	Created_At  int64              `json:"created_at"`
-	Edited_At   int64              `json:"edited_at"`
+	Edited_At   int64              `json:"edited_at,omitempty"`
 	Title       string             `gorm:"unique" json:"title"`
-	Content     string             `json:"content"`
+	Content     string             `json:"content,omitempty"`
 	Attachments []AttachmentRecord `gorm:"foreignKey:BlogPostID" json:"attachments,omitempty"`
 }
 
@@ -51,11 +51,7 @@ type AdminUser struct {
 	Salt     string
 }
 
-type Database struct {
-	*gorm.DB
-}
-
-func (d *Database) Init() Database {
+func InitDb(testing bool) (*gorm.DB, error) {
 	gormConfig := &gorm.Config{}
 
 	if os.Getenv("DEV") != "true" {
@@ -64,14 +60,17 @@ func (d *Database) Init() Database {
 
 	var db *gorm.DB
 
-	db, err = gorm.Open(sqlite.Open(Path), gormConfig)
+	if testing {
+		db, err = gorm.Open(sqlite.Open("file::memory:"))
+	} else {
+		db, err = gorm.Open(sqlite.Open(Path), gormConfig)
+	}
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	db.AutoMigrate(&BlogPost{}, &AdminUser{}, &AttachmentRecord{}, &GalleryRecord{}, &GalleryGroup{})
-	d.DB = db
 
-	return *d
+	return db, nil
 }
