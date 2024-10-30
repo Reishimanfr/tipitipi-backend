@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -20,7 +21,9 @@ var (
 
 // Creates a new object in the S3 cluster in some bucket. Returns the URL to the file (assuming the file is meant to be public)
 // TODO: implement some function to compress images and mp4s if compress is set to true
-func (w *Worker) AddObject(bucket, key string, buffer []byte) (fileUrl *string, error error) {
+func (w *Worker) AddObject(bucket, key string, buffer []byte) (fileUrl *string, err error) {
+	// return aws.String("TESTING"), nil
+
 	fileType := http.DetectContentType(buffer)
 
 	input := &s3.CreateMultipartUploadInput{
@@ -35,32 +38,53 @@ func (w *Worker) AddObject(bucket, key string, buffer []byte) (fileUrl *string, 
 		return nil, err
 	}
 
-	var partLen, cur int64
-	remaining := int64(len(buffer))
-	completedParts := []*s3.CompletedPart{}
+	var wg sync.WaitGroup
+	completedParts := make([]*s3.CompletedPart, int64(len(buffer))/maxPartSize+1)
+	errors := make(chan error, 1)
+	mu := sync.Mutex{}
 
+	partLen, cur := int64(0), int64(0)
+	remaining := int64(len(buffer))
 	partIdx := 1
 
-	for cur = 0; remaining != 0; cur += partLen {
+	for cur = 0; remaining > 0; cur += partLen {
 		if remaining < maxPartSize {
 			partLen = remaining
 		} else {
 			partLen = maxPartSize
 		}
 
-		completedPart, err := uploadPart(w.S3, resp, buffer[cur:cur+partLen], partIdx)
-		if err != nil {
-			err2 := abortMultipartUpload(w.S3, resp)
-			if err2 != nil {
-				return nil, fmt.Errorf("failed to both upload the file and cancel it's upload request. Errors: %v\n%v", err, err2)
+		wg.Add(1)
+		go func(partIdx int, partData []byte) {
+			defer wg.Done()
+			completedPart, err := uploadPart(w.S3, resp, partData, partIdx)
+			if err != nil {
+				errors <- err
+				return
 			}
 
-			return nil, err
-		}
+			mu.Lock()
+			completedParts[partIdx-1] = completedPart
+			mu.Unlock()
+		}(partIdx, buffer[cur:cur+partLen])
 
 		remaining -= partLen
 		partIdx++
-		completedParts = append(completedParts, completedPart)
+	}
+
+	go func() {
+		wg.Wait()
+		close(errors)
+	}()
+
+	for err := range errors {
+		if err != nil {
+			err2 := abortMultipartUpload(w.S3, resp)
+			if err2 != nil {
+				return nil, fmt.Errorf("failed to abort multipart upload: %v, original error: %v", err2, err)
+			}
+			return nil, err
+		}
 	}
 
 	_, err = completeMultipartUpload(w.S3, resp, completedParts)
