@@ -9,6 +9,15 @@ func (s *Server) InitHandler() {
 		public.GET("/blog/post/:id", s.BlogGetOne)
 		public.GET("/blog/posts", s.BlogGetBulk)
 		public.GET("/proxy", s.Proxy)
+		// Get info on all available gallery groups (like how many images they have)
+		public.GET("/gallery/groups/all/info", s.GalleryGetGroupsBulk)
+
+		// Get info on a specified gallery group
+		public.GET("/gallery/groups/:groupId/info", s.GalleryGetGroupOne)
+
+		// Get image from a specified gallery group
+		// TESTING NEEDED
+		public.GET("/gallery/groups/:groupId/images", s.GalleryGetImagesOne)
 	}
 
 	protected := s.Router.Group("/")
@@ -23,21 +32,6 @@ func (s *Server) InitHandler() {
 
 		gallery := protected.Group("/gallery")
 		{
-			// Get info on all available gallery groups (like how many images they have)
-			gallery.GET("/groups/all/info", s.GalleryGetGroupsBulk)
-
-			// Get info on a specified gallery group
-			gallery.GET("/groups/:groupId/info", s.GalleryGetGroupOne)
-
-			// Get images from all gallery groups
-			// TESTING NEEDED
-			// @deprecated
-			// gallery.GET("/groups/all/images", h.getImagesAllGroups)
-
-			// Get image from a specified gallery group
-			// TESTING NEEDED
-			gallery.GET("/groups/:groupId/images", s.GalleryGetImagesOne)
-
 			// Initializes a new gallery group
 			// TESTING NEEDED
 			gallery.POST("/groups/new/:name", s.GalleryCreateOne)

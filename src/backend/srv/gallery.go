@@ -117,7 +117,7 @@ func (s *Server) GalleryGetImagesOne(c *gin.Context) {
 
 	if err := s.Db.Preload("Images").Where("id = ?", groupId).First(&groupInfo).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
 				"error":   "Group with this ID doesn't exist",
 				"message": nil,
 			})
@@ -506,11 +506,11 @@ func (s *Server) GalleryDelete(c *gin.Context) {
 	}
 
 	var resolveGroup *core.GalleryGroup
-	imageKeys := make([]string, len(resolveGroup.Images))
 
 	tx := s.Db.Begin()
 
 	if err := tx.Where("id = ?", groupId).First(&resolveGroup).Error; err != nil {
+		tx.Rollback()
 		if err == gorm.ErrRecordNotFound {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
 				"error":   "Group not found",
@@ -528,7 +528,10 @@ func (s *Server) GalleryDelete(c *gin.Context) {
 		return
 	}
 
+	imageKeys := make([]string, len(resolveGroup.Images))
+
 	if err := tx.Select(clause.Associations).Delete(&resolveGroup).Error; err != nil {
+		tx.Rollback()
 		s.Log.Error("Failed to cascade delete group", zap.Error(err))
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
@@ -552,13 +555,15 @@ func (s *Server) GalleryDelete(c *gin.Context) {
 		imageKeys = append(imageKeys, image.Key)
 	}
 
-	err = s.Ovh.DeleteObjectsBulk(os.Getenv("AWS_GALLERY_BUCKET_NAME"), imageKeys)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   err.Error(),
-			"message": "Some files failed to be deleted from S3",
-		})
-		return
+	if len(imageKeys) > 0 {
+		err = s.Ovh.DeleteObjectsBulk(os.Getenv("AWS_GALLERY_BUCKET_NAME"), imageKeys)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"error":   err.Error(),
+				"message": "Some files failed to be deleted from S3",
+			})
+			return
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
