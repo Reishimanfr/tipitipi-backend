@@ -2,7 +2,6 @@
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react";
 import validateToken from "../../functions/validate";
-
 const Admin = () => {
     const navigate = useNavigate()
 

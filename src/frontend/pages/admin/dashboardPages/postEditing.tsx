@@ -3,31 +3,15 @@ import validateToken from "../../../functions/validate";
 import Unauthorized from "../../errorPages/unauthorized";
 import {
   validateDataForm,
-  buildMultipart,
-  getToken
+  buildPostMultipart,
+  getToken,
 } from "../../../functions/postManipulatingFunctions";
 import QuillBody from "../../../components/quillBody";
-
-interface BlogAttachments {
-  id: number;
-  url: string;
-  filename: string;
-  blog_post_id: number;
-}
-
-interface BlogPostDataBodyJson {
-  content: string;
-  created_at: string;
-  edited_at: string;
-  id: number;
-  attachments: BlogAttachments[];
-  title: string;
-  error?: string;
-}
+import { BlogPostDataBodyJson } from "../../../functions/interfaces";
 
 // async function fetchFileAsBlob(path: string): Promise<Blob> {
 //   const response = await fetch(path);
-  
+
 //   if (!response.ok) {
 //     throw new Error("Błąd podczas pobierania pliku");
 //   }
@@ -52,6 +36,7 @@ async function fetchPosts(
 ) {
   try {
     const response = await fetch(
+      //TODO niewiem czy bezpieczne / sciagamy wszystkie post yistniejace ze zdjeciami itd
       `http://localhost:2333/blog/posts?limit=999&attachments=true`,
       {
         method: "GET",
@@ -67,9 +52,6 @@ async function fetchPosts(
     console.error(error);
   }
 }
-
-
-
 
 const PostEditing = () => {
   const [selectedPost, setSelectedPost] = useState<BlogPostDataBodyJson>();
@@ -110,12 +92,11 @@ const PostEditing = () => {
     }
   }
 
-
   async function editPost() {
     if (!validateDataForm(title, content)) {
       return;
     }
-  
+
     const token = getToken();
     if (!selectedPost) {
       alert("Nie znaleziono posta");
@@ -125,7 +106,7 @@ const PostEditing = () => {
       alert("Nie dokonano żadnych zmian");
       return;
     }
-    const formData = buildMultipart(title, content);
+    const formData = buildPostMultipart(title, content);
 
     try {
       const response = await fetch(
@@ -154,59 +135,27 @@ const PostEditing = () => {
 
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
-;
-
   useEffect(() => {
     if (selectedPost) {
       setTitle(selectedPost.title);
 
       if (selectedPost.attachments && selectedPost.content) {
-        let tempContent = selectedPost.content
+        let tempContent = selectedPost.content;
         selectedPost.attachments.forEach((attachment, index) => {
           tempContent = tempContent.replace(
             `{{${index}}}`,
             `<img style="max-height:200px;" src="http://localhost:2333/proxy?key=${attachment.filename}" alt="${attachment.filename}"/>`
           );
-          
         });
-        setContent(tempContent)
-      }
-        else {
-          if(content) {
-            const tempContent = content?.replace(/{{\d+}}/g, "")
-            setContent(tempContent)
-          }
-      
+        setContent(tempContent);
+      } else {
+        if (content) {
+          const tempContent = content?.replace(/{{\d+}}/g, "");
+          setContent(tempContent);
         }
-      // setContent(selectedPost.content);
+      }
     }
   }, [selectedPost]);
-
-
-  const test = () => {
-    if (selectedPost!.attachments && content) {
-      console.log(selectedPost!.attachments)
-      let tempContent = content
-      selectedPost!.attachments.forEach((attachment, index) => {
-        if (!tempContent) {
-          return;
-        }
-        tempContent = tempContent.replace(
-          `{{${index}}}`,
-          `<img style="max-height:200px;" src="http://localhost:2333/proxy?key=${attachment.filename}" alt="${attachment.filename}"/>`
-        );
-        
-      });
-      setContent(tempContent)
-    }
-    else {
-      if(content) {
-        const tempContent = content?.replace(/{{\d+}}/g, "")
-        setContent(tempContent)
-      }
-  
-    }
-  }
 
   useEffect(() => {
     const ValidateAuthorization = async () => {
@@ -222,7 +171,7 @@ const PostEditing = () => {
       }
     };
     fetchPostsEffect();
-  }, [isAuthorized])
+  }, [isAuthorized]);
 
   if (loading) {
     return <div>Loading</div>;
@@ -274,8 +223,6 @@ const PostEditing = () => {
       ) : (
         <div></div>
       )}
-
-      <button onClick={test}>test</button>
     </div>
   );
 };

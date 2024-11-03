@@ -1,23 +1,7 @@
 import Post from "../components/post";
 import { useState, useEffect } from "react";
 import PostSkeleton from "../components/postSkeletonLoading";
-
-interface BlogAttachments {
-  id: number;
-  url: string;
-  filename: string;
-  blog_post_id: number;
-}
-
-interface BlogPostDataBodyJson {
-  content: string;
-  created_at: string;
-  edited_at: string;
-  id: number;
-  attachments: BlogAttachments[];
-  title: string;
-  error?: string;
-}
+import { BlogPostDataBodyJson } from "../functions/interfaces";
 
 const PostPage = () => {
   const [post, setPost] = useState<BlogPostDataBodyJson | null>(null);

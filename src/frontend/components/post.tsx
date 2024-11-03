@@ -1,15 +1,10 @@
 import { Link } from "react-router-dom";
-interface BlogAttachments {
-  id: number;
-  url: string;
-  filename: string;
-  blog_post_id: number;
-}
+import { BlogAttachments } from "../functions/interfaces";
 interface Props {
   id: number;
   title: string;
   content?: string | null;
-  date: string;
+  date: number;
   attachments?: BlogAttachments[] | null;
   willBeUsedManyTimes: boolean;
   loading?: boolean;
@@ -57,7 +52,7 @@ const Post = ({
       )}
 
       <h1 className="pt-[1%] pl-[1%]">
-        {new Date(parseInt(date) * 1000).toLocaleDateString("en-pl").toString()}
+        {new Date(date * 1000).toLocaleDateString("en-pl").toString()}
       </h1>
 
 

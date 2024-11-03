@@ -6,8 +6,8 @@ import Post from "../components/post";
 
 interface BlogPostDataBodyJson {
   content: string;
-  created_at: string;
-  edited_at: string;
+  created_at: number;
+  edited_at: number;
   id: number;
   title: string;
 }
