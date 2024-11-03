@@ -6,13 +6,12 @@ interface BlogAttachments {
   id: number;
   url: string;
   filename: string;
-  blog_post_id: number;
 }
 
 interface BlogPostDataBodyJson {
   content: string;
-  created_at: string;
-  edited_at: string;
+  created_at: number;
+  edited_at: number;
   id: number;
   attachments: BlogAttachments[];
   title: string;

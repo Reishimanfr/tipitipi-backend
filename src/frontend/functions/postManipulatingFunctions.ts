@@ -1,19 +1,18 @@
-interface BlogAttachments {
-  id: number;
-  url: string;
-  filename: string;
-  blog_post_id: number;
-}
+// interface BlogAttachments {
+//   id: number;
+//   url: string;
+//   filename: string;
+// }
 
-interface BlogPostDataBodyJson {
-  content: string;
-  created_at: string;
-  edited_at: string;
-  id: number;
-  attachments: BlogAttachments[];
-  title: string;
-  error?: string;
-}
+// interface BlogPostDataBodyJson {
+//   content: string;
+//   created_at: ;
+//   edited_at: ;
+//   id: number;
+//   attachments: BlogAttachments[];
+//   title: string;
+//   error?: string;
+// }
 
 
 export function validateDataForm(title: string, content: string): boolean {
@@ -72,6 +71,7 @@ function base64ToBlob(base64: string): Blob | null {
   return new Blob([byteArray], { type: mimeType });
 }
 
+
 function extractImagesFromContent(content: string) {
   const images: string[] = [];
   let i = -1;
@@ -86,7 +86,7 @@ function extractImagesFromContent(content: string) {
   return { images: images, contentWithoutImages: contentWithoutImages };
 }
 
-export function buildMultipart(title: string, content: string) {
+export function buildPostMultipart(title: string, content: string) {
   const extractedData = extractImagesFromContent(content);
   const base64images: string[] = extractedData.images;
 
@@ -95,7 +95,6 @@ export function buildMultipart(title: string, content: string) {
   formData.append("title", title);
   formData.append("content", extractedData.contentWithoutImages);
 
-  let index = 0
   for (const image of base64images) {
     const blob = base64ToBlob(image);
     if (!blob) {
@@ -106,12 +105,30 @@ export function buildMultipart(title: string, content: string) {
       blob,
       title + "." + blob.type.split("/")[1]
     );
-    index ++
   }
 
   return formData;
 }
 
+export function buildGalleryMultipart(images : FileList) : FormData | null{
+  const formData = new FormData();
+  for(const image of images) {
+    const blob = imageToBlob(image) 
+    if(!blob) return null
+    formData.append("files[]" , blob )
+  }
+  return formData
+}
+
+function imageToBlob (image : File) : Blob | null{
+  if (!image.type.match(/image\/(webp|jpeg|png|gif)/)) {
+    console.error("File is not a supported image type.");
+    return null;
+  }
+
+  // Zwracamy nowy Blob z ustawionym typem MIME
+  return new Blob([image], { type: image.type });
+}
 
 export function getToken(){
     const token = localStorage.getItem("token");
@@ -123,24 +140,4 @@ export function getToken(){
     return token
 }
 
-export async function fetchPosts(
-    setPosts: React.Dispatch<React.SetStateAction<BlogPostDataBodyJson[]>>
-  ) {
-    try {
-      const response = await fetch(
-        `http://localhost:2333/blog/posts?limit=999&attachments=true`,
-        {
-          method: "GET",
-        }
-      );
-      if (!response.ok) {
-        throw new Error(response.statusText);
-      }
-  
-      const data: Array<BlogPostDataBodyJson> = await response.json();
-      setPosts((prevPosts) => prevPosts?.concat(data));
-    } catch (error) {
-      console.error(error);
-    }
-  }
 
