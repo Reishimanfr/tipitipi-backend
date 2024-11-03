@@ -1,20 +1,10 @@
 
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react";
-import validateToken from "../../components/validate";
+import validateToken from "../../functions/validate";
 
 const Admin = () => {
     const navigate = useNavigate()
-    // useEffect(() => {
-    //     if(props.isAuthorized){
-    //         navigate("/admin/dashboard")
-    //     }
-    //     else {
-    //         navigate("/admin/login")
-    //     }
-    // });
-   
-
 
     const [loading ,setLoading] = useState(true)
     const [isAuthorized , setIsAuthorized] = useState(false) 

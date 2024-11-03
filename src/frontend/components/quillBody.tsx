@@ -25,6 +25,7 @@ const QuillBody = ({title,setTitle,content,setContent,handlerPost} : Props) => {
 
           <h1 className="text-xl">Podaj treść posta:</h1>
           <ReactQuill
+            className="quill"
             theme="snow"
             value={content}
             onChange={setContent}

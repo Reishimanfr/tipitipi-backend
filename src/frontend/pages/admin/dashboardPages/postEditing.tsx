@@ -1,28 +1,27 @@
 import { useState, useEffect } from "react";
-import validateToken from "../../../components/validate";
+import validateToken from "../../../functions/validate";
 import Unauthorized from "../../errorPages/unauthorized";
 import {
   validateDataForm,
   buildMultipart,
-  getToken,
-  fetchPosts,
-} from "./postManipulatingFunctions";
+  getToken
+} from "../../../functions/postManipulatingFunctions";
 import QuillBody from "../../../components/quillBody";
 
 interface BlogAttachments {
-  ID: number;
-  BlogPostID: number;
-  Path: string;
-  Filename: string;
+  id: number;
+  url: string;
+  filename: string;
+  blog_post_id: number;
 }
 
 interface BlogPostDataBodyJson {
-  Content: string;
-  Created_At: string;
-  Edited_At: string;
-  ID: number;
-  Attachments: BlogAttachments[];
-  Title: string;
+  content: string;
+  created_at: string;
+  edited_at: string;
+  id: number;
+  attachments: BlogAttachments[];
+  title: string;
   error?: string;
 }
 
@@ -48,6 +47,29 @@ interface BlogPostDataBodyJson {
 //     console.log('Error: ', error);
 //   };
 // }
+async function fetchPosts(
+  setPosts: React.Dispatch<React.SetStateAction<BlogPostDataBodyJson[]>>
+) {
+  try {
+    const response = await fetch(
+      `http://localhost:2333/blog/posts?limit=999&attachments=true`,
+      {
+        method: "GET",
+      }
+    );
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+
+    const data: Array<BlogPostDataBodyJson> = await response.json();
+    setPosts((prevPosts) => prevPosts?.concat(data));
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+
+
 
 const PostEditing = () => {
   const [selectedPost, setSelectedPost] = useState<BlogPostDataBodyJson>();
@@ -66,7 +88,7 @@ const PostEditing = () => {
     }
     try {
       const response = await fetch(
-        `http://localhost:2333/blog/post/${selectedPost.ID}`,
+        `http://localhost:2333/blog/post/${selectedPost.id}`,
         {
           method: "DELETE",
           headers: {
@@ -87,6 +109,8 @@ const PostEditing = () => {
       alert("Wystąpił błąd: " + error);
     }
   }
+
+
   async function editPost() {
     if (!validateDataForm(title, content)) {
       return;
@@ -97,7 +121,7 @@ const PostEditing = () => {
       alert("Nie znaleziono posta");
       return;
     }
-    if (title == selectedPost.Title && content == selectedPost.Content) {
+    if (title == selectedPost.title && content == selectedPost.content) {
       alert("Nie dokonano żadnych zmian");
       return;
     }
@@ -105,7 +129,7 @@ const PostEditing = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:2333/blog/post/${selectedPost.ID}`,
+        `http://localhost:2333/blog/post/${selectedPost.id}`,
         {
           method: "PATCH",
           headers: {
@@ -134,13 +158,55 @@ const PostEditing = () => {
 
   useEffect(() => {
     if (selectedPost) {
-      setTitle(selectedPost.Title);
-      setContent(selectedPost.Content);
+      setTitle(selectedPost.title);
+
+      if (selectedPost.attachments && selectedPost.content) {
+        let tempContent = selectedPost.content
+        selectedPost.attachments.forEach((attachment, index) => {
+          tempContent = tempContent.replace(
+            `{{${index}}}`,
+            `<img style="max-height:200px;" src="http://localhost:2333/proxy?key=${attachment.filename}" alt="${attachment.filename}"/>`
+          );
+          
+        });
+        setContent(tempContent)
+      }
+        else {
+          if(content) {
+            const tempContent = content?.replace(/{{\d+}}/g, "")
+            setContent(tempContent)
+          }
+      
+        }
+      // setContent(selectedPost.content);
     }
   }, [selectedPost]);
 
 
-
+  const test = () => {
+    if (selectedPost!.attachments && content) {
+      console.log(selectedPost!.attachments)
+      let tempContent = content
+      selectedPost!.attachments.forEach((attachment, index) => {
+        if (!tempContent) {
+          return;
+        }
+        tempContent = tempContent.replace(
+          `{{${index}}}`,
+          `<img style="max-height:200px;" src="http://localhost:2333/proxy?key=${attachment.filename}" alt="${attachment.filename}"/>`
+        );
+        
+      });
+      setContent(tempContent)
+    }
+    else {
+      if(content) {
+        const tempContent = content?.replace(/{{\d+}}/g, "")
+        setContent(tempContent)
+      }
+  
+    }
+  }
 
   useEffect(() => {
     const ValidateAuthorization = async () => {
@@ -148,6 +214,7 @@ const PostEditing = () => {
     };
     ValidateAuthorization();
   }, []);
+
   useEffect(() => {
     const fetchPostsEffect = async () => {
       if (isAuthorized && posts.length == 0) {
@@ -156,6 +223,7 @@ const PostEditing = () => {
     };
     fetchPostsEffect();
   }, [isAuthorized])
+
   if (loading) {
     return <div>Loading</div>;
   }
@@ -175,8 +243,8 @@ const PostEditing = () => {
           {posts ? (
             posts.map((post, index) => {
               return (
-                <option key={post.ID} value={index}>
-                  {post.ID + " , " + post.Title}
+                <option key={post.id} value={index}>
+                  {post.id + " , " + post.title}
                 </option>
               );
             })
@@ -206,6 +274,8 @@ const PostEditing = () => {
       ) : (
         <div></div>
       )}
+
+      <button onClick={test}>test</button>
     </div>
   );
 };

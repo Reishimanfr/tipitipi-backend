@@ -1,23 +1,23 @@
 import { useEffect, useState } from "react";
 import Unauthorized from "../../errorPages/unauthorized";
-import validateToken from "../../../components/validate";
-import { validateDataForm , buildMultipart, getToken } from "./postManipulatingFunctions";
+import validateToken from "../../../functions/validate";
+import { validateDataForm , buildMultipart, getToken } from "../../../functions/postManipulatingFunctions";
 import QuillBody from "../../../components/quillBody";
 
 interface BlogAttachments {
-  ID: number;
-  BlogPostID: number;
-  Path: string;
-  Filename: string;
+  id: number;
+  url: string;
+  filename: string;
+  blog_post_id: number;
 }
 
 interface BlogPostDataBodyJson {
-  Content: string;
-  Created_At: string;
-  Edited_At: string;
-  ID: number;
-  Attachments: BlogAttachments[];
-  Title: string;
+  content: string;
+  created_at: string;
+  edited_at: string;
+  id: number;
+  attachments: BlogAttachments[];
+  title: string;
   error?: string;
 }
 

@@ -5,11 +5,11 @@ import { useState, useEffect } from "react";
 import Post from "../components/post";
 
 interface BlogPostDataBodyJson {
-  Content: string;
-  Created_At: string;
-  Edited_At: string;
-  ID: number;
-  Title: string;
+  content: string;
+  created_at: string;
+  edited_at: string;
+  id: number;
+  title: string;
 }
 const Mainpage = () => {
   const [posts, setPosts] = useState<Array<BlogPostDataBodyJson>>([]);
@@ -31,7 +31,7 @@ const Mainpage = () => {
         const data: Array<BlogPostDataBodyJson> = await response.json();
         setPosts((prevPosts) => prevPosts?.concat(data));
       } catch (error) {
-        alert(error);
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -57,23 +57,23 @@ const Mainpage = () => {
         leftSide={true}
       />
       
-
-      <h1 className="text-3xl mb-[1%]">Oto kilka najnowszych postów</h1>
-      {posts ? (
-        posts.map((post) => {
+        {posts.length > 0 ? (<h1 className="text-3xl mb-[1%]">Oto kilka najnowszych postów</h1>) : (<div></div>)}
+      
+      {posts.length>0 ? (
+        posts.map((post,index) => {
           return (
             <Post
-              key={post.ID}
-              id={post.ID}
-              content={post.Content}
-              title={post.Title}
-              date={post.Edited_At}
+              key={index}
+              id={post.id}
+              content={post.content}
+              title={post.title}
+              date={post.edited_at}
               willBeUsedManyTimes={true}
             />
           );
         })
       ) : (
-        <div>No post found</div>
+        <div className="text-3xl mb-[1%]">Brak postów</div>
       )}
       <br></br>
       <br></br>

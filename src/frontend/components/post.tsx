@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 interface BlogAttachments {
-  ID: number;
-  BlogPostID: number;
-  Path: string;
-  Filename: string;
+  id: number;
+  url: string;
+  filename: string;
+  blog_post_id: number;
 }
 interface Props {
   id: number;
@@ -12,6 +12,7 @@ interface Props {
   date: string;
   attachments?: BlogAttachments[] | null;
   willBeUsedManyTimes: boolean;
+  loading?: boolean;
 }
 
 const Post = ({
@@ -22,14 +23,14 @@ const Post = ({
   attachments = null,
   willBeUsedManyTimes,
 }: Props) => {
-  if (attachments) {
+  if (attachments && content) {
     attachments.forEach((attachment, index) => {
       if (!content) {
         return;
       }
       content = content.replace(
         `{{${index}}}`,
-        `<img src='${attachment.Path}'/>`
+        `<img style="max-height:200px;" src="http://localhost:2333/proxy?key=${attachment.filename}" alt="${attachment.filename}"/>`
       );
     });
   }

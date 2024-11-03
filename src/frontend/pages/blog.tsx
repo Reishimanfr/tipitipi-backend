@@ -1,31 +1,32 @@
 import Post from "../components/post";
 import { useState, useEffect } from "react";
+import PostSkeleton from "../components/postSkeletonLoading";
 
 interface BlogAttachments {
-  ID: number;
-  BlogPostID: number;
-  Path: string;
-  Filename: string;
+  id: number;
+  url: string;
+  filename: string;
+  blog_post_id: number;
 }
 
 interface BlogPostDataBodyJson {
-  Content: string;
-  Created_At: string;
-  Edited_At: string;
-  ID: number;
-  Attachments: BlogAttachments[];
-  Title: string;
+  content: string;
+  created_at: string;
+  edited_at: string;
+  id: number;
+  attachments: BlogAttachments[];
+  title: string;
   error?: string;
 }
 
 const Blog = () => {
-  const limit = 6
+  const limit = 6;
   const [offset, setOffset] = useState(0);
-  const [sortBy,setSortBy] = useState<"newest" | "oldest" | "likes">("newest")
+  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "likes">("newest");
 
   const [posts, setPosts] = useState<Array<BlogPostDataBodyJson>>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [isMore , setIsMore] = useState(true)
+  const [isMore, setIsMore] = useState(true);
 
   useEffect(() => {
     async function fetchPost() {
@@ -43,14 +44,18 @@ const Blog = () => {
         const data: Array<BlogPostDataBodyJson> = await response.json();
         setPosts((prevPosts) => prevPosts?.concat(data));
       } catch (error) {
-        alert(error);
+        console.error(error);
       } finally {
         setLoading(false);
       }
     }
     fetchPost();
-  }, [offset,sortBy]);
+  }, [offset, sortBy]);
 
+  useEffect(() => {
+    setPosts([]);
+    setOffset(0);
+  }, [sortBy]);
 
   useEffect(() => {
     function handleScroll() {
@@ -59,40 +64,58 @@ const Blog = () => {
       const clientHeight = window.innerHeight;
 
       if (scrollTop + clientHeight >= scrollHeight && isMore) {
-        if(offset + 6> posts.length) {
-          setIsMore(false)
+        if (offset + 6 > posts.length) {
+          setIsMore(false);
+        } else {
+          setOffset((prevOffset) => prevOffset + 6);
         }
-        else {
-          setOffset((prevOffset) => prevOffset + 6 );
-        }
-        
       }
     }
 
-    window.addEventListener("scroll" , handleScroll);
+    window.addEventListener("scroll", handleScroll);
     return () => {
-      window.removeEventListener("scroll" , handleScroll)
-      }
+      window.removeEventListener("scroll", handleScroll);
+    };
   });
 
-
   if (loading) {
-    return <div>Loading</div>;
+    return (
+      <div className="globalCss">
+        <h1 className="text-3xl mt-5">Blog</h1>
+        <PostSkeleton />
+      </div>
+    );
   }
   return (
     <div className="globalCss">
       <h1 className="text-3xl mt-5">Blog</h1>
 
       <label htmlFor="sorting">Sortowanie</label>
-      <select name="sorts" id="sorting" onChange={(e) => setSortBy(e.target.value as "newest" | "oldest" | "likes")}>
+      <select
+        name="sorts"
+        id="sorting"
+        onChange={(e) =>
+          setSortBy(e.target.value as "newest" | "oldest" | "likes")
+        }
+      >
         <option value="newest">Najnowsze</option>
         <option value="oldest">Najstarsze</option>
         <option value="likes">Najwięcej polubień</option>
       </select>
       {posts ? (
-        posts.map((post) => {
-          return <div key={post.ID} className="mt-[3%]" ><Post id={post.ID} content={post.Content} title={post.Title} date={post.Edited_At} willBeUsedManyTimes={true} attachments={post.Attachments}/></div>;
-  
+        posts.map((post, index) => {
+          return (
+            <div key={index} className="mt-[3%]">
+              <Post
+                id={post.id}
+                content={post.content}
+                title={post.title}
+                date={post.edited_at}
+                willBeUsedManyTimes={true}
+                attachments={post.attachments}
+              />
+            </div>
+          );
         })
       ) : (
         <div>No post found</div>
