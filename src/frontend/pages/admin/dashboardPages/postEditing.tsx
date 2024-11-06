@@ -180,7 +180,7 @@ const PostEditing = () => {
     return <Unauthorized />;
   }
   return (
-    <div className="globalCss">
+    <div className="globalCss mt-[1%]">
       <div className="my-[1%]">
         <label className="text-xl">Proszę wybrać post</label>
         <br></br>

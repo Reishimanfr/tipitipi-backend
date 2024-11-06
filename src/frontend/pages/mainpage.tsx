@@ -3,14 +3,7 @@ import landscapeImage from "../assets/landscape.jpg";
 import Image_Text from "../components/image_text";
 import { useState, useEffect } from "react";
 import Post from "../components/post";
-
-interface BlogPostDataBodyJson {
-  content: string;
-  created_at: number;
-  edited_at: number;
-  id: number;
-  title: string;
-}
+import { BlogPostDataBodyJson } from "../functions/interfaces";
 const Mainpage = () => {
   const [posts, setPosts] = useState<Array<BlogPostDataBodyJson>>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -43,7 +36,7 @@ const Mainpage = () => {
     return <div>Loading</div>;
   }
   return (
-    <div className="globalCss">
+    <div className="globalCss ">
       {/* <h1>Mainpage</h1>
             <Link to="/admin">Admin</Link>
             <h1 className="text-center">{props.mainpageFirstHeader}</h1> */}
