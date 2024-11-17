@@ -25,7 +25,7 @@ type GalleryRecord struct {
 type GalleryGroup struct {
 	ID     int             `gorm:"primaryKey;autoIncrement" json:"id"`
 	Name   string          `gorm:"unique" json:"name"`
-	Images []GalleryRecord `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"images"`
+	Images []GalleryRecord `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"images,omitempty"`
 }
 
 type AttachmentRecord struct {
