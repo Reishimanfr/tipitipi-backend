@@ -93,7 +93,7 @@ func main() {
 		},
 		CorsConfig: &cors.Config{
 			AllowMethods:           []string{"HEAD", "POST", "DELETE", "PATCH", "GET"},
-			AllowHeaders:           []string{"*"},
+			AllowHeaders:           []string{"Content-Type", "Authorization"},
 			AllowCredentials:       true,
 			AllowFiles:             false,
 			AllowAllOrigins:        true,

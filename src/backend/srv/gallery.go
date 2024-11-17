@@ -136,6 +136,64 @@ func (s *Server) GalleryGetImagesOne(c *gin.Context) {
 	c.JSON(http.StatusOK, groupInfo.Images)
 }
 
+func (s *Server) GalleryGetImagesBulk(c *gin.Context) {
+	offset, err := strconv.Atoi(c.DefaultQuery("offset", "0"))
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error":   "Offset is not a valid integer",
+			"message": nil,
+		})
+		return
+	}
+
+	limit, err := strconv.Atoi(c.DefaultQuery("limit", "1"))
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error":   "Limit is not a valid integer",
+			"message": nil,
+		})
+		return
+	}
+
+	if offset < 0 {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error":   "Offset must be higher than 0",
+			"message": nil,
+		})
+		return
+	}
+
+	if limit < 0 {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error":   "Limit must be higher than 0",
+			"message": nil,
+		})
+		return
+	}
+
+	var groups []*core.GalleryGroup
+
+	if err := s.Db.Preload("Images").Where("1 = 1").Offset(offset).Limit(limit).Find(&groups).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+				"error":   "Group with this ID doesn't exist",
+				"message": nil,
+			})
+			return
+		}
+
+		s.Log.Error("SQL query failed", zap.Error(err))
+
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error":   err.Error(),
+			"message": "Something went wrong while querying the SQL database",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, groups)
+}
+
 /*
 Creates a new gallery group. If a group with the specified name already exists this will return 409 Conflict.
 */

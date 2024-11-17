@@ -9,8 +9,11 @@ func (s *Server) InitHandler() {
 		public.GET("/blog/post/:id", s.BlogGetOne)
 		public.GET("/blog/posts", s.BlogGetBulk)
 		public.GET("/proxy", s.Proxy)
+
 		// Get info on all available gallery groups (like how many images they have)
 		public.GET("/gallery/groups/all/info", s.GalleryGetGroupsBulk)
+
+		public.GET("/gallery/groups/all/images", s.GalleryGetImagesBulk)
 
 		// Get info on a specified gallery group
 		public.GET("/gallery/groups/:groupId/info", s.GalleryGetGroupOne)
