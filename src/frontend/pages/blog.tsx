@@ -1,22 +1,7 @@
 import Post from "../components/post";
 import { useState, useEffect } from "react";
 import PostSkeleton from "../components/postSkeletonLoading";
-
-interface BlogAttachments {
-  id: number;
-  url: string;
-  filename: string;
-}
-
-interface BlogPostDataBodyJson {
-  content: string;
-  created_at: number;
-  edited_at: number;
-  id: number;
-  attachments: BlogAttachments[];
-  title: string;
-  error?: string;
-}
+import { BlogPostDataBodyJson } from "../functions/interfaces";
 
 const Blog = () => {
   const limit = 6;

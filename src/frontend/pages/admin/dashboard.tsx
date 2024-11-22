@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom"
 import validateToken from "../../functions/validate"
 import Unauthorized from "../errorPages/unauthorized"
 
-const buttonCSS = "border p-[0.5%] ml-[1%] mb-[1%] border-gray-900 hover:bg-gray-900 hover:text-white hover:duration-300 rounded-md"
+const buttonCSS = "border p-[0.5%] ml-[1%] mb-8 border-gray-900 hover:bg-gray-900 hover:text-white hover:duration-300 rounded-md"
 
 
 const Dashboard = () => {
@@ -15,7 +15,7 @@ const Dashboard = () => {
     const Logout = () => {
         if(window.confirm("Czy napewno chcesz się wylogować?")) {
             alert("Wylogowano");
-            localStorage.setItem("token",'')
+            localStorage.removeItem("token")
             navigate('/admin/login')
         }
     }

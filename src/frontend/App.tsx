@@ -26,9 +26,10 @@ function App() {
  
 
   return (
-    <div className='relative min-h-screen pb-20'>
+    <div className="flex flex-col min-h-screen">
       <BrowserRouter>
       <Navbar/>
+      <div className='flex-grow'>
       <Routes>
         {/* admin pages */}
         <Route path='/admin' element ={<Admin/>} />
@@ -53,6 +54,8 @@ function App() {
         <Route path="/blog/:id" element={<PostPage/>}/>
         <Route path='*' element={<PageNotFound/>}/>
       </Routes>
+      </div>
+
       <Footer/>
       </BrowserRouter>
     </div> 

@@ -36,10 +36,10 @@ const PostPage = () => {
   }, []);
 
   if (loading) {
-    return <div className="globalCss"><PostSkeleton/></div>
+    return <div className="globalCss mt-[1%]"><PostSkeleton/></div>
   }
   return (
-    <div className="globalCss">
+    <div className="globalCss mt-[1%]">
       {post ? (
         <Post
           title={post.title}

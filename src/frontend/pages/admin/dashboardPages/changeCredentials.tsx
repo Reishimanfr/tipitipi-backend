@@ -40,14 +40,18 @@ async function updateCredentials() {
       })
     });
 
-    if (response.status === 200) {
+    if (response.status >= 200 && response.status < 300) {
       alert("Zaktualizowano");
       localStorage.setItem("token",'')
       navigate('/admin/login')
-    } else {
-      //TODO nie wiem co zwraca /admin/account , ponizej linijka skopiowana z post creating
-      // const data: BlogPostDataBodyJson = await response.json();
-      alert("Błąd: ");
+    }
+    //  else {
+    //   //TODO nie wiem co zwraca /admin/account , ponizej linijka skopiowana z post creating
+    //   // const data: BlogPostDataBodyJson = await response.json();
+    //   alert("Błąd: ");
+    // }
+    if (!response.ok) {
+      throw new Error(response.statusText);
     }
   } catch (error){
     console.error(error)

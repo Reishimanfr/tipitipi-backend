@@ -79,12 +79,16 @@ const PostEditing = () => {
         }
       );
 
-      if (response.status === 200) {
+      if (response.status >= 200 && response.status < 300) {
         alert("Usunięto post");
         window.location.reload();
-      } else {
-        const data: BlogPostDataBodyJson = await response.json();
-        alert("Błąd: " + data.error);
+      } 
+      // else {
+      //   const data: BlogPostDataBodyJson = await response.json();
+      //   alert("Błąd: " + data.error);
+      // }
+      if (!response.ok) {
+        throw new Error(response.statusText);
       }
     } catch (error) {
       console.error(error);
@@ -120,12 +124,16 @@ const PostEditing = () => {
         }
       );
 
-      if (response.status === 200) {
+      if (response.status >= 200 && response.status < 300) {
         alert("Edytowano post");
         window.location.reload();
-      } else {
-        const data: BlogPostDataBodyJson = await response.json();
-        alert("Błąd: " + data.error);
+      } 
+      // else {
+      //   const data: BlogPostDataBodyJson = await response.json();
+      //   alert("Błąd: " + data.error);
+      // }
+      if (!response.ok) {
+        throw new Error(response.statusText);
       }
     } catch (error) {
       console.error(error);
