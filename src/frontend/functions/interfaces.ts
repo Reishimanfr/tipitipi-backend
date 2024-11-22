@@ -23,3 +23,11 @@ export interface GalleryCreateNewJson {
   error?: string;
   message: string;
 }
+
+export interface GalleryImage {
+  id: number;
+  alt_text: string;
+  url: string;
+  key: string;
+  group_id: number;
+}

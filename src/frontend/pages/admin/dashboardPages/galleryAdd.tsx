@@ -107,10 +107,6 @@ const GalleryAdd = () => {
     }
   }
 
-  useEffect(() => {
-    console.log(groups)
-  },[groups])
-
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
   useEffect(() => {

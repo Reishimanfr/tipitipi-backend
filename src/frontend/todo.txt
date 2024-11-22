@@ -1,7 +1,3 @@
-cennik // po zdobyciu info
-
-animacje tailwind // bardziej skomplikowane niz myslalem
-
 ladowanie zdjecia w poscie i buttony // css
 
 zdjecia nie po kolei się tenteguja // wina bazy danych
