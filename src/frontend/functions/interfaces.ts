@@ -13,3 +13,13 @@ export interface BlogPostDataBodyJson {
   title: string;
   error?: string;
 }
+
+export interface GalleryGroup {
+  id: number;
+  name: string;
+}
+
+export interface GalleryCreateNewJson {
+  error?: string;
+  message: string;
+}

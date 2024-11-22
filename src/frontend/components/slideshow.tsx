@@ -1,65 +1,46 @@
-import{ useState } from "react";
+import { useState } from "react";
 
 interface Props {
-  images: string[]; 
+  images: string[];
 }
 
-const SlideShow = ({ images } : Props) => {
+const SlideShow = ({ images }: Props) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const nextSlide = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === images.length - 1 ? 0 : prevIndex + 1
-    );
-  };
-
-  const prevSlide = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? images.length - 1 : prevIndex - 1
-    );
-  };
-
+  // Przejście do wybranego slajdu
   const goToSlide = (index: number) => {
     setCurrentIndex(index);
   };
 
   return (
-    <div className="slideshow-container relative">
-      {/* Render the current image */}
-      {images.length > 0 && (
-        <img
-          src={images[currentIndex]}
-          alt={`Slide ${currentIndex}`}
-          className="slideshow-image center mx-auto max-h-[200px]"
-        />
-      )}
-
-      {/* Previous button */}
-      <button
-        className="prev-button absolute left-0 top-1/2 transform -translate-y-1/2 bg-black text-white p-2"
-        onClick={prevSlide}
-      >
-        &#10094;
-      </button>
-
-      {/* Next button */}
-      <button
-        className="next-button absolute right-0 top-1/2 transform -translate-y-1/2 bg-black text-white p-2"
-        onClick={nextSlide}
-      >
-        &#10095;
-      </button>
-
-      {/* Image indicators */}
-      <div className="indicators flex justify-center mt-2">
-        {images.map((_, index) => (
-          <span
-            key={index}
-            className={`indicator cursor-pointer w-3 h-3 mx-1 rounded-full ${
-              index === currentIndex ? "bg-blue-600" : "bg-gray-300"
-            }`}
-            onClick={() => goToSlide(index)}
+    <div className="flex flex-col items-center space-y-4 mt-24 z-0">
+      {/* Wybrany slajd powiększony */}
+      <div className="w-full max-w-xl">
+        {images.length > 0 && (
+          <img
+            src={images[currentIndex]}
+            alt={`Slide ${currentIndex}`}
+            className="w-full h-[400px] object-cover rounded-lg shadow-lg transition-transform transform duration-300 scale-105"
           />
+        )}
+      </div>
+
+      {/* Pasek miniatur */}
+      <div className="flex overflow-x-auto space-x-4">
+        {images.map((image, index) => (
+          <div
+            key={index}
+            className={`${
+              index === currentIndex ? "scale-105 " : "opacity-60"
+            } cursor-pointer transition-transform transform duration-300`}
+            onClick={() => goToSlide(index)}
+          >
+            <img
+              src={image}
+              alt={`Thumbnail ${index}`}
+              className="h-36 object-cover rounded-md"
+            />
+          </div>
         ))}
       </div>
     </div>
@@ -67,3 +48,6 @@ const SlideShow = ({ images } : Props) => {
 };
 
 export default SlideShow;
+
+
+

@@ -1,19 +1,14 @@
 import { useState, useEffect } from "react";
 import validateToken from "../../../functions/validate";
 import Unauthorized from "../../errorPages/unauthorized";
+import { GalleryGroup , GalleryCreateNewJson } from "../../../functions/interfaces";
 import {
   buildGalleryMultipart,
   getToken,
 } from "../../../functions/postManipulatingFunctions";
 
-interface GalleryCreateNewJson {
-  error?: string;
-  message: string;
-}
-interface GalleryGroup {
-  id: number;
-  name: string;
-}
+
+
 
 async function addNewGroup(name: string) {
   const token = getToken();
@@ -68,7 +63,6 @@ const GalleryAdd = () => {
 
       const data: Array<GalleryGroup> = await response.json();
       setGroups((prevGroups) => prevGroups?.concat(data));
-      console.log(groups);
     } catch (error) {
       console.error(error);
     }
@@ -113,6 +107,10 @@ const GalleryAdd = () => {
     }
   }
 
+  useEffect(() => {
+    console.log(groups)
+  },[groups])
+
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
   useEffect(() => {
@@ -136,10 +134,12 @@ const GalleryAdd = () => {
     return <Unauthorized />;
   }
   return (
-    <div className="mt-[1%] globalCss">
+    <div className="globalCss mt-[1%]">
       <div>
         <h1 className="text-3xl font-bold mb-6">Tworzenie albumów/grup</h1>
-        <label className="text-xl" htmlFor="newAlbum">Podaj nazwę nowego albumu: </label>
+        <label className="text-xl" htmlFor="newAlbum">
+          Podaj nazwę nowego albumu:{" "}
+        </label>
         <input
           className="border-2 "
           type="text"

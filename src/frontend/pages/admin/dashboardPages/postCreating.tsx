@@ -60,7 +60,7 @@ export default function PostCreating() {
   }
 
   return (
-    <div className="mt-[1%] globalCss">
+    <div className="globalCss mt-[1%]">
       <QuillBody
         title={title}
         setTitle={setTitle}
