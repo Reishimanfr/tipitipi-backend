@@ -1,3 +1,0 @@
-ladowanie zdjecia w poscie i buttony // css
-
-zdjecia nie po kolei się tenteguja // wina bazy danych

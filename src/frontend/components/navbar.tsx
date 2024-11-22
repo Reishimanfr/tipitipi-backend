@@ -93,7 +93,7 @@ function Navbar() {
   });
 
   return (
-    <div className={`sticky top-0 h-20 bg-black w-full transition-transform duration-300 transform ${show ? 'translate-y-0' : '-translate-y-full'}`}>
+    <div className={`sticky z-50 top-0 h-20 bg-black w-full transition-transform duration-300 transform ${show ? 'translate-y-0' : '-translate-y-full'}`}>
       <div>
         <Link to="/">
           <img
