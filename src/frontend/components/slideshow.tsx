@@ -13,7 +13,7 @@ const SlideShow = ({ images }: Props) => {
   };
 
   return (
-    <div className="flex flex-col items-center space-y-4">
+    <div className="flex flex-col items-center space-y-4 mt-24 z-0">
       {/* Wybrany slajd powiększony */}
       <div className="w-full max-w-xl">
         {images.length > 0 && (
@@ -38,7 +38,7 @@ const SlideShow = ({ images }: Props) => {
             <img
               src={image}
               alt={`Thumbnail ${index}`}
-              className="w-32 h-32 object-cover rounded-md"
+              className="h-36 object-cover rounded-md"
             />
           </div>
         ))}
