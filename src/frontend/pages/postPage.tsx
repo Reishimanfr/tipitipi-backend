@@ -36,7 +36,7 @@ const PostPage = () => {
   }, []);
 
   if (loading) {
-    return <div className="globalCss mt-[1%]"><PostSkeleton/></div>
+    return <div className="mt-[5%]"><PostSkeleton/></div>
   }
   return (
     <div className="globalCss mt-[1%]">

@@ -38,7 +38,7 @@ export default function PostCreating() {
       //   const data: BlogPostDataBodyJson = await response.json();
       //   alert("Błąd: " + data.error);
       // }
-      if (!response.ok) {
+      else {
         throw new Error(response.statusText);
       }
     } catch (error) {

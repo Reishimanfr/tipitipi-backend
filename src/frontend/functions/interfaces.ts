@@ -19,10 +19,10 @@ export interface GalleryGroup {
   name: string;
 }
 
-export interface GalleryCreateNewJson {
-  error?: string;
-  message: string;
-}
+// export interface GalleryCreateNewJson {
+//   error?: string;
+//   message: string;
+// }
 
 export interface GalleryImage {
   id: number;

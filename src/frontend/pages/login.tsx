@@ -12,19 +12,22 @@ const Login = () => {
         const formData = new FormData()
         formData.append("username",login)
         formData.append("password",password)
-        const request = await fetch("http://localhost:2333/api/admin/login", {
+        const response = await fetch("http://localhost:2333/api/admin/login", {
             method: "POST",
             body: formData
         })
       
-        const response  = await request.json()       //TODO idk what data type is 
+        const data  = await response.json()       //TODO idk what data type is 
+        console.log(data)
+        console.log("a")
+        console.log(response)
 
-        if(request.ok && response.token != undefined) {
-            localStorage.setItem("token",response.token)
+        if(response.ok && data.token != undefined) {
+            localStorage.setItem("token",data.token)
             navigate("/admin/dashboard")
         }
         else{
-            console.log("something went wrong: " , response.error)
+            console.log("something went wrong: " , data.error)
         }
         
     }

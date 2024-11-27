@@ -66,7 +66,6 @@ function Navbar() {
   //u góry mamy state od tego że menu dla urzadzen mobilnych ma byc wyswietlane
 
   const handleResize = () => {
-    console.log(menuVisible);
     if (menuVisible) {
       setMenuVisible(window.innerWidth <= 768);
     }

@@ -1,20 +1,3 @@
-// interface BlogAttachments {
-//   id: number;
-//   url: string;
-//   filename: string;
-// }
-
-// interface BlogPostDataBodyJson {
-//   content: string;
-//   created_at: ;
-//   edited_at: ;
-//   id: number;
-//   attachments: BlogAttachments[];
-//   title: string;
-//   error?: string;
-// }
-
-
 export function validateDataForm(title: string, content: string): boolean {
   if (title === "") {
     alert("Podano pusty tytuł");
@@ -33,18 +16,6 @@ export function validateDataForm(title: string, content: string): boolean {
   }
   return true;
 }
-// function makeFilename(length: number) {
-//   let result = "";
-//   const characters =
-//     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-//   const charactersLength = characters.length;
-//   let counter = 0;
-//   while (counter < length) {
-//     result += characters.charAt(Math.floor(Math.random() * charactersLength));
-//     counter += 1;
-//   }
-//   return result;
-// }
 
 function base64ToBlob(base64: string): Blob | null {
   //mimetype is first part of base64 variable , that matches given regexp in match function

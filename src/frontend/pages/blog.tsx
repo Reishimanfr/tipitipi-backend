@@ -67,6 +67,9 @@ const Blog = () => {
       <div className="globalCss">
         <h1 className="text-3xl mt-5">Blog</h1>
         <PostSkeleton />
+        <PostSkeleton />
+        <PostSkeleton />
+        <PostSkeleton />
       </div>
     );
   }
@@ -74,7 +77,7 @@ const Blog = () => {
     <div className="globalCss">
       <h1 className="text-3xl mt-5">Blog</h1>
 
-      <label htmlFor="sorting">Sortowanie</label>
+      <label htmlFor="sorting" className="mr-2">Sortowanie</label>
       <select
         name="sorts"
         id="sorting"
@@ -96,7 +99,6 @@ const Blog = () => {
                 title={post.title}
                 date={post.edited_at}
                 willBeUsedManyTimes={true}
-                attachments={post.attachments}
               />
             </div>
           );

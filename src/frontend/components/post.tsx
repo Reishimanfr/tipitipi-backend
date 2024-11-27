@@ -18,7 +18,7 @@ const Post = ({
   attachments = null,
   willBeUsedManyTimes,
 }: Props) => {
-  if (attachments && content) {
+  if (attachments && content && !willBeUsedManyTimes) {
     attachments.forEach((attachment, index) => {
       if (!content) {
         return;
