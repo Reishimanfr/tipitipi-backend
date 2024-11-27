@@ -1,6 +1,6 @@
 const PostSkeleton = () => {
   return (
-    <div className=" shadow rounded-md p-4 max-w-sm w-full mx-auto globalCss mt-[1%]">
+    <div className="m-12 shadow rounded-md p-4 mx-auto globalCss mt-[1%]">
       <div className="animate-pulse flex space-x-4">
         <div className="rounded-full bg-slate-200 h-10 w-10"></div>
         <div className="flex-1 space-y-6 py-1">

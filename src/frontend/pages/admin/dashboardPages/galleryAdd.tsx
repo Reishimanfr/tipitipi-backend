@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import validateToken from "../../../functions/validate";
 import Unauthorized from "../../errorPages/unauthorized";
-import { GalleryGroup , GalleryCreateNewJson } from "../../../functions/interfaces";
+import { GalleryGroup } from "../../../functions/interfaces";
 import {
   buildGalleryMultipart,
   getToken,
@@ -33,9 +33,9 @@ async function addNewGroup(name: string) {
     if (response.status >= 200 && response.status < 300) {
       alert("Dodano grupę");
       window.location.reload();
-    } else {
-      const data: GalleryCreateNewJson = await response.json();
-      alert("Błąd: " + data.error);
+    } 
+    else{
+      throw new Error(response.statusText);
     }
   } catch (error) {
     console.error(error);
@@ -97,9 +97,8 @@ const GalleryAdd = () => {
       if (response.status >= 200 && response.status < 300) {
         alert("Dodano zdjęcia");
         window.location.reload();
-      } else {
-        const data: GalleryCreateNewJson = await response.json();
-        alert("Błąd: " + data.error);
+      } else{
+        throw new Error(response.statusText);
       }
     } catch (error) {
       console.error(error);

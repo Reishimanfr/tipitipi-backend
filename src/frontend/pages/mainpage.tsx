@@ -4,6 +4,7 @@ import Image_Text from "../components/image_text";
 import { useState, useEffect } from "react";
 import Post from "../components/post";
 import { BlogPostDataBodyJson } from "../functions/interfaces";
+import PostSkeleton from "../components/postSkeletonLoading";
 const Mainpage = () => {
   const [posts, setPosts] = useState<Array<BlogPostDataBodyJson>>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -29,7 +30,9 @@ const Mainpage = () => {
         setLoading(false);
       }
     }
-    fetchPost();
+    if(posts.length==0){
+      fetchPost();
+    }
   }, []);
 
   if (loading) {
@@ -66,7 +69,11 @@ const Mainpage = () => {
           );
         })
       ) : (
-        <div className="text-3xl mb-[1%]">Brak postów</div>
+        <div>
+          <PostSkeleton/>
+          <PostSkeleton/>
+          <PostSkeleton/>
+        </div>
       )}
       <br></br>
       <br></br>

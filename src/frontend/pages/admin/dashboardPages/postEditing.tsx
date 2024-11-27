@@ -9,34 +9,12 @@ import {
 import QuillBody from "../../../components/quillBody";
 import { BlogPostDataBodyJson } from "../../../functions/interfaces";
 
-// async function fetchFileAsBlob(path: string): Promise<Blob> {
-//   const response = await fetch(path);
-
-//   if (!response.ok) {
-//     throw new Error("Błąd podczas pobierania pliku");
-//   }
-
-//   const blob = await response.blob();
-//   return blob;
-// }
-
-// async function getBase64(path : string) {
-//   const file = await fetchFileAsBlob(path)
-//   var reader = new FileReader();
-//   reader.readAsDataURL(file);
-//   reader.onload = function () {
-//     console.log(reader.result);
-//   };
-//   reader.onerror = function (error) {
-//     console.log('Error: ', error);
-//   };
-// }
 async function fetchPosts(
   setPosts: React.Dispatch<React.SetStateAction<BlogPostDataBodyJson[]>>
 ) {
   try {
     const response = await fetch(
-      //TODO niewiem czy bezpieczne / sciagamy wszystkie post yistniejace ze zdjeciami itd
+      //TODO niewiem czy bezpieczne / sciagamy wszystkie post yistniejace ze zdjeciami itd // trza zrobic partiala
       `http://localhost:2333/blog/posts?limit=999&attachments=true`,
       {
         method: "GET",
@@ -87,7 +65,7 @@ const PostEditing = () => {
       //   const data: BlogPostDataBodyJson = await response.json();
       //   alert("Błąd: " + data.error);
       // }
-      if (!response.ok) {
+      else{
         throw new Error(response.statusText);
       }
     } catch (error) {
@@ -132,7 +110,7 @@ const PostEditing = () => {
       //   const data: BlogPostDataBodyJson = await response.json();
       //   alert("Błąd: " + data.error);
       // }
-      if (!response.ok) {
+      else {
         throw new Error(response.statusText);
       }
     } catch (error) {
