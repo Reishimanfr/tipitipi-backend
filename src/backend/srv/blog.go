@@ -2,13 +2,8 @@ package srv
 
 import (
 	"bash06/strona-fundacja/src/backend/core"
-	"bytes"
 	"fmt"
-	"io"
-	"mime/multipart"
 	"net/http"
-	"os"
-	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
@@ -21,52 +16,26 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-var (
-	sortOptions       = []string{"newest", "oldest", "likes"}
-	awsBlogBucketName = os.Getenv("AWS_BLOG_BUCKET_NAME")
-)
-
-const (
-	errPostNotFound       = "Post not found"
-	errPostIdInvalid      = "Invalid post ID provided"
-	errPostDupName        = "Post with this title already exists"
-	errOptOffsetInv       = "Offset value is not a valid integer"
-	errOptOffsetSmall     = "Offset value must be at least 0"
-	errOptLimitInv        = "Limit is not a valid integer"
-	errOptLimitSmall      = "Limit must be at least 1"
-	errOptSortInv         = "Invalid sort option provided"
-	errSqlQuery           = "Error while executing SQL query"
-	errSqlTransaction     = "Failed to commit SQL transaction"
-	errGetwd              = "Failed to get the current working directory"
-	errMultipartParse     = "Failed to parse multipart form"
-	errMultipartNoTitle   = "No post title provided"
-	errMultipartNoContent = "No post content provided"
-	errAttachmentDelete   = "Failed to delete files"
-	errAwsUpload          = "Some files failed to upload to S3"
-	postDeletedOk         = "Post and it's files deleted successfully"
-	postCreatedOk         = "Post created successfully"
-)
+var sortOptions = []string{"newest", "oldest"}
 
 // blog/post/:id
 // Returns a single post under some ID
 func (s *Server) BlogGetOne(c *gin.Context) {
-	stringId := c.Param("id")
-	id, err := strconv.Atoi(stringId)
-	attach := c.Query("attachments") == "true"
-
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   errPostIdInvalid,
-			"message": nil,
+			"error": "Invalid post ID provided",
 		})
 		return
 	}
 
+	files := c.DefaultQuery("files", "false") == "true"
+
 	var postRecord *core.BlogPost
 	var dbErr error
 
-	if attach {
-		dbErr = s.Db.Preload("Attachments").Where("id = ?", id).First(&postRecord).Error
+	if files {
+		dbErr = s.Db.Preload("Files").Where("id = ?", id).First(&postRecord).Error
 	} else {
 		dbErr = s.Db.Where("id = ?", id).First(&postRecord).Error
 	}
@@ -74,8 +43,7 @@ func (s *Server) BlogGetOne(c *gin.Context) {
 	if dbErr != nil {
 		if dbErr == gorm.ErrRecordNotFound {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-				"error":   "Record not found",
-				"message": nil,
+				"error": "Record not found",
 			})
 			return
 		}
@@ -84,7 +52,7 @@ func (s *Server) BlogGetOne(c *gin.Context) {
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   dbErr.Error(),
-			"message": errSqlQuery,
+			"message": "Something went wrong while processing your request",
 		})
 		return
 	}
@@ -98,22 +66,20 @@ func (s *Server) BlogGetBulk(c *gin.Context) {
 	offsetStr := c.DefaultQuery("offset", "0")
 	limitStr := c.DefaultQuery("limit", "5")
 	sort := strings.ToLower(c.DefaultQuery("sort", "newest"))
-	attach := c.DefaultQuery("attachments", "false") == "true"
+	files := c.DefaultQuery("files", "false") == "true"
 	partial := c.DefaultQuery("partial", "false") == "true"
 
 	offset, err := strconv.Atoi(offsetStr)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   errOptOffsetInv,
-			"message": nil,
+			"error": "Offset is not a valid integer",
 		})
 		return
 	}
 
 	if offset < 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   errOptOffsetSmall,
-			"message": nil,
+			"error": "Offset must be at least 0",
 		})
 		return
 	}
@@ -121,24 +87,21 @@ func (s *Server) BlogGetBulk(c *gin.Context) {
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   errOptLimitInv,
-			"message": nil,
+			"error": "Limit is not a valid integer",
 		})
 		return
 	}
 
 	if limit < 1 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   errOptLimitSmall,
-			"message": nil,
+			"error": "Limit must be at least 1",
 		})
 		return
 	}
 
 	if !slices.Contains(sortOptions, sort) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   errOptSortInv,
-			"message": nil,
+			"error": "Invalid sort option provided",
 		})
 		return
 	}
@@ -161,29 +124,26 @@ func (s *Server) BlogGetBulk(c *gin.Context) {
 		}
 	}
 
-	result := new(gorm.DB)
-
 	if partial {
-		result = s.Db.Select([]string{"created_at", "title", "id"}).Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords)
-	} else if attach {
-		result = s.Db.Preload("Attachments").Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords)
+		err = s.Db.Select([]string{"created_at", "title", "id"}).Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords).Error
+	} else if files {
+		err = s.Db.Preload("Files").Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords).Error
 	} else {
-		result = s.Db.Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords)
+		err = s.Db.Order(orderClause).Offset(offset).Limit(limit).Find(&postRecords).Error
 	}
 
-	if result.Error != nil && result.Error != gorm.ErrRecordNotFound {
-		s.Log.Error("Error while getting post records from database", zap.Error(result.Error))
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+				"error": "Post not found",
+			})
+			return
+		}
+
+		s.Log.Error("Error while getting post records from database", zap.Error(err))
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   result.Error.Error(),
-			"message": errSqlQuery,
-		})
-		return
-	}
-
-	if len(postRecords) < 1 {
-		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-			"error":   errPostNotFound,
-			"message": nil,
+			"error":   err,
+			"message": "Something went wrong while processing your request",
 		})
 		return
 	}
@@ -198,7 +158,7 @@ func (s *Server) BlogCreateOne(c *gin.Context) {
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": errMultipartParse,
+			"message": "Something went wrong while processing your request",
 		})
 		return
 	}
@@ -208,16 +168,14 @@ func (s *Server) BlogCreateOne(c *gin.Context) {
 
 	if title == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   errMultipartNoTitle,
-			"message": nil,
+			"error": "No post title provided",
 		})
 		return
 	}
 
 	if content == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   errMultipartNoContent,
-			"message": nil,
+			"error": "No post content provided",
 		})
 		return
 	}
@@ -227,8 +185,7 @@ func (s *Server) BlogCreateOne(c *gin.Context) {
 
 	if exists {
 		c.AbortWithStatusJSON(http.StatusConflict, gin.H{
-			"error":   errPostDupName,
-			"message": nil,
+			"error": "Post with this title already exists",
 		})
 		return
 	}
@@ -245,9 +202,7 @@ func (s *Server) BlogCreateOne(c *gin.Context) {
 
 	// Exit early if there are no files to be uploaded
 	if len(files) < 1 {
-		c.JSON(http.StatusOK, gin.H{
-			"message": postCreatedOk,
-		})
+		c.Status(http.StatusOK)
 		return
 	}
 
@@ -257,43 +212,26 @@ func (s *Server) BlogCreateOne(c *gin.Context) {
 	var nextPostId int
 	s.Db.Model(&core.BlogPost{}).Select("COALESCE(MAX(id), 0)").Scan(&nextPostId)
 
-	for i, fHeader := range files {
+	for _, file := range files {
 		wg.Add(1)
 
-		go func(fHeader *multipart.FileHeader, i int) {
+		go func() {
 			defer wg.Done()
 
-			f, err := fHeader.Open()
-			if err != nil {
+			if result, err := s.DownloadFile(file); err != nil {
+				s.Log.Error("Failed to download file", zap.Error(err))
 				errors <- err
-				return
+			} else {
+				if err := s.Db.Create(&core.File{
+					Filename:   result.Filename,
+					BlogPostID: nextPostId,
+					Size:       result.Size,
+					Mimetype:   result.Mimetype,
+				}).Error; err != nil {
+					errors <- fmt.Errorf("failed to create database record for %s: %v", result.Filename, err)
+				}
 			}
-
-			defer f.Close()
-
-			buffer := new(bytes.Buffer)
-
-			if _, err := io.Copy(buffer, f); err != nil {
-				errors <- err
-				return
-			}
-
-			ext := filepath.Ext(fHeader.Filename)
-			key := fmt.Sprintf("%v-%v%v", nextPostId, i, ext)
-
-			// TODO: implement optimizing attachments based on the mimetype
-			url, err := s.Ovh.AddObject(awsBlogBucketName, key, buffer.Bytes())
-			if err != nil {
-				errors <- err
-			}
-
-			s.Db.Create(&core.AttachmentRecord{
-				BlogPostID: nextPostId,
-				URL:        *url,
-				Filename:   key,
-			})
-
-		}(fHeader, i)
+		}()
 	}
 
 	wg.Wait()
@@ -303,44 +241,39 @@ func (s *Server) BlogCreateOne(c *gin.Context) {
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":   err.Error(),
-				"message": errAwsUpload,
+				"message": "Some files failed ot be downloaded",
 			})
 			return
 		}
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"message": postCreatedOk,
-	})
+	c.Status(http.StatusOK)
 }
 
 // blog/post/:id
 // Deletes a post under some ID (and it's related attachments if any)
 func (s *Server) BlogDeleteOne(c *gin.Context) {
-	stringId := c.Param("id")
-	id, err := strconv.Atoi(stringId)
+	id, err := strconv.Atoi(c.Param("id"))
 
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   errPostIdInvalid,
-			"message": nil,
+			"error": "Invalid post ID provided",
 		})
 		return
 	}
 
 	post := new(core.BlogPost)
 
-	if err := s.Db.Preload("Attachments").Where("id = ?", id).First(&post).Error; err != nil {
+	if err := s.Db.Preload("Files").Where("id = ?", id).First(&post).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-				"error":   errPostNotFound,
-				"message": nil,
+				"error": "Post not found",
 			})
 			return
 		}
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": errSqlQuery,
+			"message": "Something went wrong while processing your request",
 			"error":   err.Error(),
 		})
 		return
@@ -353,17 +286,17 @@ func (s *Server) BlogDeleteOne(c *gin.Context) {
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": errSqlQuery,
+			"message": "Something went wrong while processing your request",
 		})
 		return
 	}
 
-	if err := tx.Model(&core.AttachmentRecord{}).Delete("blog_post_id = ?", post.ID).Error; err != nil {
+	if err := tx.Model(&core.File{}).Delete("blog_post_id = ?", post.ID).Error; err != nil {
 		tx.Rollback()
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": errSqlQuery,
+			"message": "Something went wrong while processing your request",
 		})
 		return
 	}
@@ -371,55 +304,66 @@ func (s *Server) BlogDeleteOne(c *gin.Context) {
 	if err := tx.Commit().Error; err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": errSqlTransaction,
+			"message": "Something went wrong while processing your request",
 		})
 		return
 	}
 
-	if len(post.Attachments) > 0 {
-		bucketKeys := []string{}
+	if len(post.Files) < 1 {
+		c.Status(http.StatusOK)
+		return
+	}
 
-		for _, at := range post.Attachments {
-			bucketKeys = append(bucketKeys, at.Filename)
-		}
+	var wg sync.WaitGroup
+	errors := make(chan error, len(post.Files))
 
-		err := s.Ovh.DeleteObjectsBulk(os.Getenv("AWS_BLOG_BUCKET_NAME"), bucketKeys)
+	for _, file := range post.Files {
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+
+			if err := s.DeleteFile(file.Filename); err != nil {
+				s.Log.Error("Failed to delete file from disk", zap.String("Filename", file.Filename), zap.Error(err))
+				errors <- err
+				return
+			}
+		}()
+	}
+
+	wg.Wait()
+	close(errors)
+
+	for err := range errors {
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-				"error":   err.Error(),
-				"message": errAttachmentDelete,
+				"errors":  errors,
+				"message": "Some files failed to be deleted from disk",
 			})
 			return
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": postDeletedOk,
-		"error":   nil,
-	})
+	c.Status(http.StatusOK)
 }
 
 // blog/post/:id
 // Edits a post under the specified ID
 func (s *Server) BlogEditOne(c *gin.Context) {
-	stringId := c.Param("id")
-	id, err := strconv.Atoi(stringId)
-
+	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   errPostIdInvalid,
-			"message": nil,
+			"error": "Invalid post ID provided",
 		})
 		return
 	}
 
-	var postRecord *core.BlogPost
+	var post *core.BlogPost
 
-	if err := s.Db.Where("id = ?", id).First(&postRecord).Error; err != nil {
+	if err := s.Db.Where("id = ?", id).First(&post).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-				"error":   errPostNotFound,
-				"message": nil,
+				"error": "Post not found",
 			})
 			return
 		}
@@ -439,7 +383,7 @@ func (s *Server) BlogEditOne(c *gin.Context) {
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": errMultipartParse,
+			"message": "Something went wrong while processing your request",
 		})
 		return
 	}
@@ -449,16 +393,14 @@ func (s *Server) BlogEditOne(c *gin.Context) {
 
 	if title == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   errMultipartNoTitle,
-			"message": nil,
+			"error": "No post title provided",
 		})
 		return
 	}
 
 	if content == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   errMultipartNoContent,
-			"message": nil,
+			"error": "No post content provided",
 		})
 		return
 	}
@@ -466,162 +408,98 @@ func (s *Server) BlogEditOne(c *gin.Context) {
 	form, _ := c.MultipartForm()
 	files := form.File["files[]"]
 
-	// Exit early if there are no files to be uploaded
-	if len(files) < 1 {
-		c.JSON(http.StatusOK, gin.H{
-			"message": postCreatedOk,
-		})
-		return
-	}
-
 	var wg sync.WaitGroup
-	errors := make(chan error, len(files))
+	errors := make(chan error, len(post.Files))
 
-	var nextPostId int
-	s.Db.Model(&core.BlogPost{}).Select("COALESCE(MAX(id), 0)").Scan(&nextPostId)
-
-	for i, fHeader := range files {
+	for _, file := range post.Files {
 		wg.Add(1)
 
-		go func(fHeader *multipart.FileHeader, i int) {
+		go func() {
 			defer wg.Done()
 
-			f, err := fHeader.Open()
-			if err != nil {
+			if err := s.DeleteFile(file.Filename); err != nil {
+				s.Log.Error("Failed to delete file from disk", zap.String("Filename", file.Filename), zap.Error(err))
 				errors <- err
 				return
 			}
 
-			defer f.Close()
-
-			buffer := new(bytes.Buffer)
-
-			if _, err := io.Copy(buffer, f); err != nil {
-				errors <- err
-				return
-			}
-
-			ext := filepath.Ext(fHeader.Filename)
-			nextIdString := strconv.Itoa(nextPostId)
-			idxString := strconv.Itoa(i)
-
-			key := nextIdString + "-" + idxString + ext
-
-			// TODO: implement optimizing attachments based on the mimetype
-			url, err := s.Ovh.AddObject(awsBlogBucketName, key, buffer.Bytes())
-			if err != nil {
+			if err := s.Db.Model(&core.File{}).Delete("blog_post_id = ?", id).Error; err != nil {
+				s.Log.Error("Failed to delete file record from database", zap.String("Filename", file.Filename), zap.Error(err))
 				errors <- err
 			}
-
-			s.Db.Create(&core.AttachmentRecord{
-				BlogPostID: nextPostId,
-				URL:        *url,
-				Filename:   key,
-			})
-
-		}(fHeader, i)
+		}()
 	}
 
 	wg.Wait()
 	close(errors)
 
-	/*
-		for i, fHeader := range files {
-			wg.Add(1)
-
-			go func(fHeader *multipart.FileHeader, i int) {
-				defer wg.Done()
-
-				f, err := fHeader.Open()
-				if err != nil {
-					errors <- err
-					return
-				}
-
-				defer f.Close()
-
-				buffer := new(bytes.Buffer)
-
-				if _, err := io.Copy(buffer, f); err != nil {
-					errors <- err
-					return
-				}
-
-				ext := filepath.Ext(fHeader.Filename)
-				key := fmt.Sprintf("%v-%v%v", nextPostId, i, ext)
-
-				// TODO: implement optimizing attachments based on the mimetype
-				url, err := s.Ovh.AddObject(awsBlogBucketName, key, buffer.Bytes())
-				if err != nil {
-					errors <- err
-				}
-
-				s.Db.Create(&core.AttachmentRecord{
-					BlogPostID: nextPostId,
-					URL:        *url,
-					Filename:   key,
-				})
-
-			}(fHeader, i)
+	for err := range errors {
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"errors":  errors,
+				"message": "Something went wrong while processing your request",
+			})
+			return
 		}
+	}
 
-		wg.Wait()
-		close(errors)
+	if err := s.Db.UpdateColumns(&core.BlogPost{
+		ID:        id,
+		Title:     title,
+		Content:   content,
+		Edited_At: time.Now().Unix(),
+	}).Error; err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error":   err.Error(),
+			"message": "Something went wrong while processing your request",
+		})
+		return
+	}
 
-		for err := range errors {
+	if len(files) < 1 {
+		c.Status(http.StatusOK)
+		return
+	}
+
+	var nextPostId int
+	s.Db.Model(&core.BlogPost{}).Select("COALESCE(MAX(id), 0)").Scan(&nextPostId)
+
+	errors = make(chan error, len(files))
+
+	for _, file := range files {
+		wg.Add(1)
+
+		go func() {
+			defer wg.Done()
+
+			result, err := s.DownloadFile(file)
 			if err != nil {
-				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-					"error":   err.Error(),
-					"message": errAwsUpload,
-				})
+				errors <- err
 				return
 			}
+
+			if err := s.Db.Create(&core.File{
+				Filename:   result.Filename,
+				Size:       result.Size,
+				Mimetype:   result.Mimetype,
+				BlogPostID: nextPostId,
+			}).Error; err != nil {
+				errors <- err
+				return
+			}
+		}()
+	}
+
+	wg.Wait()
+	close(errors)
+
+	for err := range errors {
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+				"errors":  errors,
+				"message": "Something went wrong while processing your request",
+			})
+			return
 		}
-
-	*/
-
-	// form := c.Request.MultipartForm
-	// files := form.File["files[]"]
-
-	// if len(files) > 0 {
-
-	// }
-
-	// if len(rawFiles) > 0 {
-	// 	files := make([]*core.AttachmentRecord, 0, len(rawFiles))
-
-	// 	currentDir, err := os.Getwd()
-	// 	if err != nil {
-	// 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-	// 			"error":   err.Error(),
-	// 			"message": err_getwd_failed,
-	// 		})
-	// 		return
-	// 	}
-
-	// 	for range rawFiles {
-	// 		name := core.RandStringBytesMaskImprSrcUnsafe(15)
-
-	// 		files = append(files, &core.AttachmentRecord{
-	// 			Filename:   name,
-	// 			Path:       filepath.Join(currentDir, "../assets", stringId, name), //TODO: validate this code
-	// 			BlogPostID: id,
-	// 		})
-	// 	}
-	// }
-
-	// someImagePath := post.Attachments[0].Path
-	// dirPath := filepath.Join(someImagePath, "..")
-
-	// fmt.Println(dirPath)
-
-	// for _, image := range post.Attachments {
-	// 	if err := os(image.Path); err != nil {
-	// 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-	// 			"error":   err.Error(),
-	// 			"message": err_attach_delete,
-	// 		})
-	// 		return
-	// 	}
-	// }
+	}
 }
