@@ -7,11 +7,6 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var (
-	Logger *zap.Logger
-	err    error
-)
-
 func InitLogger() (*zap.Logger, error) {
 	var config zap.Config
 
@@ -22,17 +17,13 @@ func InitLogger() (*zap.Logger, error) {
 		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 	}
 
-	Logger, err = config.Build()
+	logger, err := config.Build()
 
 	if err != nil {
 		return nil, err
 	}
 
-	defer Logger.Sync()
+	defer logger.Sync()
 
-	return Logger, nil
-}
-
-func GetLogger() *zap.Logger {
-	return Logger
+	return logger, nil
 }

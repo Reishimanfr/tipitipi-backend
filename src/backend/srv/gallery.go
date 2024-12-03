@@ -3,9 +3,7 @@ package srv
 import (
 	"bash06/strona-fundacja/src/backend/core"
 	"fmt"
-	"io"
 	"net/http"
-	"os"
 	"strconv"
 	"sync"
 
@@ -27,7 +25,7 @@ func (s *Server) GalleryGetGroupsBulk(c *gin.Context) {
 	if err := s.Db.Model(&core.GalleryGroup{}).Select("id", "name").Where("1 = 1").Find(&allGroups).Error; err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": errSqlQuery,
+			"message": "Something went wrong while processing your request",
 		})
 		return
 	}
@@ -46,19 +44,17 @@ func (s *Server) GalleryGetGroupOne(c *gin.Context) {
 	groupId, err := strconv.Atoi(c.Param("groupId"))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Group ID is not a valid integer",
-			"message": nil,
+			"error": "Group ID is not a valid integer",
 		})
 		return
 	}
 
-	var groupInfo *core.GalleryGroup
+	var group *core.GalleryGroup
 
-	if err := s.Db.Where("id = ?", groupId).Select("id", "name").First(&groupInfo).Error; err != nil {
+	if err := s.Db.Where("id = ?", groupId).Select("id", "name").First(&group).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-				"error":   "Group with this ID doesn't exist",
-				"message": nil,
+				"error": "Group with this ID doesn't exist",
 			})
 			return
 		}
@@ -70,35 +66,11 @@ func (s *Server) GalleryGetGroupOne(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, groupInfo)
+	c.JSON(http.StatusOK, group)
 }
 
 /*
-Returns info about all images in a specified group by it's ID. If the group contains no images this will return an empty array. If the group doesn't exist this will return 404
-
-Available query params:
-NAME       DEFAULT_VAL       DESCRIPTION
-limit      (3)               Sets the amount of returned images in one request
-offset     (0)               Offsets the returned images by X
-
-How offset works:
-* offset = 0
-[* * * * * *]
-^^^^^^^^^^^^^ (All images will be returned (until we hit the limit). Nothing will be omitted)
-
-* offset = 3
-[* * * * * *]
--------^^^^^^ (Images from this point on will be returned. The first 3 will be ignored)
-
-How limit works:
-* limit = 2 (and offset 0)
-[* * * * * *]
--^^^^^------- (Only these images will be returned. Everything else is omitted)
-
-* limit = 3 and offset = 5
-[* * * * * *]
------------^ (This image will be returned BUT because there are not enough images the array will be of len(1))
-
+Returns all images in a specified group by it's ID. If the group contains no images this will return an empty array. If the group doesn't exist this will return 404
 Example request urls:
 GET /gallery/groups/1/images
 GET /gallery/groups/123/images?limit=3&offset=3
@@ -107,19 +79,17 @@ func (s *Server) GalleryGetImagesOne(c *gin.Context) {
 	groupId, err := strconv.Atoi(c.Param("groupId"))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadGateway, gin.H{
-			"error":   "Group ID is not a valid integer",
-			"message": nil,
+			"error": "Group ID is not a valid integer",
 		})
 		return
 	}
 
-	var groupInfo *core.GalleryGroup
+	var group *core.GalleryGroup
 
-	if err := s.Db.Preload("Images").Where("id = ?", groupId).First(&groupInfo).Error; err != nil {
+	if err := s.Db.Preload("Images").Where("id = ?", groupId).First(&group).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
-				"error":   "Group with this ID doesn't exist",
-				"message": nil,
+				"error": "Group with this ID doesn't exist",
 			})
 			return
 		}
@@ -133,15 +103,14 @@ func (s *Server) GalleryGetImagesOne(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, groupInfo.Images)
+	c.JSON(http.StatusOK, group.Images)
 }
 
 func (s *Server) GalleryGetImagesBulk(c *gin.Context) {
 	offset, err := strconv.Atoi(c.DefaultQuery("offset", "0"))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Offset is not a valid integer",
-			"message": nil,
+			"error": "Offset is not a valid integer",
 		})
 		return
 	}
@@ -149,24 +118,21 @@ func (s *Server) GalleryGetImagesBulk(c *gin.Context) {
 	limit, err := strconv.Atoi(c.DefaultQuery("limit", "1"))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Limit is not a valid integer",
-			"message": nil,
+			"error": "Limit is not a valid integer",
 		})
 		return
 	}
 
 	if offset < 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Offset must be higher than 0",
-			"message": nil,
+			"error": "Offset must be higher than 0",
 		})
 		return
 	}
 
 	if limit < 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Limit must be higher than 0",
-			"message": nil,
+			"error": "Limit must be higher than 0",
 		})
 		return
 	}
@@ -202,8 +168,7 @@ func (s *Server) GalleryCreateOne(c *gin.Context) {
 
 	if name == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "No group name provided",
-			"message": nil,
+			"error": "No group name provided",
 		})
 		return
 	}
@@ -211,23 +176,19 @@ func (s *Server) GalleryCreateOne(c *gin.Context) {
 	if err := s.Db.Create(&core.GalleryGroup{Name: name}).Error; err != nil {
 		if err.Error() == "UNIQUE constraint failed: gallery_groups.name" {
 			c.AbortWithStatusJSON(http.StatusConflict, gin.H{
-				"error":   "Group with this name exists already",
-				"message": nil,
+				"error": "Group with this name exists already",
 			})
 			return
 		}
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": errSqlQuery,
+			"message": "Something went wrong while processing your request",
 		})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
-		"error":   nil,
-		"message": "Group created successfully",
-	})
+	c.Status(http.StatusCreated)
 }
 
 /*
@@ -268,12 +229,11 @@ func (s *Server) GalleryPostBulk(c *gin.Context) {
 	// Max 100MiB and 5 images per request
 	c.Request.Body = http.MaxBytesReader(c.Writer, c.Request.Body, 100<<20)
 
-	err = c.Request.ParseMultipartForm(8 << 20) // 8 MiB memory limit
+	err = c.Request.ParseMultipartForm(8 << 20)
 	if err != nil {
 		if err.Error() == "http: request body too large" {
 			c.AbortWithStatusJSON(http.StatusRequestEntityTooLarge, gin.H{
-				"error":   "Request body too large",
-				"message": nil,
+				"error": "Request body too large",
 			})
 			return
 		}
@@ -282,7 +242,7 @@ func (s *Server) GalleryPostBulk(c *gin.Context) {
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": errMultipartParse,
+			"message": "Something went wrong while processing your request",
 		})
 		return
 	}
@@ -292,16 +252,14 @@ func (s *Server) GalleryPostBulk(c *gin.Context) {
 
 	if len(files) == 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "No files provided",
-			"message": nil,
+			"error": "No files provided",
 		})
 		return
 	}
 
 	if len(files) > 5 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   "Too many files provided (max 5)",
-			"message": nil,
+			"error": "Too many files provided (max 5)",
 		})
 		return
 	}
@@ -311,42 +269,25 @@ func (s *Server) GalleryPostBulk(c *gin.Context) {
 	var wg sync.WaitGroup
 	errors := make(chan error, len(files))
 
-	for _, file := range files {
+	for _, f := range files {
 		wg.Add(1)
 
 		go func() {
 			defer wg.Done()
 
-			filename := core.RandomFilename(10)
-
-			f, err := file.Open()
+			r, err := s.DownloadFile(f)
 			if err != nil {
-				errors <- fmt.Errorf("error while opening multipart file %v: %v", file.Filename, err)
+				errors <- err
 				return
 			}
 
-			buffer, err := io.ReadAll(f)
-			if err != nil {
-				errors <- fmt.Errorf("error while reading file %v into memory: %v", file.Filename, err)
-				return
-			}
-
-			url, err := s.Ovh.AddObject(os.Getenv("AWS_GALLERY_BUCKET_NAME"), filename, buffer)
-			if err != nil {
-				errors <- fmt.Errorf("error while sending file %v to S3: %v", file.Filename, err)
-				return
-			}
-
-			if err := tx.Create(&core.GalleryRecord{
-				GroupID: groupId,
-				AltText: "", // TODO
-				Key:     filename,
-				URL:     *url,
+			if err := s.Db.Create(&core.GalleryRecord{
+				GroupID:  groupId,
+				Key:      r.Filename,
+				Mimetype: r.Mimetype,
+				Size:     r.Size,
 			}).Error; err != nil {
-				tx.Rollback()
-
-				errors <- fmt.Errorf("error while adding database record for file %v: %v", file.Filename, err)
-				return
+				errors <- fmt.Errorf("failed to create database record for %s: %v", f.Filename, err)
 			}
 		}()
 	}
@@ -358,7 +299,7 @@ func (s *Server) GalleryPostBulk(c *gin.Context) {
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":   err.Error(),
-				"message": errAwsUpload,
+				"message": "Some files failed to be downloaded",
 			})
 			return
 		}
@@ -372,10 +313,7 @@ func (s *Server) GalleryPostBulk(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"error":   nil,
-		"message": "Files uploaded to gallery group successfully!",
-	})
+	c.Status(http.StatusOK)
 }
 
 /*
@@ -419,9 +357,9 @@ func (s *Server) GalleryDeleteOne(c *gin.Context) {
 		return
 	}
 
-	var resolveImage *core.GalleryRecord
+	var image *core.GalleryRecord
 
-	err = s.Db.Where("group_id = ? AND id = ?", groupId, imageId).First(&resolveImage).Error
+	err = s.Db.Where("group_id = ? AND id = ?", groupId, imageId).First(&image).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
@@ -442,7 +380,7 @@ func (s *Server) GalleryDeleteOne(c *gin.Context) {
 
 	tx := s.Db.Begin()
 
-	if err := tx.Delete(&resolveImage).Error; err != nil {
+	if err := tx.Delete(&image).Error; err != nil {
 		tx.Rollback()
 
 		s.Log.Error("Failed to delete gallery image record", zap.Error(err))
@@ -464,21 +402,17 @@ func (s *Server) GalleryDeleteOne(c *gin.Context) {
 		return
 	}
 
-	err = s.Ovh.DeleteObjectsBulk(os.Getenv("AWS_GALLERY_BUCKET_NAME"), []string{resolveImage.Key})
-	if err != nil {
-		s.Log.Error("Deleting files from S3 failed", zap.Error(err))
+	if err := s.DeleteFile(image.Key); err != nil {
+		s.Log.Error("Failed to delete file from disk", zap.String("Filename", image.Key), zap.Error(err))
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": "Something went wrong while deleting images from S3",
+			"message": "Failed to delete file from disk",
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"error":   nil,
-		"message": "Image deleted successfully",
-	})
+	c.Status(http.StatusOK)
 }
 
 /*
@@ -519,14 +453,13 @@ func (s *Server) GalleryDeleteAll(c *gin.Context) {
 		return
 	}
 
-	// TODO: this should also delete images from S3
 	if err := tx.Where("group_id = ?", groupId).Delete(&core.GalleryRecord{}).Error; err != nil {
 		tx.Rollback()
-		s.Log.Error("Failed to remove children of gallery group", zap.Int("Gallery Group ID", groupId), zap.Error(err))
+		s.Log.Error("Failed to remove children of gallery group", zap.Int("GalleryGroupID", groupId), zap.Error(err))
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": "Something went wrong while deleting all related records",
+			"message": "Something went wrong while processing your request",
 		})
 		return
 	}
@@ -534,19 +467,16 @@ func (s *Server) GalleryDeleteAll(c *gin.Context) {
 	if err := tx.Commit().Error; err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": errSqlTransaction,
+			"message": "Something went wrong while processing your request",
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"error":   nil,
-		"message": "All images from group deleted successfully",
-	})
+	c.Status(http.StatusOK)
 }
 
 func (s *Server) GalleryDelete(c *gin.Context) {
-	groupId, err := strconv.Atoi(c.Param("groupId"))
+	id, err := strconv.Atoi(c.Param("groupId"))
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error":   "Group ID is not a valid integer",
@@ -555,7 +485,7 @@ func (s *Server) GalleryDelete(c *gin.Context) {
 		return
 	}
 
-	if groupId < 0 {
+	if id < 0 {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"error":   "Group ID must be at least 0",
 			"message": nil,
@@ -567,7 +497,7 @@ func (s *Server) GalleryDelete(c *gin.Context) {
 
 	tx := s.Db.Begin()
 
-	if err := tx.Where("id = ?", groupId).First(&resolveGroup).Error; err != nil {
+	if err := tx.Where("id = ?", id).First(&resolveGroup).Error; err != nil {
 		tx.Rollback()
 		if err == gorm.ErrRecordNotFound {
 			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
@@ -585,8 +515,6 @@ func (s *Server) GalleryDelete(c *gin.Context) {
 		})
 		return
 	}
-
-	imageKeys := make([]string, len(resolveGroup.Images))
 
 	if err := tx.Select(clause.Associations).Delete(&resolveGroup).Error; err != nil {
 		tx.Rollback()
@@ -609,23 +537,15 @@ func (s *Server) GalleryDelete(c *gin.Context) {
 		return
 	}
 
-	for _, image := range resolveGroup.Images {
-		imageKeys = append(imageKeys, image.Key)
-	}
-
-	if len(imageKeys) > 0 {
-		err = s.Ovh.DeleteObjectsBulk(os.Getenv("AWS_GALLERY_BUCKET_NAME"), imageKeys)
-		if err != nil {
+	for _, img := range resolveGroup.Images {
+		if err := s.DeleteFile(img.Key); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":   err.Error(),
-				"message": "Some files failed to be deleted from S3",
+				"message": "Failed to delete file from disk",
 			})
 			return
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Group deleted successfully",
-		"error":   nil,
-	})
+	c.Status(http.StatusOK)
 }

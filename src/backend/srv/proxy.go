@@ -1,13 +1,13 @@
 package srv
 
 import (
-	"io"
+	"bash06/strona-fundacja/src/backend/flags"
+	"bufio"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,10 +17,13 @@ const (
 	errFileReadFailure = "Error while reading file"
 )
 
-// Proxies S3 images to be used in html <img> tags
+type PartialFileInfo struct {
+	Size     int64
+	Mimetype string
+}
+
 func (s *Server) Proxy(c *gin.Context) {
 	key := c.Query("key")
-	bucket := c.DefaultQuery("bucket", "blog")
 
 	if key == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -30,46 +33,37 @@ func (s *Server) Proxy(c *gin.Context) {
 		return
 	}
 
-	switch bucket {
-	case "blog":
-		bucket = os.Getenv("AWS_BLOG_BUCKET_NAME")
-	case "gallery":
-		bucket = os.Getenv("AWS_GALLERY_BUCKET_NAME")
-	default:
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   errOptBucketInv,
-			"message": nil,
+	var file *PartialFileInfo
+
+	if err := s.Db.Model(&PartialFileInfo{}).Where("filename LIKE ?", "%"+key+"%").Select("size", "mimetype").First(&file).Error; err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error":   err.Error(),
+			"message": "Failed to find file",
 		})
 		return
 	}
 
-	obj, err := s.Ovh.S3.GetObject(&s3.GetObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(key),
-	})
+	filePath := filepath.Join(flags.BasePath, key)
 
+	srcFile, err := os.Open(filePath)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": "Failed to proxy file from S3",
+			"message": "Failed to open file",
 		})
 		return
 	}
 
-	defer obj.Body.Close()
+	defer srcFile.Close()
 
-	c.Header("Content-Type", *obj.ContentType)
-	c.Header("Content-Length", strconv.Itoa(int(*obj.ContentLength)))
+	reader := bufio.NewReader(srcFile)
+	buffer := make([]byte, 1024)
+
+	reader.Read(buffer)
+
+	c.Header("Content-Type", file.Mimetype)
+	c.Header("Content-Length", strconv.Itoa(int(file.Size)))
 	c.Header("Cache-Control", "max-age=3600")
 
-	body, err := io.ReadAll(obj.Body)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   errFileReadFailure,
-			"message": nil,
-		})
-		return
-	}
-
-	c.Data(http.StatusOK, *obj.ContentType, body)
+	c.Data(http.StatusOK, file.Mimetype, buffer)
 }
