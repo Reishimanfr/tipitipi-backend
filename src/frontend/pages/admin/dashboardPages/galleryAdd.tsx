@@ -7,7 +7,8 @@ import {
   getToken,
 } from "../../../functions/postManipulatingFunctions";
 
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 async function addNewGroup(name: string) {
@@ -21,7 +22,7 @@ async function addNewGroup(name: string) {
   }
   try {
     const response = await fetch(
-      `http://localhost:2333/gallery/groups/new/${name}`,
+      `http://localhost:8080/gallery/groups/new/${name}`,
       {
         method: "POST",
         headers: {
@@ -52,7 +53,7 @@ const GalleryAdd = () => {
   async function fetchGroups() {
     try {
       const response = await fetch(
-        `http://localhost:2333/gallery/groups/all/info`,
+        `http://localhost:8080/gallery/groups/all/info`,
         {
           method: "GET",
         }
@@ -84,7 +85,7 @@ const GalleryAdd = () => {
     const formData = buildGalleryMultipart(images);
     try {
       const response = await fetch(
-        `http://localhost:2333/gallery/groups/${selectedGroup.id}/images`,
+        `http://localhost:8080/gallery/groups/${selectedGroup.id}/images`,
         {
           method: "POST",
           headers: {

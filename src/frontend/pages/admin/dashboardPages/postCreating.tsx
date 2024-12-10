@@ -22,7 +22,7 @@ export default function PostCreating() {
     const token = getToken();
 
     try {
-      const response = await fetch("http://localhost:2333/blog/post/", {
+      const response = await fetch("http://localhost:8080/blog/post/", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

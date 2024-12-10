@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Footer from './components/footer'
 import Navbar from './components/navbar'
@@ -17,16 +16,20 @@ import PostPage from './pages/postPage'
 import Pricing from "./pages/pricing"
 import GalleryAdd from './pages/admin/dashboardPages/galleryAdd'
 import GalleryEdit from './pages/admin/dashboardPages/galleryEdit'
+import { Monitoring } from 'react-scan/dist/core/monitor/index'
+
+
+// import NewNavbar from './components/newNavbar'
 
 function App() {
   // const [mainpageFirstHeader,setMainpageFirstHeader] = useState("")
   // const changeMainpageFirstHeader = (newMessage : string) => {
   //   setMainpageFirstHeader(newMessage)
   // }
- 
 
   return (
     <div className="flex flex-col min-h-screen">
+      <Monitoring apiKey="AnqmUAZGoTDxYC7R9b3aZIGoEn8NoHS_" params={{}} path="/" url="https://monitoring.react-scan.com/api/v1/ingest"/>
       <BrowserRouter>
       <Navbar/>
       <div className='flex-grow'>

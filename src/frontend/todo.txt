@@ -1,0 +1,5 @@
+naprawic navbar raz a porzadnie
+obmyslic plan zeby bylo ladnie
+zaimplementowac ten endpoint do galeri
+dodac alerty
+optymalizowac

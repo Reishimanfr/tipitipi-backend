@@ -20,7 +20,7 @@ const Login = () => {
         formData.append("username",login)
         formData.append("password",password)
 
-        const response = await fetch("http://localhost:2333/admin/login", {
+        const response = await fetch("http://localhost:8080/admin/login", {
             method: "POST",
             body: JSON.stringify({
                 username: login,

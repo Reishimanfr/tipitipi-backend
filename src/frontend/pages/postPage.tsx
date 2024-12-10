@@ -14,7 +14,7 @@ const PostPage = () => {
     async function fetchPost() {
       try {
         const response = await fetch(
-          `http://localhost:2333/blog/post/${ID}?attachments=true`,
+          `http://localhost:8080/blog/post/${ID}?attachments=true`,
           {
             method: "GET",
           }

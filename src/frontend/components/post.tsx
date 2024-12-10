@@ -25,7 +25,7 @@ const Post = ({
       }
       content = content.replace(
         `{{${index}}}`,
-        `<img style="max-height:200px;" src="http://localhost:2333/proxy?key=${attachment.filename}" alt="${attachment.filename}"/>`
+        `<img style="max-height:200px;" src="http://localhost:8080/proxy?key=${attachment.filename}" alt="${attachment.filename}"/>`
       );
     });
   }

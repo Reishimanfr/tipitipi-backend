@@ -12,7 +12,7 @@ const Login = () => {
         const formData = new FormData()
         formData.append("username",login)
         formData.append("password",password)
-        const response = await fetch("http://localhost:2333/api/admin/login", {
+        const response = await fetch("http://localhost:8080/api/admin/login", {
             method: "POST",
             body: formData
         })

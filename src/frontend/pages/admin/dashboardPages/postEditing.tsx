@@ -15,7 +15,7 @@ async function fetchPosts(
   try {
     const response = await fetch(
       //TODO niewiem czy bezpieczne / sciagamy wszystkie post yistniejace ze zdjeciami itd // trza zrobic partiala
-      `http://localhost:2333/blog/posts?limit=999&attachments=true`,
+      `http://localhost:8080/blog/posts?limit=999&attachments=true`,
       {
         method: "GET",
       }
@@ -48,7 +48,7 @@ const PostEditing = () => {
     }
     try {
       const response = await fetch(
-        `http://localhost:2333/blog/post/${selectedPost.id}`,
+        `http://localhost:8080/blog/post/${selectedPost.id}`,
         {
           method: "DELETE",
           headers: {
@@ -92,7 +92,7 @@ const PostEditing = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:2333/blog/post/${selectedPost.id}`,
+        `http://localhost:8080/blog/post/${selectedPost.id}`,
         {
           method: "PATCH",
           headers: {
@@ -130,7 +130,7 @@ const PostEditing = () => {
         selectedPost.attachments.forEach((attachment, index) => {
           tempContent = tempContent.replace(
             `{{${index}}}`,
-            `<img style="max-height:200px;" src="http://localhost:2333/proxy?key=${attachment.filename}" alt="${attachment.filename}"/>`
+            `<img style="max-height:200px;" src="http://localhost:8080/proxy?key=${attachment.filename}" alt="${attachment.filename}"/>`
           );
         });
         setContent(tempContent);

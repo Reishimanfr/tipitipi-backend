@@ -15,7 +15,7 @@ async function deleteImages(id: number) {
 
   try {
     const response = await fetch(
-      `http://localhost:2333/gallery/groups/${id}/images`,
+      `http://localhost:8080/gallery/groups/${id}/images`,
       {
         method: "DELETE",
         headers: {
@@ -49,7 +49,7 @@ async function deleteImage(GroupID : number , imageID:number) {
   const token = getToken();
   try {
     const response = await fetch(
-      `http://localhost:2333/gallery/groups/${GroupID}/images/${imageID}`,
+      `http://localhost:8080/gallery/groups/${GroupID}/images/${imageID}`,
       {
         method: "DELETE",
         headers: {
@@ -77,7 +77,7 @@ async function deleteGroup(id: number) {
   const token = getToken();
 
   try {
-    const response = await fetch(`http://localhost:2333/gallery/groups/${id}`, {
+    const response = await fetch(`http://localhost:8080/gallery/groups/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -107,7 +107,7 @@ async function fetchGroups(
 ) {
   try {
     const response = await fetch(
-      `http://localhost:2333/gallery/groups/all/info`,
+      `http://localhost:8080/gallery/groups/all/info`,
       {
         method: "GET",
       }
@@ -135,7 +135,7 @@ const GalleryEdit = () => {
   async function getImagesFromOneGroup(id: number) {
     try {
       const response = await fetch(
-        `http://localhost:2333/gallery/groups/${id}/images`,
+        `http://localhost:8080/gallery/groups/${id}/images`,
         {
           method: "GET",
         }
@@ -210,7 +210,7 @@ const GalleryEdit = () => {
           {selectedGroupImages!.length > 0 ? (
             selectedGroupImages.map((image) => {
               return (
-                // <div key={image.id}><img src={`http://localhost:2333/proxy?key=${image.key}`} alt={`${image.alt_text}`}/></div>
+                // <div key={image.id}><img src={`http://localhost:8080/proxy?key=${image.key}`} alt={`${image.alt_text}`}/></div>
                 <div className="p-2 border w-1/2 m-2" key={image.id}>
                   {image.id}
                   <button

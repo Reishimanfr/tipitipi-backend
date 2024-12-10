@@ -5,6 +5,8 @@ import { useState, useEffect } from "react";
 import Post from "../components/post";
 import { BlogPostDataBodyJson } from "../functions/interfaces";
 import PostSkeleton from "../components/postSkeletonLoading";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 const Mainpage = () => {
   const [posts, setPosts] = useState<Array<BlogPostDataBodyJson>>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -13,15 +15,16 @@ const Mainpage = () => {
     async function fetchPost() {
       try {
         const response = await fetch(
-          `http://localhost:2333/blog/posts?limit=3&sort=newest`,
+          `http://localhost:8080/blog/posts?limit=3&sort=newest`,
           {
             method: "GET",
           }
         );
+        console.log(response)
         if (!response.ok) {
           throw new Error(response.statusText);
         }
-
+      
         const data: Array<BlogPostDataBodyJson> = await response.json();
         setPosts((prevPosts) => prevPosts?.concat(data));
       } catch (error) {
@@ -34,6 +37,10 @@ const Mainpage = () => {
       fetchPost();
     }
   }, []);
+
+  useEffect(() => {
+console.log(posts)
+  },[posts])
 
   if (loading) {
     return <div>Loading</div>;

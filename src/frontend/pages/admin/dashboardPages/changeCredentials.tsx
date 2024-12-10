@@ -29,7 +29,7 @@ async function updateCredentials() {
     const token = getToken()
 
     try{
-    const response = await fetch("http://localhost:2333/admin/account", {
+    const response = await fetch("http://localhost:8080/admin/account", {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`
