@@ -18,9 +18,6 @@ const Login = () => {
         })
       
         const data  = await response.json()       //TODO idk what data type is 
-        console.log(data)
-        console.log("a")
-        console.log(response)
 
         if(response.ok && data.token != undefined) {
             localStorage.setItem("token",data.token)

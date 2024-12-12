@@ -15,6 +15,7 @@ const Blog = () => {
   useEffect(() => {
     async function fetchPost() {
       try {
+        setLoading(true)
         const response = await fetch(
           `http://localhost:8080/blog/posts?offset=${offset}&limit=${limit}&sort=${sortBy}`,
           {
