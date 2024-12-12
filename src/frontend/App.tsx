@@ -1,6 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Footer from './components/footer'
-import Navbar from './components/navbar'
 import About from "./pages/about"
 import Admin from './pages/admin/admin'
 import Dashboard from './pages/admin/dashboard'
@@ -17,6 +16,8 @@ import Pricing from "./pages/pricing"
 import GalleryAdd from './pages/admin/dashboardPages/galleryAdd'
 import GalleryEdit from './pages/admin/dashboardPages/galleryEdit'
 import { Monitoring } from 'react-scan/dist/core/monitor/index'
+import MainNavbar from './components/mainNavbar'
+
 
 
 // import NewNavbar from './components/newNavbar'
@@ -31,7 +32,7 @@ function App() {
     <div className="flex flex-col min-h-screen">
       <Monitoring apiKey="AnqmUAZGoTDxYC7R9b3aZIGoEn8NoHS_" params={{}} path="/" url="https://monitoring.react-scan.com/api/v1/ingest"/>
       <BrowserRouter>
-      <Navbar/>
+      <MainNavbar/>
       <div className='flex-grow'>
       <Routes>
         {/* admin pages */}

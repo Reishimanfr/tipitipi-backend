@@ -5,7 +5,7 @@ const Gallery = () => {
   const limit = 6;
   const [offset, setOffset] = useState(0);
   const [loading, setLoading] = useState<boolean>(true);
-  const [groups, setGroups] = useState([]);
+  const [groups, setGroups] = useState([1,2,3]);
   const [isMore, setIsMore] = useState(true);
 
   useEffect(() => {
