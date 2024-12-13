@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import Topbar from "./topbar";
 import Sidebar from "./sidebar";
+import { Link } from "react-router-dom";
+import logoSmall from "../react.svg"
 
 const MainNavbar = () => {
   const [showDesktopNavbar, setShowDesktopNavbar] = useState(
@@ -36,8 +38,16 @@ const MainNavbar = () => {
 
    return (
     <div className={`sticky z-50 top-0 h-20 bg-black w-full transition-transform duration-300 transform ${show ? 'translate-y-0' : '-translate-y-full'}`}>
+         <Link to="/">
+        <img
+          src={logoSmall}
+          alt="logo"
+          className="w-auto h-16 float-left ml-[5%] mt-[1vh] hover:animate-spin"
+        ></img>
+        </Link>
         {showDesktopNavbar ? <Topbar/> : <Sidebar/>}
     </div>
    )
 };
 export default MainNavbar;
+

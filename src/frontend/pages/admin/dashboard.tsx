@@ -54,7 +54,7 @@ const Dashboard = () => {
         </div> */}
 
 
-            <div className="mt-[1%]">
+            <div className="m-8">
                 <Link to="/admin/dashboard/create-post"><button className={buttonCSS}>Dodawanie postów</button></Link><br></br>
                 <Link to="/admin/dashboard/edit-post"><button className={buttonCSS}>Edycja i usuwanie postów</button></Link><br></br>
                 <Link to="/admin/dashboard/gallery-add"><button className={buttonCSS}>Dodaj zdjęcia do galerii</button></Link> <br></br>

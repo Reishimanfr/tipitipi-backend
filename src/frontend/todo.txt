@@ -1,5 +1,3 @@
-naprawic navbar raz a porzadnie
-obmyslic plan zeby bylo ladnie
-zaimplementowac ten endpoint do galeri
+zaimplementowac ten endpoint do galeri chuj wie
 dodac alerty
 optymalizowac

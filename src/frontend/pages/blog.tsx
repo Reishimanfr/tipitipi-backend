@@ -15,7 +15,6 @@ const Blog = () => {
   useEffect(() => {
     async function fetchPost() {
       try {
-        setLoading(true)
         const response = await fetch(
           `http://localhost:8080/blog/posts?offset=${offset}&limit=${limit}&sort=${sortBy}`,
           {
@@ -94,7 +93,7 @@ const Blog = () => {
       {posts ? (
         posts.map((post, index) => {
           return (
-            <div key={index} className="mt-[3%]">
+            <div key={index} className="mt-12">
               <Post
                 id={post.id}
                 content={post.content}

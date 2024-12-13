@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import logoSmall from "../react.svg";
 import x from "../assets/x.svg";
 import list from "../assets/list.svg";
 import { useEffect, useState } from "react";
@@ -9,36 +8,31 @@ const Sidebar = () => {
     "mt-6 clear-right float-right no-underline text-white text-xl mr-2.5 bg-black-700 font-sans hover:duration-500 hover:bg-gray-300 hover:text-black" as const;
   const [menuVisible, setMenuVisible] = useState(false);
   const [show, setShow] = useState(false);
-  const handleResize = () => {
-    setMenuVisible(false);
-  };
+  // const handleResize = () => {
+  //   setMenuVisible(false);
+  // };
+
   useEffect(() => {
     if (menuVisible == false) {
       setTimeout(() => {
+        document.body.style.overflow = "auto";
         setShow(false);
       }, 500);
     } else {
       setShow(true);
+      document.body.style.overflow = "hidden";
     }
   }, [menuVisible]);
 
   useEffect(() => {
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", () => setMenuVisible(false));
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("resize", () => setMenuVisible(false));
     };
   });
-
+  useEffect(() => {}, [menuVisible]);
   return (
     <div>
-      <Link to="/">
-        <img
-          src={logoSmall}
-          alt="logo"
-          className="w-auto h-16 float-left ml-[5%] mt-[1vh] hover:animate-spin"
-        ></img>
-      </Link>
-
       {/* //burger menu or x  */}
       <div className="float-right mt-4 mr-14">
         {menuVisible ? (
@@ -53,14 +47,14 @@ const Sidebar = () => {
       </div>
 
       <div
-        className={`float-right fixed right-0 top-20 ${
+        className={`float-right absolute right-0 top-20 ${
           menuVisible
             ? "animate-slide-in animate-duration-[350ms] animate-ease-out"
             : "animate-slide-out animate-duration-[350ms] animate-ease-out"
         }`}
       >
         <div
-          className={`w-fit p-5 float-right bg-black h-screen opacity-80 ${
+          className={`w-fit p-5 float-right h-screen bg-black opacity-80 ${
             show ? "" : "hidden"
           }`}
         >

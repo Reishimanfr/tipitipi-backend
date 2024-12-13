@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-//import axios from "axios"
 
 interface LoginResponse {
     token?: string
@@ -43,7 +42,7 @@ const Login = () => {
     }
 
     return(
-        <div className="m-auto mt-[20vh] border-2 border-gray-800  text-center w-[25%] rounded-lg">
+        <div className="m-auto mt-[20vh] p-4 border-2 border-gray-800  text-center w-[30%] min-w-60 rounded-lg">
             <form>
                 <div className="p-[5%]">
                     <label className="text-xl font-semibold" htmlFor="login">Podaj login: </label>
