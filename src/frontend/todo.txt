@@ -1,0 +1,3 @@
+zaimplementowac ten endpoint do galeri chuj wie
+dodac alerty // galeria nie ma bo endpointown ie moge testowac
+optymalizowac

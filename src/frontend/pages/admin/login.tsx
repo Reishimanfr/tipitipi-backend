@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-//import axios from "axios"
+import { toast } from "react-toastify"
 
 interface LoginResponse {
     token?: string
@@ -19,31 +19,37 @@ const Login = () => {
         const formData = new FormData()
         formData.append("username",login)
         formData.append("password",password)
-
-        const response = await fetch("http://localhost:2333/admin/login", {
-            method: "POST",
-            body: JSON.stringify({
-                username: login,
-                password: password
-            }) 
-
-            
-        })
-      
-        const data : LoginResponse  = await response.json()   
-
-        if(response.status === 200 && data.token != undefined) {
-            localStorage.setItem("token",data.token)
-            navigate("/admin/dashboard")
+        try{
+            const response = await fetch("http://localhost:8080/admin/login", {
+                method: "POST",
+                body: JSON.stringify({
+                    username: login,
+                    password: password
+                }) 
+    
+                
+            })
+          
+            const data : LoginResponse  = await response.json()   
+    
+            if(response.status === 200 && data.token != undefined) {
+                localStorage.setItem("token",data.token)
+                navigate("/admin/dashboard")
+            }
+            else{
+                throw new Error(data.error)
+            }
         }
-        else{
+        catch(error){
             localStorage.setItem("token", "bad")
-            alert("something went wrong: " +  data.error)
+            toast.error("something went wrong: " +  error)
         }
+
+   
     }
 
     return(
-        <div className="m-auto mt-[20vh] border-2 border-gray-800  text-center w-[25%] rounded-lg">
+        <div className="m-auto mt-[20vh] p-4 border-2 border-gray-800  text-center w-[30%] min-w-60 rounded-lg">
             <form>
                 <div className="p-[5%]">
                     <label className="text-xl font-semibold" htmlFor="login">Podaj login: </label>

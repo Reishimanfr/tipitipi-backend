@@ -16,7 +16,7 @@ const Blog = () => {
     async function fetchPost() {
       try {
         const response = await fetch(
-          `http://localhost:2333/blog/posts?offset=${offset}&limit=${limit}&sort=${sortBy}`,
+          `http://localhost:8080/blog/posts?offset=${offset}&limit=${limit}&sort=${sortBy}`,
           {
             method: "GET",
           }
@@ -24,6 +24,7 @@ const Blog = () => {
         if (!response.ok) {
           throw new Error(response.statusText);
         }
+  
 
         const data: Array<BlogPostDataBodyJson> = await response.json();
         setPosts((prevPosts) => prevPosts?.concat(data));
@@ -62,7 +63,7 @@ const Blog = () => {
     };
   });
 
-  if (loading) {
+  if (loading || posts.length == 0) {
     return (
       <div className="globalCss">
         <h1 className="text-3xl mt-5">Blog</h1>
@@ -92,7 +93,7 @@ const Blog = () => {
       {posts ? (
         posts.map((post, index) => {
           return (
-            <div key={index} className="mt-[3%]">
+            <div key={index} className="mt-12">
               <Post
                 id={post.id}
                 content={post.content}

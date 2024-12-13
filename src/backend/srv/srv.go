@@ -54,12 +54,13 @@ func New(c *ServerConfig) (*Server, error) {
 	s := &Server{
 		Log: log,
 		Db:  db,
-		Router: gin.New(func(e *gin.Engine) {
-			e.Use(middleware.RateLimiterMiddleware(middleware.NewRateLimiter(5, 10)))
-			e.Use(cors.New(*c.CorsConfig))
-		}),
+		Router: gin.Default(),
+		
 		Argon: core.NewArgon2idHash(1, 32, 64*1024, 32, 256),
 	}
+
+	s.Router.Use(middleware.RateLimiterMiddleware(middleware.NewRateLimiter(5, 10)))
+	s.Router.Use(cors.New(*c.CorsConfig))
 
 	c.HttpConfig.Addr = ":" + c.Port
 	c.HttpConfig.Handler = s.Router

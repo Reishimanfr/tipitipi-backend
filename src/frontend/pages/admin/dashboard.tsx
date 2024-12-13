@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import validateToken from "../../functions/validate"
 import Unauthorized from "../errorPages/unauthorized"
+import { toast } from "react-toastify"
 
 const buttonCSS = "border p-3 ml-[1%] mb-8 border-gray-900 hover:bg-gray-900 hover:text-white hover:duration-300 rounded-md"
 
@@ -14,7 +15,7 @@ const Dashboard = () => {
     
     const Logout = () => {
         if(window.confirm("Czy napewno chcesz się wylogować?")) {
-            alert("Wylogowano");
+            toast.success("Wylogowano");
             localStorage.removeItem("token")
             navigate('/admin/login')
         }
@@ -54,7 +55,7 @@ const Dashboard = () => {
         </div> */}
 
 
-            <div className="mt-[1%]">
+            <div className="m-8">
                 <Link to="/admin/dashboard/create-post"><button className={buttonCSS}>Dodawanie postów</button></Link><br></br>
                 <Link to="/admin/dashboard/edit-post"><button className={buttonCSS}>Edycja i usuwanie postów</button></Link><br></br>
                 <Link to="/admin/dashboard/gallery-add"><button className={buttonCSS}>Dodaj zdjęcia do galerii</button></Link> <br></br>

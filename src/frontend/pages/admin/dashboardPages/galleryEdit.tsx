@@ -3,6 +3,7 @@ import validateToken from "../../../functions/validate";
 import Unauthorized from "../../errorPages/unauthorized";
 import { GalleryGroup, GalleryImage } from "../../../functions/interfaces";
 import { getToken } from "../../../functions/postManipulatingFunctions";
+import { toast } from "react-toastify";
 
 const RED_BUTTON_CSS =
   "border w-40 text-white shadow-lg bg-red-500 hover:bg-red-600 hover:duration-300";
@@ -15,7 +16,7 @@ async function deleteImages(id: number) {
 
   try {
     const response = await fetch(
-      `http://localhost:2333/gallery/groups/${id}/images`,
+      `http://localhost:8080/gallery/groups/${id}/images`,
       {
         method: "DELETE",
         headers: {
@@ -25,19 +26,15 @@ async function deleteImages(id: number) {
     );
 
     if (response.status >= 200 && response.status < 300) {
-      alert("Usunięto zdjęcia");
+      toast.success("Usunięto zdjęcia");
       window.location.reload();
     }
-    // else {
-    //   const data: GalleryCreateNewJson = await response.json();
-    //   alert("Błąd: " + data.error);
-    // }
     if (!response.ok) {
       throw new Error(response.statusText);
     }
   } catch (error) {
     console.error(error);
-    alert("Wystąpił błąd: " + error);
+    toast.error("Wystąpił błąd: " + error);
   }
 }
 
@@ -49,7 +46,7 @@ async function deleteImage(GroupID : number , imageID:number) {
   const token = getToken();
   try {
     const response = await fetch(
-      `http://localhost:2333/gallery/groups/${GroupID}/images/${imageID}`,
+      `http://localhost:8080/gallery/groups/${GroupID}/images/${imageID}`,
       {
         method: "DELETE",
         headers: {
@@ -62,7 +59,7 @@ async function deleteImage(GroupID : number , imageID:number) {
     }
 
     if (response.status >= 200 && response.status < 300) {
-      alert("Usunięto zdjęcie");
+      toast.success("Usunięto zdjęcie");
       window.location.reload();
     }
   } catch (error) {
@@ -77,7 +74,7 @@ async function deleteGroup(id: number) {
   const token = getToken();
 
   try {
-    const response = await fetch(`http://localhost:2333/gallery/groups/${id}`, {
+    const response = await fetch(`http://localhost:8080/gallery/groups/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -85,20 +82,15 @@ async function deleteGroup(id: number) {
     });
 
     if (response.status >= 200 && response.status < 300) {
-      alert("Usunięto album");
+      toast.success("Usunięto album");
       window.location.reload();
     }
-    // else {
-
-    //  const data: GalleryCreateNewJson = await response.json();
-    //   alert("Błąd: " + data.error);
-    // }
     if (!response.ok) {
       throw new Error(response.statusText);
     }
   } catch (error) {
     console.error(error);
-    alert("Wystąpił błąd: " + error);
+    toast.error("Wystąpił błąd: " + error);
   }
 }
 
@@ -107,7 +99,7 @@ async function fetchGroups(
 ) {
   try {
     const response = await fetch(
-      `http://localhost:2333/gallery/groups/all/info`,
+      `http://localhost:8080/gallery/groups/all/info`,
       {
         method: "GET",
       }
@@ -135,7 +127,7 @@ const GalleryEdit = () => {
   async function getImagesFromOneGroup(id: number) {
     try {
       const response = await fetch(
-        `http://localhost:2333/gallery/groups/${id}/images`,
+        `http://localhost:8080/gallery/groups/${id}/images`,
         {
           method: "GET",
         }
@@ -210,7 +202,7 @@ const GalleryEdit = () => {
           {selectedGroupImages!.length > 0 ? (
             selectedGroupImages.map((image) => {
               return (
-                // <div key={image.id}><img src={`http://localhost:2333/proxy?key=${image.key}`} alt={`${image.alt_text}`}/></div>
+                // <div key={image.id}><img src={`http://localhost:8080/proxy?key=${image.key}`} alt={`${image.alt_text}`}/></div>
                 <div className="p-2 border w-1/2 m-2" key={image.id}>
                   {image.id}
                   <button

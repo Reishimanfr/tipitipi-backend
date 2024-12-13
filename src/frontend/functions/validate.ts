@@ -5,7 +5,7 @@ export default async function validateToken(setLoading : React.Dispatch<React.Se
       console.debug("Token is invalid");
       return false;
     }
-    const response = await fetch("http://localhost:2333/admin/validate", {
+    const response = await fetch("http://localhost:8080/admin/validate", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
     });

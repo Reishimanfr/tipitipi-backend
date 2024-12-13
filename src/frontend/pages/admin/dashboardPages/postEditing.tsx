@@ -8,6 +8,7 @@ import {
 } from "../../../functions/postManipulatingFunctions";
 import QuillBody from "../../../components/quillBody";
 import { BlogPostDataBodyJson } from "../../../functions/interfaces";
+import { toast } from "react-toastify";
 
 async function fetchPosts(
   setPosts: React.Dispatch<React.SetStateAction<BlogPostDataBodyJson[]>>
@@ -15,7 +16,7 @@ async function fetchPosts(
   try {
     const response = await fetch(
       //TODO niewiem czy bezpieczne / sciagamy wszystkie post yistniejace ze zdjeciami itd // trza zrobic partiala
-      `http://localhost:2333/blog/posts?limit=999&attachments=true`,
+      `http://localhost:8080/blog/posts?limit=999&attachments=true`,
       {
         method: "GET",
       }
@@ -40,7 +41,7 @@ const PostEditing = () => {
   async function deletePost() {
     const token = getToken();
     if (!selectedPost) {
-      alert("Nie znaleziono posta");
+      toast.error("Nie znaleziono posta");
       return;
     }
     if (!window.confirm("Czy jesteś pewien że chcesz usunąć ten post?")) {
@@ -48,7 +49,7 @@ const PostEditing = () => {
     }
     try {
       const response = await fetch(
-        `http://localhost:2333/blog/post/${selectedPost.id}`,
+        `http://localhost:8080/blog/post/${selectedPost.id}`,
         {
           method: "DELETE",
           headers: {
@@ -60,17 +61,18 @@ const PostEditing = () => {
       if (response.status >= 200 && response.status < 300) {
         alert("Usunięto post");
         window.location.reload();
-      } 
-      // else {
-      //   const data: BlogPostDataBodyJson = await response.json();
-      //   alert("Błąd: " + data.error);
-      // }
-      else{
+        // toast.success("Usunięto post");
+        // setSelectedPost(undefined);
+        // let select = document.getElementById("posts") as HTMLSelectElement;
+        // if (select) {
+        //   select.selectedIndex = 0;
+        // }
+      } else {
         throw new Error(response.statusText);
       }
     } catch (error) {
       console.error(error);
-      alert("Wystąpił błąd: " + error);
+      toast.error("Wystąpił błąd: " + error);
     }
   }
 
@@ -81,18 +83,18 @@ const PostEditing = () => {
 
     const token = getToken();
     if (!selectedPost) {
-      alert("Nie znaleziono posta");
+      toast.error("Nie znaleziono posta");
       return;
     }
     if (title == selectedPost.title && content == selectedPost.content) {
-      alert("Nie dokonano żadnych zmian");
+      toast.warn("Nie dokonano żadnych zmian");
       return;
     }
     const formData = buildPostMultipart(title, content);
 
     try {
       const response = await fetch(
-        `http://localhost:2333/blog/post/${selectedPost.id}`,
+        `http://localhost:8080/blog/post/${selectedPost.id}`,
         {
           method: "PATCH",
           headers: {
@@ -103,19 +105,20 @@ const PostEditing = () => {
       );
 
       if (response.status >= 200 && response.status < 300) {
-        alert("Edytowano post");
-        window.location.reload();
-      } 
-      // else {
-      //   const data: BlogPostDataBodyJson = await response.json();
-      //   alert("Błąd: " + data.error);
-      // }
-      else {
+        // alert("Edytowano post");
+        // window.location.reload();
+        toast.success("Edytowano post");
+        setSelectedPost(undefined);
+        let select = document.getElementById("posts") as HTMLSelectElement;
+        if (select) {
+          select.selectedIndex = 0;
+        }
+      } else {
         throw new Error(response.statusText);
       }
     } catch (error) {
       console.error(error);
-      alert("Wystąpił błąd: " + error);
+      toast.error("Wystąpił błąd: " + error);
     }
   }
 
@@ -130,7 +133,7 @@ const PostEditing = () => {
         selectedPost.attachments.forEach((attachment, index) => {
           tempContent = tempContent.replace(
             `{{${index}}}`,
-            `<img style="max-height:200px;" src="http://localhost:2333/proxy?key=${attachment.filename}" alt="${attachment.filename}"/>`
+            `<img style="max-height:200px;" src="http://localhost:8080/proxy?key=${attachment.filename}" alt="${attachment.filename}"/>`
           );
         });
         setContent(tempContent);
@@ -171,6 +174,7 @@ const PostEditing = () => {
         <label className="text-xl">Proszę wybrać post</label>
         <br></br>
         <select
+          id="posts"
           name="posts"
           onChange={(e) => setSelectedPost(posts[parseInt(e.target.value)])}
         >

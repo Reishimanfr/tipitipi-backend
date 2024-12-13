@@ -1,7 +1,5 @@
-import { useState } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import Footer from './components/footer'
-import Navbar from './components/navbar'
 import About from "./pages/about"
 import Admin from './pages/admin/admin'
 import Dashboard from './pages/admin/dashboard'
@@ -17,18 +15,35 @@ import PostPage from './pages/postPage'
 import Pricing from "./pages/pricing"
 import GalleryAdd from './pages/admin/dashboardPages/galleryAdd'
 import GalleryEdit from './pages/admin/dashboardPages/galleryEdit'
+import { Monitoring } from 'react-scan/dist/core/monitor/index'
+import MainNavbar from './components/mainNavbar'
+import { ToastContainer } from 'react-toastify'
+
+
+
+// import NewNavbar from './components/newNavbar'
 
 function App() {
   // const [mainpageFirstHeader,setMainpageFirstHeader] = useState("")
   // const changeMainpageFirstHeader = (newMessage : string) => {
   //   setMainpageFirstHeader(newMessage)
   // }
- 
 
   return (
     <div className="flex flex-col min-h-screen">
+      <Monitoring apiKey="AnqmUAZGoTDxYC7R9b3aZIGoEn8NoHS_" params={{}} path="/" url="https://monitoring.react-scan.com/api/v1/ingest"/>
+      <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"/>
       <BrowserRouter>
-      <Navbar/>
+      <MainNavbar/>
       <div className='flex-grow'>
       <Routes>
         {/* admin pages */}
