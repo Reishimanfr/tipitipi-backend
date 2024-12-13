@@ -7,6 +7,7 @@ import {
   getToken,
 } from "../../../functions/postManipulatingFunctions";
 import QuillBody from "../../../components/quillBody";
+import { toast } from "react-toastify";
 
 export default function PostCreating() {
   const [title, setTitle] = useState("Tytuł posta");
@@ -31,19 +32,15 @@ export default function PostCreating() {
       });
 
       if (response.status >= 200 && response.status < 300) {
-        alert("Opublikowano post");
-        window.location.reload();
-      } 
-      // else {
-      //   const data: BlogPostDataBodyJson = await response.json();
-      //   alert("Błąd: " + data.error);
-      // }
-      else {
+        toast.success("Opublikowano post");
+        setTitle("Tytuł posta")
+        setContent("Treść posta")
+      } else {
         throw new Error(response.statusText);
       }
     } catch (error) {
       console.error(error);
-      alert("Wystąpił błąd: " + error);
+      toast.error("Wystąpił błąd: " + error);
     }
   }
 

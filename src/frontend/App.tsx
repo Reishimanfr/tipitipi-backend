@@ -17,6 +17,7 @@ import GalleryAdd from './pages/admin/dashboardPages/galleryAdd'
 import GalleryEdit from './pages/admin/dashboardPages/galleryEdit'
 import { Monitoring } from 'react-scan/dist/core/monitor/index'
 import MainNavbar from './components/mainNavbar'
+import { ToastContainer } from 'react-toastify'
 
 
 
@@ -31,6 +32,16 @@ function App() {
   return (
     <div className="flex flex-col min-h-screen">
       <Monitoring apiKey="AnqmUAZGoTDxYC7R9b3aZIGoEn8NoHS_" params={{}} path="/" url="https://monitoring.react-scan.com/api/v1/ingest"/>
+      <ToastContainer
+        position="top-center"
+        autoClose={5000}
+        hideProgressBar={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"/>
       <BrowserRouter>
       <MainNavbar/>
       <div className='flex-grow'>

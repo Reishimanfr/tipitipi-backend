@@ -3,14 +3,15 @@ import validateToken from "../../../functions/validate";
 import Unauthorized from "../../errorPages/unauthorized";
 import { getToken } from "../../../functions/postManipulatingFunctions";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const validateAdminForm = (login : string , password : string) : boolean => {
   if (login == "" || password =="") {
-    alert("Nie podano nowego loginu lub hasła")
+    toast.warn("Nie podano nowego loginu lub hasła")
     return false;
   }
   if(password.length < 8) {
-    alert("Twoje hasło powinno mieć conajmniej 8 znaków")
+    toast.warn("Twoje hasło powinno mieć conajmniej 8 znaków")
     return false;
   }
   return window.confirm("Czy jesteś pewien że chcesz edytować dane profilu?")
@@ -41,21 +42,16 @@ async function updateCredentials() {
     });
 
     if (response.status >= 200 && response.status < 300) {
-      alert("Zaktualizowano");
+      toast.success("Zaktualizowano");
       localStorage.setItem("token",'')
       navigate('/admin/login')
     }
-    //  else {
-    //   //TODO nie wiem co zwraca /admin/account , ponizej linijka skopiowana z post creating
-    //   // const data: BlogPostDataBodyJson = await response.json();
-    //   alert("Błąd: ");
-    // }
     if (!response.ok) {
       throw new Error(response.statusText);
     }
   } catch (error){
     console.error(error)
-    alert("Wystąpił błąd: " + error)
+    toast.error("Wystąpił błąd: " + error)
   }
   }
 

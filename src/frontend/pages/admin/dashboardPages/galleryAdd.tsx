@@ -7,14 +7,14 @@ import {
   getToken,
 } from "../../../functions/postManipulatingFunctions";
 
-import { ToastContainer, toast } from 'react-toastify';
+import {toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 
-async function addNewGroup(name: string) {
+async function addNewGroup(name: string , setNewGroupName: React.Dispatch<React.SetStateAction<string>>) {
   const token = getToken();
   if (name == "") {
-    alert("Nie podano nazwy nowego albumu");
+    toast.warn("Nie podano nazwy nowego albumu");
     return;
   }
   if (!window.confirm("Czy napewno chcesz dodać nowy album?")) {
@@ -32,15 +32,15 @@ async function addNewGroup(name: string) {
     );
 
     if (response.status >= 200 && response.status < 300) {
-      alert("Dodano grupę");
-      window.location.reload();
+      toast.success("Dodano grupę");
+      setNewGroupName("")
     } 
     else{
       throw new Error(response.statusText);
     }
   } catch (error) {
     console.error(error);
-    alert("Wystąpił błąd: " + error);
+    toast.error("Wystąpił błąd: " + error);
   }
 }
 
@@ -71,11 +71,11 @@ const GalleryAdd = () => {
 
   async function addImages() {
     if (selectedGroup == null) {
-      alert("Nie wybrano do którego albumu docelowego");
+      toast.warn("Nie wybrano do którego albumu docelowego");
       return;
     }
     if (images?.length == null) {
-      alert("Nie wybrano zdjęć");
+      toast.warn("Nie wybrano zdjęć");
       return;
     }
     if (!window.confirm("Czy napewno chcesz dodać zdjęcia?")) {
@@ -96,14 +96,15 @@ const GalleryAdd = () => {
       );
 
       if (response.status >= 200 && response.status < 300) {
-        alert("Dodano zdjęcia");
-        window.location.reload();
+        toast.success("Dodano zdjęcia");
+
       } else{
         throw new Error(response.statusText);
       }
     } catch (error) {
       console.error(error);
-      alert("Wystąpił błąd: " + error);
+      
+      toast.error("Wystąpił błąd: " + error);
     }
   }
 
@@ -147,7 +148,7 @@ const GalleryAdd = () => {
           className={
             "border w-40 shadow-lg hover:bg-slate-100 hover:duration-300 mt-6"
           }
-          onClick={() => addNewGroup(newGroupName)}
+          onClick={() => addNewGroup(newGroupName,setNewGroupName)}
         >
           Stwórz nowy album
         </button>

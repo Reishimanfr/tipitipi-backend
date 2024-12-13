@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import Post from "../components/post";
 import { BlogPostDataBodyJson } from "../functions/interfaces";
 import PostSkeleton from "../components/postSkeletonLoading";
-import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 const Mainpage = () => {
   const [posts, setPosts] = useState<Array<BlogPostDataBodyJson>>([]);

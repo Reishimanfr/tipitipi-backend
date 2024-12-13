@@ -3,6 +3,7 @@ import validateToken from "../../../functions/validate";
 import Unauthorized from "../../errorPages/unauthorized";
 import { GalleryGroup, GalleryImage } from "../../../functions/interfaces";
 import { getToken } from "../../../functions/postManipulatingFunctions";
+import { toast } from "react-toastify";
 
 const RED_BUTTON_CSS =
   "border w-40 text-white shadow-lg bg-red-500 hover:bg-red-600 hover:duration-300";
@@ -25,19 +26,15 @@ async function deleteImages(id: number) {
     );
 
     if (response.status >= 200 && response.status < 300) {
-      alert("Usunięto zdjęcia");
+      toast.success("Usunięto zdjęcia");
       window.location.reload();
     }
-    // else {
-    //   const data: GalleryCreateNewJson = await response.json();
-    //   alert("Błąd: " + data.error);
-    // }
     if (!response.ok) {
       throw new Error(response.statusText);
     }
   } catch (error) {
     console.error(error);
-    alert("Wystąpił błąd: " + error);
+    toast.error("Wystąpił błąd: " + error);
   }
 }
 
@@ -62,7 +59,7 @@ async function deleteImage(GroupID : number , imageID:number) {
     }
 
     if (response.status >= 200 && response.status < 300) {
-      alert("Usunięto zdjęcie");
+      toast.success("Usunięto zdjęcie");
       window.location.reload();
     }
   } catch (error) {
@@ -85,20 +82,15 @@ async function deleteGroup(id: number) {
     });
 
     if (response.status >= 200 && response.status < 300) {
-      alert("Usunięto album");
+      toast.success("Usunięto album");
       window.location.reload();
     }
-    // else {
-
-    //  const data: GalleryCreateNewJson = await response.json();
-    //   alert("Błąd: " + data.error);
-    // }
     if (!response.ok) {
       throw new Error(response.statusText);
     }
   } catch (error) {
     console.error(error);
-    alert("Wystąpił błąd: " + error);
+    toast.error("Wystąpił błąd: " + error);
   }
 }
 
