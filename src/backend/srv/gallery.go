@@ -106,6 +106,20 @@ func (s *Server) GalleryGetImagesOne(c *gin.Context) {
 	c.JSON(http.StatusOK, group.Images)
 }
 
+func (s *Server) GetEverything(c *gin.Context) {
+	var everything []*core.GalleryGroup
+
+	if err := s.Db.Preload("Images").Where("1 = 1").Find(&everything).Error; err != nil {
+		s.Log.Error("Failed to get every image entry from the database", zap.Error(err))
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"error": "Something went wrong while processing your request",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, everything)
+}
+
 func (s *Server) GalleryGetImagesBulk(c *gin.Context) {
 	offset, err := strconv.Atoi(c.DefaultQuery("offset", "0"))
 	if err != nil {

@@ -52,10 +52,10 @@ func New(c *ServerConfig) (*Server, error) {
 	}
 
 	s := &Server{
-		Log: log,
-		Db:  db,
+		Log:    log,
+		Db:     db,
 		Router: gin.Default(),
-		
+
 		Argon: core.NewArgon2idHash(1, 32, 64*1024, 32, 256),
 	}
 
