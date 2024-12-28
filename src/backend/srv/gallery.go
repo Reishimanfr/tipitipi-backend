@@ -555,7 +555,7 @@ func (s *Server) GalleryDelete(c *gin.Context) {
 		if err := s.DeleteFile(img.Key); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":   err.Error(),
-				"message": "Failed to delete file from disk",
+				"message": "Failed to delete file from disk ",
 			})
 			return
 		}
