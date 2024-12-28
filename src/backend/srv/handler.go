@@ -10,6 +10,9 @@ func (s *Server) InitHandler() {
 		public.GET("/blog/posts", s.BlogGetBulk)
 		public.GET("/proxy", s.Proxy)
 
+		// Get EVERYTHING that's available out there (who gives a fuck?)
+		public.GET("/gallery/everything", s.GetEverything)
+
 		// Get info on all available gallery groups (like how many images they have)
 		public.GET("/gallery/groups/all/info", s.GalleryGetGroupsBulk)
 
@@ -33,27 +36,23 @@ func (s *Server) InitHandler() {
 			blog.PATCH("/:id", s.BlogEditOne)
 		}
 
-		// gallery := protected.Group("/gallery")
+		gallery := protected.Group("/gallery")
 		{
 			// Initializes a new gallery group
 			// TESTING NEEDED
-			// gallery.POST("/groups/new/:name", s.GalleryCreateOne)
+			gallery.POST("/groups/new/:name", s.GalleryCreateOne)
 
 			// // Post an image to a specified group
-			// // TESTING NEEDED
-			// gallery.POST("/groups/:groupId/images", s.GalleryPostBulk)
+			gallery.POST("/groups/:groupId/images", s.GalleryPostBulk)
 
 			// // Delete an image from a specified group
-			// // TESTING NEEDED
-			// gallery.DELETE("/groups/:groupId/images/:imageId", s.GalleryDeleteOne)
+			gallery.DELETE("/groups/:groupId/images/:imageId", s.GalleryDeleteOne)
 
-			// // Delete all images from a group (without deleting the group)
-			// // TESTING NEEDED
-			// gallery.DELETE("/groups/:groupId/images", s.GalleryDeleteAll)
+			// Delete all images from a group (without deleting the group)
+			gallery.DELETE("/groups/:groupId/images", s.GalleryDeleteAll)
 
-			// // Delete an entire gallery group
-			// // TESTING NEEDED
-			// gallery.DELETE("/groups/:groupId/", s.GalleryDelete)
+			// Delete an entire gallery group
+			gallery.DELETE("/groups/:groupId/", s.GalleryDelete)
 		}
 
 		admin := protected.Group("/admin")
