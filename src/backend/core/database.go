@@ -10,7 +10,7 @@ import (
 
 type GalleryRecord struct {
 	ID       int    `gorm:"primaryKey;autoIncrement" json:"id"`
-	Key      string `json:"key"`
+	Filename string `json:"filename"`
 	GroupID  int    `gorm:"index" json:"-"`
 	Mimetype string `json:"-"`
 	Size     int64  `json:"-"`
