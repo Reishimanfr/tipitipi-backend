@@ -1,18 +1,20 @@
 package srv
 
 import (
+	"bash06/strona-fundacja/src/backend/core"
 	"bash06/strona-fundacja/src/backend/flags"
-	"bufio"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 const (
 	errOptKeyNil       = "No image key provided"
+	errOptTypeNil      = "No type provided"
 	errOptBucketInv    = "Invalid bucket type provided"
 	errFileReadFailure = "Error while reading file"
 )
@@ -20,10 +22,12 @@ const (
 type PartialFileInfo struct {
 	Size     int64
 	Mimetype string
+	Filename string
 }
 
 func (s *Server) Proxy(c *gin.Context) {
 	key := c.Query("key")
+	_type := c.Query("type")
 
 	if key == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -33,17 +37,41 @@ func (s *Server) Proxy(c *gin.Context) {
 		return
 	}
 
-	var file *PartialFileInfo
-
-	if err := s.Db.Model(&PartialFileInfo{}).Where("filename LIKE ?", "%"+key+"%").Select("size", "mimetype").First(&file).Error; err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   err.Error(),
-			"message": "Failed to find file",
+	if _type == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error":   errOptTypeNil,
+			"message": nil,
 		})
 		return
 	}
 
-	filePath := filepath.Join(flags.BasePath, key)
+	var file *PartialFileInfo
+
+	switch _type {
+	case "blog":
+		{
+			if err := s.Db.Model(&core.File{}).Where("filename LIKE ?", key+"%").Select("size", "mimetype", "filename").First(&file).Error; err != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+					"error":   err.Error(),
+					"message": "Failed to find file",
+				})
+				return
+			}
+		}
+
+	case "gallery":
+		{
+			if err := s.Db.Model(&core.GalleryRecord{}).Where("filename LIKE ?", key+"%").Select("size", "mimetype", "filename").First(&file).Error; err != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+					"error":   err.Error(),
+					"message": "Failed to find file",
+				})
+				return
+			}
+		}
+	}
+
+	filePath := filepath.Join(flags.BasePath, "files", file.Filename)
 
 	srcFile, err := os.Open(filePath)
 	if err != nil {
@@ -56,14 +84,15 @@ func (s *Server) Proxy(c *gin.Context) {
 
 	defer srcFile.Close()
 
-	reader := bufio.NewReader(srcFile)
-	buffer := make([]byte, 1024)
+	// buffer := make([]byte, 0)
 
-	reader.Read(buffer)
+	// reader.ReadBytes(buffer)
 
 	c.Header("Content-Type", file.Mimetype)
 	c.Header("Content-Length", strconv.Itoa(int(file.Size)))
 	c.Header("Cache-Control", "max-age=3600")
 
-	c.Data(http.StatusOK, file.Mimetype, buffer)
+	http.ServeContent(c.Writer, c.Request, file.Filename, time.Now(), srcFile)
+
+	// c.Data(http.StatusOK, file.Mimetype, buffer)
 }

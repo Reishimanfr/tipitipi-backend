@@ -297,7 +297,7 @@ func (s *Server) GalleryPostBulk(c *gin.Context) {
 
 			if err := s.Db.Create(&core.GalleryRecord{
 				GroupID:  groupId,
-				Key:      r.Filename,
+				Filename: r.Filename,
 				Mimetype: r.Mimetype,
 				Size:     r.Size,
 			}).Error; err != nil {
@@ -416,8 +416,8 @@ func (s *Server) GalleryDeleteOne(c *gin.Context) {
 		return
 	}
 
-	if err := s.DeleteFile(image.Key); err != nil {
-		s.Log.Error("Failed to delete file from disk", zap.String("Filename", image.Key), zap.Error(err))
+	if err := s.DeleteFile(image.Filename); err != nil {
+		s.Log.Error("Failed to delete file from disk", zap.String("Filename", image.Filename), zap.Error(err))
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
@@ -552,7 +552,7 @@ func (s *Server) GalleryDelete(c *gin.Context) {
 	}
 
 	for _, img := range resolveGroup.Images {
-		if err := s.DeleteFile(img.Key); err != nil {
+		if err := s.DeleteFile(img.Filename); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":   err.Error(),
 				"message": "Failed to delete file from disk ",
