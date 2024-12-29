@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Topbar from "./topbar";
 import Sidebar from "./sidebar";
 import { Link } from "react-router-dom";
-import logoSmall from "../react.svg"
+import logoSmall from "../assets/logo.png"
 
 const MainNavbar = () => {
   const [showDesktopNavbar, setShowDesktopNavbar] = useState(
