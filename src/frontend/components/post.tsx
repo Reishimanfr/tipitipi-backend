@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
-import { BlogAttachments } from "../functions/interfaces";
+import { BlogFiles } from "../functions/interfaces";
 interface Props {
   id: number;
   title: string;
   content?: string | null;
   date: number;
-  attachments?: BlogAttachments[] | null;
+  attachments?: BlogFiles[] | null;
   willBeUsedManyTimes: boolean;
   loading?: boolean;
 }
@@ -25,7 +25,7 @@ const Post = ({
       }
       content = content.replace(
         `{{${index}}}`,
-        `<img style="max-height:200px;" src="http://localhost:8080/proxy?key=${attachment.filename}" alt="${attachment.filename}"/>`
+        `<img style="max-height:200px;" src="http://localhost:8080/proxy?key=${attachment.filename}&type=blog" alt="${attachment.filename}"/>`
       );
     });
   }

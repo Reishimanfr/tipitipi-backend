@@ -70,6 +70,13 @@ func (s *Server) Proxy(c *gin.Context) {
 			}
 		}
 	}
+	
+	if file == nil {
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+		  "error": "Image not found",
+		})
+		return
+	  }
 
 	filePath := filepath.Join(flags.BasePath, "files", file.Filename)
 

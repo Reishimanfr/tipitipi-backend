@@ -32,8 +32,8 @@ async function addNewGroup(name: string , setNewGroupName: React.Dispatch<React.
     );
 
     if (response.status >= 200 && response.status < 300) {
-      toast.success("Dodano grupę");
       setNewGroupName("")
+      window.location.reload()
     } 
     else{
       throw new Error(response.statusText);

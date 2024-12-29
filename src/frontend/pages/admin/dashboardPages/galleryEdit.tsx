@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import validateToken from "../../../functions/validate";
 import Unauthorized from "../../errorPages/unauthorized";
-import { GalleryGroup, GalleryImage } from "../../../functions/interfaces";
+import { GroupInfo } from "../../../functions/interfaces";
 import { getToken } from "../../../functions/postManipulatingFunctions";
 import { toast } from "react-toastify";
 
@@ -94,60 +94,85 @@ async function deleteGroup(id: number) {
   }
 }
 
-async function fetchGroups(
-  setGroups: React.Dispatch<React.SetStateAction<GalleryGroup[]>>
-) {
-  try {
-    const response = await fetch(
-      `http://localhost:8080/gallery/groups/all/info`,
-      {
-        method: "GET",
-      }
-    );
-    if (!response.ok) {
-      throw new Error(response.statusText);
-    }
+// async function fetchGroups(
+//   setGroups: React.Dispatch<React.SetStateAction<GalleryGroup[]>>
+// ) {
+//   try {
+//     const response = await fetch(
+//       `http://localhost:8080/gallery/everything`,
+//       {
+//         method: "GET",
+//       }
+//     );
+//     if (!response.ok) {
+//       throw new Error(response.statusText);
+//     }
 
-    const data: Array<GalleryGroup> = await response.json();
-    setGroups((prevGroups) => prevGroups?.concat(data));
-  } catch (error) {
-    console.error(error);
-  }
-}
+//     const data: Array<GalleryGroup> = await response.json();
+//     setGroups(data);
+//   } catch (error) {
+//     console.error(error);
+//   }
+// }
 
 const GalleryEdit = () => {
-  const [groups, setGroups] = useState<GalleryGroup[]>([]);
-  const [selectedGroup, setSelectedGroup] = useState<GalleryGroup | null>();
-  const [selectedGroupImages, setSelectedGroupImages] = useState<
-    GalleryImage[]
-  >([]);
-
-
-
-  async function getImagesFromOneGroup(id: number) {
-    try {
-      const response = await fetch(
-        `http://localhost:8080/gallery/groups/${id}/images`,
-        {
-          method: "GET",
-        }
-      );
-      if (!response.ok) {
-        throw new Error(response.statusText);
-      }
-
-      const data: GalleryImage[] = await response.json();
-      setSelectedGroupImages(data);
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  const [groups, setGroups] = useState<Array<GroupInfo> | null>();
+  const [selectedGroup, setSelectedGroup] = useState<GroupInfo | null>();
 
   useEffect(() => {
-    if (selectedGroup != null) {
-      getImagesFromOneGroup(selectedGroup.id);
+    async function fetchPost() {
+      try {
+        const response = await fetch(
+          `http://localhost:8080/gallery/everything`,
+          {
+            method: "GET",
+          }
+        );
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+
+        const data = await response.json();
+        // setGroups((prevGroups) => prevGroups?.concat(data));
+        setGroups(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
     }
-  }, [selectedGroup]);
+    fetchPost();
+  }, []);
+  // const [selectedGroupImages, setSelectedGroupImages] = useState<
+  //   GalleryImage[]
+  // >([]);
+
+
+
+  // async function getImagesFromOneGroup(id: number) {
+  //   try {
+  //     const response = await fetch(
+  //       `http://localhost:8080/gallery/groups/${id}/images`,
+  //       {
+  //         method: "GET",
+  //       }
+  //     );
+  //     if (!response.ok) {
+  //       throw new Error(response.statusText);
+  //     }
+
+  //     const data: GalleryImage[] = await response.json();
+  //     setSelectedGroupImages(data);
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // }
+
+  // useEffect(() => {
+  //   if (selectedGroup != null) {
+  //     getImagesFromOneGroup(selectedGroup.id);
+  //   }
+  // }, [selectedGroup]);
 
   const [loading, setLoading] = useState(true);
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -157,14 +182,6 @@ const GalleryEdit = () => {
     };
     ValidateAuthorization();
   }, []);
-  useEffect(() => {
-    const fetchGroupsEffect = async () => {
-      if (isAuthorized && groups.length == 0) {
-        await fetchGroups(setGroups);
-      }
-    };
-    fetchGroupsEffect();
-  }, [isAuthorized]);
   if (loading) {
     return <div>Loading</div>;
   }
@@ -178,7 +195,7 @@ const GalleryEdit = () => {
       <select
         className="mb-8"
         name="groups"
-        onChange={(e) => setSelectedGroup(groups[parseInt(e.target.value)])}
+        onChange={(e) => setSelectedGroup(groups![parseInt(e.target.value)])}
       >
         <option value="">--albumy--</option>
         {groups ? (
@@ -190,7 +207,7 @@ const GalleryEdit = () => {
             );
           })
         ) : (
-          <div>No group found</div>
+          <option/>
         )}
       </select>
       <hr></hr>
@@ -199,12 +216,13 @@ const GalleryEdit = () => {
         <div>
           <h1 className="text-2xl font-bold">{selectedGroup.name}</h1>
           <br></br>
-          {selectedGroupImages!.length > 0 ? (
-            selectedGroupImages.map((image) => {
+          {selectedGroup.images ? (
+            selectedGroup.images.map((image) => {
               return (
                 // <div key={image.id}><img src={`http://localhost:8080/proxy?key=${image.key}`} alt={`${image.alt_text}`}/></div>
                 <div className="p-2 border w-1/2 m-2" key={image.id}>
                   {image.id}
+                  <img className="max-h-[200px]" src={`http://localhost:8080/proxy?key=${image.filename}&type=gallery`}/>
                   <button
                     className={`ml-[30%] border w-[20%] ${RED_BUTTON_CSS}`}
                     onClick={() => {deleteImage(selectedGroup.id , image.id)}}
