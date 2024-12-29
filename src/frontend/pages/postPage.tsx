@@ -14,7 +14,7 @@ const PostPage = () => {
     async function fetchPost() {
       try {
         const response = await fetch(
-          `http://localhost:8080/blog/post/${ID}?attachments=true`,
+          `http://localhost:8080/blog/post/${ID}?files=true`,
           {
             method: "GET",
           }
@@ -46,7 +46,7 @@ const PostPage = () => {
           content={post.content}
           date={post.edited_at}
           id={post.id}
-          attachments={post.attachments}
+          attachments={post.files}
           willBeUsedManyTimes={false}
         />
       ) : (

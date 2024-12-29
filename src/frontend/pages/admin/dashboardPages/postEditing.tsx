@@ -16,7 +16,7 @@ async function fetchPosts(
   try {
     const response = await fetch(
       //TODO niewiem czy bezpieczne / sciagamy wszystkie post yistniejace ze zdjeciami itd // trza zrobic partiala
-      `http://localhost:8080/blog/posts?limit=999&attachments=true`,
+      `http://localhost:8080/blog/posts?limit=999&files=true`,
       {
         method: "GET",
       }
@@ -61,12 +61,6 @@ const PostEditing = () => {
       if (response.status >= 200 && response.status < 300) {
         alert("Usunięto post");
         window.location.reload();
-        // toast.success("Usunięto post");
-        // setSelectedPost(undefined);
-        // let select = document.getElementById("posts") as HTMLSelectElement;
-        // if (select) {
-        //   select.selectedIndex = 0;
-        // }
       } else {
         throw new Error(response.statusText);
       }
@@ -127,20 +121,22 @@ const PostEditing = () => {
   useEffect(() => {
     if (selectedPost) {
       setTitle(selectedPost.title);
-
-      if (selectedPost.attachments && selectedPost.content) {
+      
+      if (selectedPost.files && selectedPost.content) {
         let tempContent = selectedPost.content;
-        selectedPost.attachments.forEach((attachment, index) => {
+        selectedPost.files.forEach((attachment, index) => {
           tempContent = tempContent.replace(
             `{{${index}}}`,
-            `<img style="max-height:200px;" src="http://localhost:8080/proxy?key=${attachment.filename}" alt="${attachment.filename}"/>`
+            `<img style="max-height:200px;" src="http://localhost:8080/proxy?key=${attachment.filename}&type=blog" alt="${attachment.filename}"/>`
           );
         });
         setContent(tempContent);
+        
       } else {
-        if (content) {
-          const tempContent = content?.replace(/{{\d+}}/g, "");
+        if (selectedPost.content) {
+          const tempContent = selectedPost.content?.replace(/{{\d+}}/g, "");
           setContent(tempContent);
+          
         }
       }
     }

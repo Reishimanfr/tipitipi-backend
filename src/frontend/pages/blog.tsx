@@ -63,7 +63,7 @@ const Blog = () => {
     };
   });
 
-  if (loading || posts.length == 0) {
+  if (loading) {
     return (
       <div className="globalCss">
         <h1 className="text-3xl mt-5">Blog</h1>
@@ -73,6 +73,13 @@ const Blog = () => {
         <PostSkeleton />
       </div>
     );
+  }
+  if(posts.length == 0){
+    return (
+      <div>
+        <h1 className="text-5xl m-12">Brak postów</h1>
+      </div>
+    )
   }
   return (
     <div className="globalCss">
