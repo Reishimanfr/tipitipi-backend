@@ -31,9 +31,6 @@ const Gallery = () => {
     fetchPost();
   }, []);
 
-  useEffect(() => {
-    console.log(groups);
-  }, [groups]);
 
   // useEffect(() => {
   //   function handleScroll() {

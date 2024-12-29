@@ -1,3 +1,0 @@
-zaimplementowac ten endpoint do galeri chuj wie
-dodac alerty // galeria nie ma bo endpointown ie moge testowac // w gallery edit to nie takie proste bo w selecie wybrany post dalej bangla
-optymalizowac

@@ -61,12 +61,6 @@ const PostEditing = () => {
       if (response.status >= 200 && response.status < 300) {
         alert("Usunięto post");
         window.location.reload();
-        // toast.success("Usunięto post");
-        // setSelectedPost(undefined);
-        // let select = document.getElementById("posts") as HTMLSelectElement;
-        // if (select) {
-        //   select.selectedIndex = 0;
-        // }
       } else {
         throw new Error(response.statusText);
       }

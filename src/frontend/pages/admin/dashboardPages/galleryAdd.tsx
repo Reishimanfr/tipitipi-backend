@@ -33,7 +33,7 @@ async function addNewGroup(name: string , setNewGroupName: React.Dispatch<React.
 
     if (response.status >= 200 && response.status < 300) {
       setNewGroupName("")
-      window.location.reload()
+      toast.success("Dodano album")
     } 
     else{
       throw new Error(response.statusText);
@@ -97,7 +97,7 @@ const GalleryAdd = () => {
 
       if (response.status >= 200 && response.status < 300) {
         toast.success("Dodano zdjęcia");
-
+        setImages(null)
       } else{
         throw new Error(response.statusText);
       }
@@ -141,6 +141,7 @@ const GalleryAdd = () => {
           className="border-2 "
           type="text"
           name="newAlbum"
+          value={newGroupName}
           onChange={(e) => setNewGroupName(e.target.value)}
         />
         <br></br>
@@ -194,6 +195,7 @@ const GalleryAdd = () => {
           type="file"
           name="image"
           accept="image/*"
+          value={images ? undefined : ""}
           onChange={(e) => {
             setImages(e.target.files);
           }}
