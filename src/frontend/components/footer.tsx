@@ -4,7 +4,7 @@ const Footer = () => {
         <div className="text-white text-right mr-[1%] py-2">
           <p>Kontakt: xxx-xxx-xxx</p>
           <p>Email: example@gmail.com</p>
-          <p>Adres: skibiditoaletowa 27</p>
+          <p>Adres: przykladowa 27</p>
         </div>
       </div>
     );

@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+    font-family: 'Ubuntu';
+    src: url('./assets/Ubuntu-Regular.ttf') format('ttf');
+    font-weight: 400;
+    font-style: normal;
+  }
+
 div.globalCss {
     margin-left: 5%;
     margin-right: 5%;
@@ -9,4 +16,8 @@ div.globalCss {
 
 .quill img {
     max-height: 200px;
+}
+
+body {
+    background-color: #F5F2E3;
 }

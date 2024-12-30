@@ -34,6 +34,7 @@ async function addNewGroup(name: string , setNewGroupName: React.Dispatch<React.
     if (response.status >= 200 && response.status < 300) {
       setNewGroupName("")
       toast.success("Dodano album")
+      window.location.reload()
     } 
     else{
       throw new Error(response.statusText);
@@ -147,7 +148,7 @@ const GalleryAdd = () => {
         <br></br>
         <button
           className={
-            "border w-40 shadow-lg hover:bg-slate-100 hover:duration-300 mt-6"
+            "border w-40 bg-white shadow-lg hover:bg-slate-100 hover:duration-300 mt-6"
           }
           onClick={() => addNewGroup(newGroupName,setNewGroupName)}
         >
@@ -205,7 +206,7 @@ const GalleryAdd = () => {
 
         <button
           className={
-            "border w-40 shadow-lg hover:bg-slate-100 hover:duration-300"
+            "border w-40 bg-white shadow-lg hover:bg-slate-100 hover:duration-300"
           }
           onClick={() => addImages()}
         >

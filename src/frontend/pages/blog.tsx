@@ -95,7 +95,7 @@ const Blog = () => {
       >
         <option value="newest">Najnowsze</option>
         <option value="oldest">Najstarsze</option>
-        <option value="likes">Najwięcej polubień</option>
+        {/* <option value="likes">Najwięcej polubień</option> */}
       </select>
       {posts ? (
         posts.map((post, index) => {

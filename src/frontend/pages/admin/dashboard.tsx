@@ -4,7 +4,7 @@ import validateToken from "../../functions/validate"
 import Unauthorized from "../errorPages/unauthorized"
 import { toast } from "react-toastify"
 
-const buttonCSS = "border p-3 ml-[1%] mb-8 border-gray-900 hover:bg-gray-900 hover:text-white hover:duration-300 rounded-md"
+const buttonCSS = "border p-3 ml-[1%] bg-white mb-8 border-gray-900 hover:bg-gray-900 hover:text-white hover:duration-300 rounded-md"
 
 
 const Dashboard = () => {

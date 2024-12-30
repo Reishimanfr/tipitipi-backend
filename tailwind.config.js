@@ -3,6 +3,19 @@ export default {
   content: ["./index.html","./src/frontend/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      colors: {
+        transparent: 'transparent',
+        current: 'currentColor',
+        'tipiOrange': '#EB9511',
+        'tipiYellow': '#F0B93A',
+        'tipiBrown': '#853A3F',
+        'tipiPink': '#EC7B7F',
+        'tipiWhite': '#F5F2E3'
+      },
+      fontFamily: {
+        custom: ['Ubuntu', 'sans-serif'], // Nazwa "CustomFont" z CSS
+      },
+
       animation: {
         'slide-in': 'slide-in 0.5s ease-in-out',
         'slide-out': 'slide-out 0.5s ease-in-out',
@@ -30,28 +43,7 @@ export default {
             //opacity: 0,
           },
         },
-        // slideInFromLeft: {
-        //   '0%': { transform: 'translateX(-10%)', opacity: '0' },
-        //   '100%': { transform: 'translateX(0)', opacity: '1' },
-        // },
-        // slideInFromRight: {
-        //   '0%': { transform: 'translateX(10%)', opacity: '0' },
-        //   '100%': { transform: 'translateX(0)', opacity: '1' },
-        // }
       },
     },
   },
-  // plugins: [
-  //   function ({ addUtilities }) {
-  //     const newUtilities = {
-  //       '.fill-forwards': {
-  //         'animation-fill-mode': 'forwards',
-  //       },
-  //       // Dodaj więcej niestandardowych właściwości CSS, jeśli to konieczne
-  //     };
-      
-  //     addUtilities(newUtilities, ['responsive', 'hover']);
-  //   },
-  //   require('tailwindcss-animated')
-  // ],
 };
