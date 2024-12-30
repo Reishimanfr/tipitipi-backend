@@ -1,11 +1,13 @@
-import { useState } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { ToastContainer } from 'react-toastify'
 import Footer from './components/footer'
-import Navbar from './components/navbar'
+import MainNavbar from './components/mainNavbar'
 import About from "./pages/about"
 import Admin from './pages/admin/admin'
 import Dashboard from './pages/admin/dashboard'
 import ChangeCredentials from './pages/admin/dashboardPages/changeCredentials'
+import GalleryAdd from './pages/admin/dashboardPages/galleryAdd'
+import GalleryEdit from './pages/admin/dashboardPages/galleryEdit'
 import PostCreating from './pages/admin/dashboardPages/postCreating'
 import PostEditing from './pages/admin/dashboardPages/postEditing'
 import Login from './pages/admin/login'
@@ -15,20 +17,32 @@ import Gallery from "./pages/gallery"
 import Mainpage from "./pages/mainpage"
 import PostPage from './pages/postPage'
 import Pricing from "./pages/pricing"
-import GalleryAdd from './pages/admin/dashboardPages/galleryAdd'
-import GalleryEdit from './pages/admin/dashboardPages/galleryEdit'
+
+
+
+// import NewNavbar from './components/newNavbar'
 
 function App() {
   // const [mainpageFirstHeader,setMainpageFirstHeader] = useState("")
   // const changeMainpageFirstHeader = (newMessage : string) => {
   //   setMainpageFirstHeader(newMessage)
   // }
- 
 
   return (
     <div className="flex flex-col min-h-screen">
+      {/* <Monitoring apiKey="AnqmUAZGoTDxYC7R9b3aZIGoEn8NoHS_" params={{}} path="/" url="https://monitoring.react-scan.com/api/v1/ingest"/> */}
+      <ToastContainer
+        position="top-center"
+        autoClose={2000}
+        hideProgressBar={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"/>
       <BrowserRouter>
-      <Navbar/>
+      <MainNavbar/>
       <div className='flex-grow'>
       <Routes>
         {/* admin pages */}

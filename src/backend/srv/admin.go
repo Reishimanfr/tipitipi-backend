@@ -16,15 +16,6 @@ type AuthBody struct {
 	Password string `json:"password"`
 }
 
-const (
-	err_invalid_json             = "Malformed or invalid JSON body"
-	err_hashing_failure          = "Failed to hash password"
-	err_auth_invalid_credentials = "Invalid credentials"
-	err_auth_jwt_failure         = "Failed to generate new token"
-	err_auth_no_creds            = "You must provide at least one credential to be changed"
-	ok_auth_update_success       = "Admin user credentials updated successfully"
-)
-
 func (s *Server) Authorize(c *gin.Context) {
 	body := new(AuthBody)
 	var adminUser *core.AdminUser
@@ -32,7 +23,7 @@ func (s *Server) Authorize(c *gin.Context) {
 	if err := c.ShouldBindJSON(body); err != nil {
 		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   err.Error(),
-			"message": err_invalid_json,
+			"message": "Malformed or invalid JSON body",
 		})
 		return
 	}
@@ -43,7 +34,7 @@ func (s *Server) Authorize(c *gin.Context) {
 
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error":   err.Error(),
-				"message": errSqlQuery,
+				"message": "Something went wrong while processing your request",
 			})
 			return
 		}
@@ -56,7 +47,7 @@ func (s *Server) Authorize(c *gin.Context) {
 			s.Log.Error("Error while hashing the provided default admin password", zap.Error(err))
 
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-				"error":   err_hashing_failure,
+				"error":   "Failed to hash password",
 				"message": nil,
 			})
 			return
@@ -76,7 +67,7 @@ func (s *Server) Authorize(c *gin.Context) {
 
 	if body.Username != adminUser.Username || err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"error":   err_auth_invalid_credentials,
+			"error":   "Invalid credentials",
 			"message": nil,
 		})
 		return
@@ -87,7 +78,7 @@ func (s *Server) Authorize(c *gin.Context) {
 		s.Log.Error("Error while generating JWT token", zap.Error(err))
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   err_auth_jwt_failure,
+			"error":   "Failed to generate new token",
 			"message": nil,
 		})
 	}
@@ -103,7 +94,7 @@ func (s *Server) UpdateCredentials(c *gin.Context) {
 	if err := c.ShouldBind(&creds); err != nil {
 		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, gin.H{
 			"error":   err.Error(),
-			"message": err_invalid_json,
+			"message": "Malformed or invalid JSON body",
 		})
 		return
 	}
@@ -113,7 +104,7 @@ func (s *Server) UpdateCredentials(c *gin.Context) {
 
 	if newPass == "" && newUser == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   err_auth_no_creds,
+			"error":   "You must provide at least one credential to be changed",
 			"message": nil,
 		})
 		return
@@ -129,7 +120,7 @@ func (s *Server) UpdateCredentials(c *gin.Context) {
 			s.Log.Error("Error while hashing password", zap.Error(err))
 
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-				"message": err_hashing_failure,
+				"message": "Failed to hash password",
 				"error":   err.Error(),
 			})
 			return
@@ -147,23 +138,18 @@ func (s *Server) UpdateCredentials(c *gin.Context) {
 		s.Log.Error("Error while updating admin credentials", zap.Error(err))
 
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"message": errSqlQuery,
+			"message": "Something went wrong while processing your request",
 			"error":   err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"message": ok_auth_update_success,
-		"error":   nil,
-	})
+	c.Status(http.StatusOK)
 }
 
 func (s *Server) ValidateToken(c *gin.Context) {
 	// The reason we can do this is that the JWT middleware
 	// already handles everything for us and writing the same
 	// code again would just be a waste of time
-	c.JSON(http.StatusOK, gin.H{
-		"message": "JWT token is valid",
-	})
+	c.Status(http.StatusOK)
 }

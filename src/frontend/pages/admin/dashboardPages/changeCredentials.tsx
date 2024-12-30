@@ -1,16 +1,18 @@
-import { useState ,useEffect } from "react";
-import validateToken from "../../../functions/validate";
-import Unauthorized from "../../errorPages/unauthorized";
-import { getToken } from "../../../functions/postManipulatingFunctions";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
+import { API_URL } from '../../../functions/global'
+import { getToken } from "../../../functions/postManipulatingFunctions"
+import validateToken from "../../../functions/validate"
+import Unauthorized from "../../errorPages/unauthorized"
 
 const validateAdminForm = (login : string , password : string) : boolean => {
   if (login == "" || password =="") {
-    alert("Nie podano nowego loginu lub hasła")
+    toast.warn("Nie podano nowego loginu lub hasła")
     return false;
   }
   if(password.length < 8) {
-    alert("Twoje hasło powinno mieć conajmniej 8 znaków")
+    toast.warn("Twoje hasło powinno mieć conajmniej 8 znaków")
     return false;
   }
   return window.confirm("Czy jesteś pewien że chcesz edytować dane profilu?")
@@ -29,7 +31,7 @@ async function updateCredentials() {
     const token = getToken()
 
     try{
-    const response = await fetch("http://localhost:2333/admin/account", {
+    const response = await fetch(`${API_URL}/admin/account`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`
@@ -41,21 +43,16 @@ async function updateCredentials() {
     });
 
     if (response.status >= 200 && response.status < 300) {
-      alert("Zaktualizowano");
+      toast.success("Zaktualizowano");
       localStorage.setItem("token",'')
       navigate('/admin/login')
     }
-    //  else {
-    //   //TODO nie wiem co zwraca /admin/account , ponizej linijka skopiowana z post creating
-    //   // const data: BlogPostDataBodyJson = await response.json();
-    //   alert("Błąd: ");
-    // }
     if (!response.ok) {
       throw new Error(response.statusText);
     }
   } catch (error){
     console.error(error)
-    alert("Wystąpił błąd: " + error)
+    toast.error("Wystąpił błąd: " + error)
   }
   }
 
@@ -80,7 +77,7 @@ async function updateCredentials() {
   return (
    
   <div>
-    <div className="m-auto mt-[20vh] border-2 border-gray-800  text-center w-[25%] rounded-lg">
+    <div className="m-auto mt-[20vh] p-4 bg-white border-2 border-gray-800  text-center w-[30%] min-w-60 rounded-lg">
             <form>
                 <div className="p-[5%]">
                     <label className="text-xl font-semibold" htmlFor="login">Podaj nowy login: </label>

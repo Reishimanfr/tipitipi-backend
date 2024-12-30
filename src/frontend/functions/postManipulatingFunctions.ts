@@ -1,11 +1,12 @@
+import { toast } from "react-toastify";
 export function validateDataForm(title: string, content: string): boolean {
   if (title === "") {
-    alert("Podano pusty tytuł");
+    toast.error("Podano pusty tytuł");
 
     return false;
   }
   if (content === "<p><br></p>") {
-    alert("Podano pustą treść");
+    toast.error("Podano pustą treść");
     return false;
   }
   const confirm = window.confirm(

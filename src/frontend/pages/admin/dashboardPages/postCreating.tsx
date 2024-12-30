@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
-import Unauthorized from "../../errorPages/unauthorized";
-import validateToken from "../../../functions/validate";
+import { useEffect, useState } from "react"
+import { toast } from "react-toastify"
+import QuillBody from "../../../components/quillBody"
+import { API_URL } from '../../../functions/global'
 import {
-  validateDataForm,
-  buildPostMultipart,
-  getToken,
-} from "../../../functions/postManipulatingFunctions";
-import QuillBody from "../../../components/quillBody";
+        buildPostMultipart,
+        getToken,
+        validateDataForm,
+} from "../../../functions/postManipulatingFunctions"
+import validateToken from "../../../functions/validate"
+import Unauthorized from "../../errorPages/unauthorized"
 
 export default function PostCreating() {
   const [title, setTitle] = useState("Tytuł posta");
@@ -22,7 +24,7 @@ export default function PostCreating() {
     const token = getToken();
 
     try {
-      const response = await fetch("http://localhost:2333/blog/post/", {
+      const response = await fetch(`${API_URL}/blog/post/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -31,19 +33,15 @@ export default function PostCreating() {
       });
 
       if (response.status >= 200 && response.status < 300) {
-        alert("Opublikowano post");
-        window.location.reload();
-      } 
-      // else {
-      //   const data: BlogPostDataBodyJson = await response.json();
-      //   alert("Błąd: " + data.error);
-      // }
-      else {
+        toast.success("Opublikowano post");
+        setTitle("Tytuł posta")
+        setContent("Treść posta")
+      } else {
         throw new Error(response.statusText);
       }
     } catch (error) {
       console.error(error);
-      alert("Wystąpił błąd: " + error);
+      toast.error("Wystąpił błąd: " + error);
     }
   }
 

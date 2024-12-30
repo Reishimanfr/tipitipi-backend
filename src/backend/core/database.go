@@ -1,25 +1,19 @@
 package core
 
 import (
-	"os"
-	"path"
+	"bash06/strona-fundacja/src/backend/flags"
 
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
-var (
-	Exec, _ = os.Executable()
-	Path    = path.Join(Exec, "../database.sqlite")
-)
-
 type GalleryRecord struct {
-	ID      int    `gorm:"primaryKey;autoIncrement" json:"id"`
-	AltText string `json:"alt_text"`
-	URL     string `json:"url"`
-	Key     string `json:"key"` // AWS bucket key
-	GroupID int    `gorm:"index" json:"group_id"`
+	ID       int    `gorm:"primaryKey;autoIncrement" json:"id"`
+	Filename string `json:"filename"`
+	GroupID  int    `gorm:"index" json:"-"`
+	Mimetype string `json:"-"`
+	Size     int64  `json:"-"`
 }
 
 type GalleryGroup struct {
@@ -28,20 +22,21 @@ type GalleryGroup struct {
 	Images []GalleryRecord `gorm:"foreignKey:GroupID;constraint:OnDelete:CASCADE" json:"images,omitempty"`
 }
 
-type AttachmentRecord struct {
+type File struct {
 	ID         int    `gorm:"primaryKey;autoIncrement" json:"id"`
-	URL        string `json:"url"`
 	Filename   string `json:"filename"`
+	Size       int64  `json:"-"`
+	Mimetype   string `json:"-"`
 	BlogPostID int    `gorm:"index" json:"-"`
 }
 
 type BlogPost struct {
-	ID          int                `gorm:"primaryKey;autoIncrement" json:"id"`
-	Created_At  int64              `json:"created_at"`
-	Edited_At   int64              `json:"edited_at,omitempty"`
-	Title       string             `gorm:"unique" json:"title"`
-	Content     string             `json:"content,omitempty"`
-	Attachments []AttachmentRecord `gorm:"foreignKey:BlogPostID" json:"attachments,omitempty"`
+	ID         int    `gorm:"primaryKey;autoIncrement" json:"id"`
+	Created_At int64  `json:"created_at"`
+	Edited_At  int64  `json:"edited_at,omitempty"`
+	Title      string `gorm:"unique" json:"title"`
+	Content    string `json:"content"`
+	Files      []File `gorm:"foreignKey:BlogPostID" json:"files,omitempty"`
 }
 
 type AdminUser struct {
@@ -51,26 +46,20 @@ type AdminUser struct {
 	Salt     string
 }
 
-func InitDb(testing bool) (*gorm.DB, error) {
+func InitDb() (*gorm.DB, error) {
 	gormConfig := &gorm.Config{}
 
-	if os.Getenv("DEV") != "true" {
+	if !*flags.Dev {
 		gormConfig.Logger = logger.Discard
 	}
 
-	var db *gorm.DB
-
-	if testing {
-		db, err = gorm.Open(sqlite.Open("file::memory:"))
-	} else {
-		db, err = gorm.Open(sqlite.Open(Path), gormConfig)
-	}
+	db, err := gorm.Open(sqlite.Open("database.sqlite"), gormConfig)
 
 	if err != nil {
 		return nil, err
 	}
 
-	db.AutoMigrate(&BlogPost{}, &AdminUser{}, &AttachmentRecord{}, &GalleryRecord{}, &GalleryGroup{})
+	db.AutoMigrate(&BlogPost{}, &AdminUser{}, &File{}, &GalleryRecord{}, &GalleryGroup{})
 
 	return db, nil
 }

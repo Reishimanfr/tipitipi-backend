@@ -1,26 +1,33 @@
 package srv
 
 import (
-	"io"
+	"bash06/strona-fundacja/src/backend/core"
+	"bash06/strona-fundacja/src/backend/flags"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
+	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-gonic/gin"
 )
 
 const (
 	errOptKeyNil       = "No image key provided"
+	errOptTypeNil      = "No type provided"
 	errOptBucketInv    = "Invalid bucket type provided"
 	errFileReadFailure = "Error while reading file"
 )
 
-// Proxies S3 images to be used in html <img> tags
+type PartialFileInfo struct {
+	Size     int64
+	Mimetype string
+	Filename string
+}
+
 func (s *Server) Proxy(c *gin.Context) {
 	key := c.Query("key")
-	bucket := c.DefaultQuery("bucket", "blog")
+	_type := c.Query("type")
 
 	if key == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
@@ -30,46 +37,69 @@ func (s *Server) Proxy(c *gin.Context) {
 		return
 	}
 
-	switch bucket {
-	case "blog":
-		bucket = os.Getenv("AWS_BLOG_BUCKET_NAME")
-	case "gallery":
-		bucket = os.Getenv("AWS_GALLERY_BUCKET_NAME")
-	default:
+	if _type == "" {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-			"error":   errOptBucketInv,
+			"error":   errOptTypeNil,
 			"message": nil,
 		})
 		return
 	}
 
-	obj, err := s.Ovh.S3.GetObject(&s3.GetObjectInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(key),
-	})
+	var file *PartialFileInfo
 
+	switch _type {
+	case "blog":
+		{
+			if err := s.Db.Model(&core.File{}).Where("filename LIKE ?", key+"%").Select("size", "mimetype", "filename").First(&file).Error; err != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+					"error":   err.Error(),
+					"message": "Failed to find file",
+				})
+				return
+			}
+		}
+
+	case "gallery":
+		{
+			if err := s.Db.Model(&core.GalleryRecord{}).Where("filename LIKE ?", key+"%").Select("size", "mimetype", "filename").First(&file).Error; err != nil {
+				c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+					"error":   err.Error(),
+					"message": "Failed to find file",
+				})
+				return
+			}
+		}
+	}
+	
+	if file == nil {
+		c.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+		  "error": "Image not found",
+		})
+		return
+	  }
+
+	filePath := filepath.Join(flags.BasePath, "files", file.Filename)
+
+	srcFile, err := os.Open(filePath)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 			"error":   err.Error(),
-			"message": "Failed to proxy file from S3",
+			"message": "Failed to open file",
 		})
 		return
 	}
 
-	defer obj.Body.Close()
+	defer srcFile.Close()
 
-	c.Header("Content-Type", *obj.ContentType)
-	c.Header("Content-Length", strconv.Itoa(int(*obj.ContentLength)))
+	// buffer := make([]byte, 0)
+
+	// reader.ReadBytes(buffer)
+
+	c.Header("Content-Type", file.Mimetype)
+	c.Header("Content-Length", strconv.Itoa(int(file.Size)))
 	c.Header("Cache-Control", "max-age=3600")
 
-	body, err := io.ReadAll(obj.Body)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   errFileReadFailure,
-			"message": nil,
-		})
-		return
-	}
+	http.ServeContent(c.Writer, c.Request, file.Filename, time.Now(), srcFile)
 
-	c.Data(http.StatusOK, *obj.ContentType, body)
+	// c.Data(http.StatusOK, file.Mimetype, buffer)
 }

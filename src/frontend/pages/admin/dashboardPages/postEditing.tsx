@@ -1,13 +1,15 @@
-import { useState, useEffect } from "react";
-import validateToken from "../../../functions/validate";
-import Unauthorized from "../../errorPages/unauthorized";
+import { useEffect, useState } from "react"
+import { toast } from "react-toastify"
+import QuillBody from "../../../components/quillBody"
+import { API_URL } from '../../../functions/global'
+import { BlogPostDataBodyJson } from "../../../functions/interfaces"
 import {
-  validateDataForm,
-  buildPostMultipart,
-  getToken,
-} from "../../../functions/postManipulatingFunctions";
-import QuillBody from "../../../components/quillBody";
-import { BlogPostDataBodyJson } from "../../../functions/interfaces";
+        buildPostMultipart,
+        getToken,
+        validateDataForm,
+} from "../../../functions/postManipulatingFunctions"
+import validateToken from "../../../functions/validate"
+import Unauthorized from "../../errorPages/unauthorized"
 
 async function fetchPosts(
   setPosts: React.Dispatch<React.SetStateAction<BlogPostDataBodyJson[]>>
@@ -15,7 +17,7 @@ async function fetchPosts(
   try {
     const response = await fetch(
       //TODO niewiem czy bezpieczne / sciagamy wszystkie post yistniejace ze zdjeciami itd // trza zrobic partiala
-      `http://localhost:2333/blog/posts?limit=999&attachments=true`,
+      `${API_URL}/blog/posts?limit=999&files=true`,
       {
         method: "GET",
       }
@@ -40,7 +42,7 @@ const PostEditing = () => {
   async function deletePost() {
     const token = getToken();
     if (!selectedPost) {
-      alert("Nie znaleziono posta");
+      toast.error("Nie znaleziono posta");
       return;
     }
     if (!window.confirm("Czy jesteś pewien że chcesz usunąć ten post?")) {
@@ -48,7 +50,7 @@ const PostEditing = () => {
     }
     try {
       const response = await fetch(
-        `http://localhost:2333/blog/post/${selectedPost.id}`,
+        `${API_URL}/blog/post/${selectedPost.id}`,
         {
           method: "DELETE",
           headers: {
@@ -60,17 +62,12 @@ const PostEditing = () => {
       if (response.status >= 200 && response.status < 300) {
         alert("Usunięto post");
         window.location.reload();
-      } 
-      // else {
-      //   const data: BlogPostDataBodyJson = await response.json();
-      //   alert("Błąd: " + data.error);
-      // }
-      else{
+      } else {
         throw new Error(response.statusText);
       }
     } catch (error) {
       console.error(error);
-      alert("Wystąpił błąd: " + error);
+      toast.error("Wystąpił błąd: " + error);
     }
   }
 
@@ -81,18 +78,18 @@ const PostEditing = () => {
 
     const token = getToken();
     if (!selectedPost) {
-      alert("Nie znaleziono posta");
+      toast.error("Nie znaleziono posta");
       return;
     }
     if (title == selectedPost.title && content == selectedPost.content) {
-      alert("Nie dokonano żadnych zmian");
+      toast.warn("Nie dokonano żadnych zmian");
       return;
     }
     const formData = buildPostMultipart(title, content);
 
     try {
       const response = await fetch(
-        `http://localhost:2333/blog/post/${selectedPost.id}`,
+        `${API_URL}/blog/post/${selectedPost.id}`,
         {
           method: "PATCH",
           headers: {
@@ -103,19 +100,20 @@ const PostEditing = () => {
       );
 
       if (response.status >= 200 && response.status < 300) {
-        alert("Edytowano post");
-        window.location.reload();
-      } 
-      // else {
-      //   const data: BlogPostDataBodyJson = await response.json();
-      //   alert("Błąd: " + data.error);
-      // }
-      else {
+        // alert("Edytowano post");
+        // window.location.reload();
+        toast.success("Edytowano post");
+        setSelectedPost(undefined);
+        let select = document.getElementById("posts") as HTMLSelectElement;
+        if (select) {
+          select.selectedIndex = 0;
+        }
+      } else {
         throw new Error(response.statusText);
       }
     } catch (error) {
       console.error(error);
-      alert("Wystąpił błąd: " + error);
+      toast.error("Wystąpił błąd: " + error);
     }
   }
 
@@ -124,20 +122,22 @@ const PostEditing = () => {
   useEffect(() => {
     if (selectedPost) {
       setTitle(selectedPost.title);
-
-      if (selectedPost.attachments && selectedPost.content) {
+      
+      if (selectedPost.files && selectedPost.content) {
         let tempContent = selectedPost.content;
-        selectedPost.attachments.forEach((attachment, index) => {
+        selectedPost.files.forEach((attachment, index) => {
           tempContent = tempContent.replace(
             `{{${index}}}`,
-            `<img style="max-height:200px;" src="http://localhost:2333/proxy?key=${attachment.filename}" alt="${attachment.filename}"/>`
+            `<img style="max-height:200px;" src="${API_URL}/proxy?key=${attachment.filename}&type=blog" alt="${attachment.filename}"/>`
           );
         });
         setContent(tempContent);
+        
       } else {
-        if (content) {
-          const tempContent = content?.replace(/{{\d+}}/g, "");
+        if (selectedPost.content) {
+          const tempContent = selectedPost.content?.replace(/{{\d+}}/g, "");
           setContent(tempContent);
+          
         }
       }
     }
@@ -171,6 +171,7 @@ const PostEditing = () => {
         <label className="text-xl">Proszę wybrać post</label>
         <br></br>
         <select
+          id="posts"
           name="posts"
           onChange={(e) => setSelectedPost(posts[parseInt(e.target.value)])}
         >

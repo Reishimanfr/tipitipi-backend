@@ -1,10 +1,12 @@
-import background_example from "../assets/example_background.jpg";
-import landscapeImage from "../assets/landscape.jpg";
-import Image_Text from "../components/image_text";
-import { useState, useEffect } from "react";
-import Post from "../components/post";
-import { BlogPostDataBodyJson } from "../functions/interfaces";
-import PostSkeleton from "../components/postSkeletonLoading";
+import { useEffect, useState } from "react"
+import "react-toastify/dist/ReactToastify.css"
+import background_example from "../assets/example_background.jpg"
+import landscapeImage from "../assets/landscape.jpg"
+import Image_Text from "../components/image_text"
+import Post from "../components/post"
+import PostSkeleton from "../components/postSkeletonLoading"
+import { API_URL } from '../functions/global'
+import { BlogPostDataBodyJson } from "../functions/interfaces"
 const Mainpage = () => {
   const [posts, setPosts] = useState<Array<BlogPostDataBodyJson>>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -13,11 +15,12 @@ const Mainpage = () => {
     async function fetchPost() {
       try {
         const response = await fetch(
-          `http://localhost:2333/blog/posts?limit=3&sort=newest`,
+          `${API_URL}/blog/posts?limit=3&sort=newest`,
           {
             method: "GET",
           }
         );
+        console.log(response);
         if (!response.ok) {
           throw new Error(response.statusText);
         }
@@ -30,21 +33,18 @@ const Mainpage = () => {
         setLoading(false);
       }
     }
-    if(posts.length==0){
+    if (posts.length == 0) {
       fetchPost();
     }
   }, []);
 
-  if (loading) {
-    return <div>Loading</div>;
-  }
   return (
     <div className="globalCss ">
       {/* <h1>Mainpage</h1>
             <Link to="/admin">Admin</Link>
             <h1 className="text-center">{props.mainpageFirstHeader}</h1> */}
 
-        <Image_Text
+      <Image_Text
         image={background_example}
         header="Jakiś nagłówek"
         paragraph="Lorem ipsum dolor sit amet, consectetur adipiscing 
@@ -52,11 +52,23 @@ const Mainpage = () => {
                     sagittis vel sapien."
         leftSide={true}
       />
-      
-        {posts.length > 0 ? (<h1 className="text-3xl mb-[1%]">Oto kilka najnowszych postów</h1>) : (<div></div>)}
-      
-      {posts.length>0 ? (
-        posts.map((post,index) => {
+      {loading ? (
+        <div>
+          <PostSkeleton />
+          <PostSkeleton />
+          <PostSkeleton />
+        </div>
+      ) : (
+        <div></div>
+      )}
+      {posts.length > 0 && !loading ? (
+        <h1 className="text-3xl mb-[1%]">Oto kilka najnowszych postów</h1>
+      ) : (
+        <div></div>
+      )}
+
+      {posts.length > 0 && !loading ? (
+        posts.map((post, index) => {
           return (
             <Post
               key={index}
@@ -69,11 +81,7 @@ const Mainpage = () => {
           );
         })
       ) : (
-        <div>
-          <PostSkeleton/>
-          <PostSkeleton/>
-          <PostSkeleton/>
-        </div>
+        <div></div>
       )}
       <br></br>
       <br></br>

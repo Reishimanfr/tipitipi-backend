@@ -10,17 +10,20 @@ func (s *Server) InitHandler() {
 		public.GET("/blog/posts", s.BlogGetBulk)
 		public.GET("/proxy", s.Proxy)
 
+		// Get EVERYTHING that's available out there (who gives a fuck?)
+		public.GET("/gallery/everything", s.GetEverything)
+
 		// Get info on all available gallery groups (like how many images they have)
 		public.GET("/gallery/groups/all/info", s.GalleryGetGroupsBulk)
 
-		public.GET("/gallery/groups/all/images", s.GalleryGetImagesBulk)
+		// public.GET("/gallery/groups/all/images", s.GalleryGetImagesBulk)
 
 		// Get info on a specified gallery group
-		public.GET("/gallery/groups/:groupId/info", s.GalleryGetGroupOne)
+		// public.GET("/gallery/groups/:groupId/info", s.GalleryGetGroupOne)
 
 		// Get image from a specified gallery group
 		// TESTING NEEDED
-		public.GET("/gallery/groups/:groupId/images", s.GalleryGetImagesOne)
+		// public.GET("/gallery/groups/:groupId/images", s.GalleryGetImagesOne)
 	}
 
 	protected := s.Router.Group("/")
@@ -39,20 +42,16 @@ func (s *Server) InitHandler() {
 			// TESTING NEEDED
 			gallery.POST("/groups/new/:name", s.GalleryCreateOne)
 
-			// Post an image to a specified group
-			// TESTING NEEDED
+			// // Post an image to a specified group
 			gallery.POST("/groups/:groupId/images", s.GalleryPostBulk)
 
-			// Delete an image from a specified group
-			// TESTING NEEDED
+			// // Delete an image from a specified group
 			gallery.DELETE("/groups/:groupId/images/:imageId", s.GalleryDeleteOne)
 
 			// Delete all images from a group (without deleting the group)
-			// TESTING NEEDED
 			gallery.DELETE("/groups/:groupId/images", s.GalleryDeleteAll)
 
 			// Delete an entire gallery group
-			// TESTING NEEDED
 			gallery.DELETE("/groups/:groupId/", s.GalleryDelete)
 		}
 

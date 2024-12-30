@@ -1,7 +1,8 @@
-import Post from "../components/post";
-import { useState, useEffect } from "react";
-import PostSkeleton from "../components/postSkeletonLoading";
-import { BlogPostDataBodyJson } from "../functions/interfaces";
+import { useEffect, useState } from "react"
+import Post from "../components/post"
+import PostSkeleton from "../components/postSkeletonLoading"
+import { API_URL } from '../functions/global'
+import { BlogPostDataBodyJson } from "../functions/interfaces"
 
 const Blog = () => {
   const limit = 6;
@@ -16,7 +17,7 @@ const Blog = () => {
     async function fetchPost() {
       try {
         const response = await fetch(
-          `http://localhost:2333/blog/posts?offset=${offset}&limit=${limit}&sort=${sortBy}`,
+          `${API_URL}/blog/posts?offset=${offset}&limit=${limit}&sort=${sortBy}`,
           {
             method: "GET",
           }
@@ -24,6 +25,7 @@ const Blog = () => {
         if (!response.ok) {
           throw new Error(response.statusText);
         }
+  
 
         const data: Array<BlogPostDataBodyJson> = await response.json();
         setPosts((prevPosts) => prevPosts?.concat(data));
@@ -73,6 +75,13 @@ const Blog = () => {
       </div>
     );
   }
+  if(posts.length == 0){
+    return (
+      <div>
+        <h1 className="text-5xl m-12">Brak postów</h1>
+      </div>
+    )
+  }
   return (
     <div className="globalCss">
       <h1 className="text-3xl mt-5">Blog</h1>
@@ -87,12 +96,12 @@ const Blog = () => {
       >
         <option value="newest">Najnowsze</option>
         <option value="oldest">Najstarsze</option>
-        <option value="likes">Najwięcej polubień</option>
+        {/* <option value="likes">Najwięcej polubień</option> */}
       </select>
       {posts ? (
         posts.map((post, index) => {
           return (
-            <div key={index} className="mt-[3%]">
+            <div key={index} className="mt-12">
               <Post
                 id={post.id}
                 content={post.content}

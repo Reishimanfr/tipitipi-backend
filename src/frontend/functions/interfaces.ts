@@ -1,6 +1,5 @@
-export interface BlogAttachments {
+export interface BlogFiles {
   id: number;
-  url: string;
   filename: string;
 }
 
@@ -9,7 +8,7 @@ export interface BlogPostDataBodyJson {
   created_at: number;
   edited_at: number;
   id: number;
-  attachments: BlogAttachments[];
+  files: BlogFiles[];
   title: string;
   error?: string;
 }
@@ -30,4 +29,16 @@ export interface GalleryImage {
   url: string;
   key: string;
   group_id: number;
+}
+
+export interface GroupInfo {
+  name: string;
+  id: number;
+  images: GalleryImages[]
+}
+
+//zmienic to images na image tylko tamten interfejs jest stary
+interface GalleryImages {
+  id: number;
+  filename: string;
 }

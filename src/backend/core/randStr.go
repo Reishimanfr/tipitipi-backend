@@ -6,7 +6,7 @@ const (
 	letterBytes = "abcdefghijklmnoprstuwxyzABCDEFGHIJKLMNOPRSTUWXYZ"
 )
 
-func RandomFilename(n int) string {
+func RandStr(n int) string {
 	if n < 1 {
 		return ""
 	}

@@ -26,3 +26,8 @@ dist-ssr
 # Database files
 *.sqlite
 *.db
+
+# Dir for downloaded files
+src/backend/files
+src/backend/backend
+.vercel
