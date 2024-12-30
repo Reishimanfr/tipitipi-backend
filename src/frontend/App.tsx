@@ -1,9 +1,13 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { ToastContainer } from 'react-toastify'
 import Footer from './components/footer'
+import MainNavbar from './components/mainNavbar'
 import About from "./pages/about"
 import Admin from './pages/admin/admin'
 import Dashboard from './pages/admin/dashboard'
 import ChangeCredentials from './pages/admin/dashboardPages/changeCredentials'
+import GalleryAdd from './pages/admin/dashboardPages/galleryAdd'
+import GalleryEdit from './pages/admin/dashboardPages/galleryEdit'
 import PostCreating from './pages/admin/dashboardPages/postCreating'
 import PostEditing from './pages/admin/dashboardPages/postEditing'
 import Login from './pages/admin/login'
@@ -13,11 +17,6 @@ import Gallery from "./pages/gallery"
 import Mainpage from "./pages/mainpage"
 import PostPage from './pages/postPage'
 import Pricing from "./pages/pricing"
-import GalleryAdd from './pages/admin/dashboardPages/galleryAdd'
-import GalleryEdit from './pages/admin/dashboardPages/galleryEdit'
-import { Monitoring } from 'react-scan/dist/core/monitor/index'
-import MainNavbar from './components/mainNavbar'
-import { ToastContainer } from 'react-toastify'
 
 
 

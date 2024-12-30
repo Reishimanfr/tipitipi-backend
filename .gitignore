@@ -30,3 +30,4 @@ dist-ssr
 # Dir for downloaded files
 src/backend/files
 src/backend/backend
+.vercel
