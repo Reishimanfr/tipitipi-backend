@@ -36,9 +36,9 @@ const Post = ({
     }
   }
   return (
-    <div className=" mb-6 border-4 border-gray-800 rounded-lg">
-      <div className="bg-gray-900 text-white pt-4 p-4 text-3xl">
-        <div className="float-left">{title}</div>
+    <div className=" mb-6 border-4 bg-white border-gray-800 rounded-lg">
+      <div className="bg-gray-900 text-white pt-4 p-4 text-xl md:text-3xl">
+        <div className="float-left ">{title}</div>
         <div className="float-right">
           {" "}
           {new Date(date * 1000).toLocaleDateString("en-GB") +
@@ -52,7 +52,7 @@ const Post = ({
       </div>
       {content ? (
         <div
-          className={`ql-editor px-4 pt-4 text-medium ${
+          className={`ql-editor  px-4 pt-4 text-medium ${
             willBeUsedManyTimes ? "line-clamp-2" : ""
           }`}
           dangerouslySetInnerHTML={{ __html: content }}
@@ -61,9 +61,9 @@ const Post = ({
         <div></div>
       )}
 
-      <h1 className="pt-4 pl-4">
+      {/* <h1 className="pt-4 pl-4">
         {new Date(date * 1000).toLocaleDateString("en-pl").toString()}
-      </h1>
+      </h1> */}
 
       {willBeUsedManyTimes ? (
         <Link to={`/blog/${id}`}>

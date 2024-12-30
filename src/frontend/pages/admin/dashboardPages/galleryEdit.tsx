@@ -186,7 +186,7 @@ const GalleryEdit = () => {
           {selectedGroup.images ? (
             selectedGroup.images.map((image) => {
               return (
-                <div className="p-2 mx-auto border w-1/2 m-2" key={image.id}>
+                <div className="p-2 mx-auto bg-white border w-1/2 m-2" key={image.id}>
                   <p className="text-center">Zdjęcie numer: {image.id}</p>
                   <img className="max-h-[200px] mx-auto my-6" src={`http://localhost:8080/proxy?key=${image.filename}&type=gallery`}/>
                   <button

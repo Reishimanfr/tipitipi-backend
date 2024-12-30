@@ -37,12 +37,12 @@ const MainNavbar = () => {
   });
 
    return (
-    <div className={`sticky z-50 top-0 h-20 bg-black w-full transition-transform duration-300 transform ${show ? 'translate-y-0' : '-translate-y-full'}`}>
+    <div className={`sticky z-50 top-0 h-20 bg-[#24252A] w-full transition-transform duration-300 transform ${show ? 'translate-y-0' : '-translate-y-full'}`}>
          <Link to="/">
         <img
           src={logoSmall}
           alt="logo"
-          className="w-auto h-16 float-left ml-[5%] mt-[1vh] hover:animate-spin"
+          className="w-auto h-16 float-left ml-[5%] mt-[1vh]"
         ></img>
         </Link>
         {showDesktopNavbar ? <Topbar/> : <Sidebar/>}

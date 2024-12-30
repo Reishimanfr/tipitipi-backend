@@ -25,7 +25,7 @@ const QuillBody = ({title,setTitle,content,setContent,handlerPost} : Props) => {
 
           <h1 className="text-xl">Podaj treść posta:</h1>
           <ReactQuill
-            className="quill"
+            className="quill bg-white"
             theme="snow"
             value={content}
             onChange={setContent}
@@ -48,7 +48,7 @@ const QuillBody = ({title,setTitle,content,setContent,handlerPost} : Props) => {
             }}
           />
           <br></br>
-          <button className={"border w-40 shadow-lg hover:bg-slate-100 hover:duration-300"} onClick={() => handlerPost()}>
+          <button className={"border w-40 bg-white shadow-lg hover:bg-slate-100 hover:duration-300"} onClick={() => handlerPost()}>
             Postuj
           </button>
         </div>

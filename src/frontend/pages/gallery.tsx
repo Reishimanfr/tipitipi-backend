@@ -66,7 +66,7 @@ const Gallery = () => {
   }
 
   return (
-    <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 min-h-screen">
+    <div className="bg-gradient-to-r from-tipiOrange to-tipiPink min-h-screen">
       {groups ? (
         groups.map((group) =>
           group.images ? (
