@@ -1,11 +1,12 @@
-import background_example from "../assets/example_background.jpg";
-import landscapeImage from "../assets/landscape.jpg";
-import Image_Text from "../components/image_text";
-import { useState, useEffect } from "react";
-import Post from "../components/post";
-import { BlogPostDataBodyJson } from "../functions/interfaces";
-import PostSkeleton from "../components/postSkeletonLoading";
-import "react-toastify/dist/ReactToastify.css";
+import { useEffect, useState } from "react"
+import "react-toastify/dist/ReactToastify.css"
+import background_example from "../assets/example_background.jpg"
+import landscapeImage from "../assets/landscape.jpg"
+import Image_Text from "../components/image_text"
+import Post from "../components/post"
+import PostSkeleton from "../components/postSkeletonLoading"
+import { API_URL } from '../functions/global'
+import { BlogPostDataBodyJson } from "../functions/interfaces"
 const Mainpage = () => {
   const [posts, setPosts] = useState<Array<BlogPostDataBodyJson>>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -14,7 +15,7 @@ const Mainpage = () => {
     async function fetchPost() {
       try {
         const response = await fetch(
-          `http://localhost:8080/blog/posts?limit=3&sort=newest`,
+          `${API_URL}/blog/posts?limit=3&sort=newest`,
           {
             method: "GET",
           }

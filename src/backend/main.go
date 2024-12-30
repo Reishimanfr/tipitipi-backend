@@ -31,13 +31,6 @@ func main() {
 	}
 
 	serverConfig := &srv.ServerConfig{
-		Port: *flags.Port,
-		HttpConfig: &http.Server{
-			ReadTimeout:    5 * time.Second,
-			WriteTimeout:   10 * time.Second,
-			IdleTimeout:    120 * time.Second,
-			MaxHeaderBytes: 1 << 20, // 1 MB
-		},
 		CorsConfig: &cors.Config{
 			AllowMethods:           []string{"HEAD", "POST", "DELETE", "PATCH", "GET"},
 			AllowHeaders:           []string{"Content-Type", "Authorization"},
@@ -53,6 +46,8 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to initialize server", zap.Error(err))
 	}
+
+	server.Router.RunTLS("")
 
 	server.InitHandler()
 

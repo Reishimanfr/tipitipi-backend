@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
-import validateToken from "../../../functions/validate";
-import Unauthorized from "../../errorPages/unauthorized";
+import { useEffect, useState } from "react"
+import { toast } from "react-toastify"
+import QuillBody from "../../../components/quillBody"
+import { API_URL } from '../../../functions/global'
+import { BlogPostDataBodyJson } from "../../../functions/interfaces"
 import {
-  validateDataForm,
-  buildPostMultipart,
-  getToken,
-} from "../../../functions/postManipulatingFunctions";
-import QuillBody from "../../../components/quillBody";
-import { BlogPostDataBodyJson } from "../../../functions/interfaces";
-import { toast } from "react-toastify";
+        buildPostMultipart,
+        getToken,
+        validateDataForm,
+} from "../../../functions/postManipulatingFunctions"
+import validateToken from "../../../functions/validate"
+import Unauthorized from "../../errorPages/unauthorized"
 
 async function fetchPosts(
   setPosts: React.Dispatch<React.SetStateAction<BlogPostDataBodyJson[]>>
@@ -16,7 +17,7 @@ async function fetchPosts(
   try {
     const response = await fetch(
       //TODO niewiem czy bezpieczne / sciagamy wszystkie post yistniejace ze zdjeciami itd // trza zrobic partiala
-      `http://localhost:8080/blog/posts?limit=999&files=true`,
+      `${API_URL}/blog/posts?limit=999&files=true`,
       {
         method: "GET",
       }
@@ -49,7 +50,7 @@ const PostEditing = () => {
     }
     try {
       const response = await fetch(
-        `http://localhost:8080/blog/post/${selectedPost.id}`,
+        `${API_URL}/blog/post/${selectedPost.id}`,
         {
           method: "DELETE",
           headers: {
@@ -88,7 +89,7 @@ const PostEditing = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8080/blog/post/${selectedPost.id}`,
+        `${API_URL}/blog/post/${selectedPost.id}`,
         {
           method: "PATCH",
           headers: {
@@ -127,7 +128,7 @@ const PostEditing = () => {
         selectedPost.files.forEach((attachment, index) => {
           tempContent = tempContent.replace(
             `{{${index}}}`,
-            `<img style="max-height:200px;" src="http://localhost:8080/proxy?key=${attachment.filename}&type=blog" alt="${attachment.filename}"/>`
+            `<img style="max-height:200px;" src="${API_URL}/proxy?key=${attachment.filename}&type=blog" alt="${attachment.filename}"/>`
           );
         });
         setContent(tempContent);

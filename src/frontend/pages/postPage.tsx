@@ -1,7 +1,8 @@
-import Post from "../components/post";
-import { useState, useEffect } from "react";
-import PostSkeleton from "../components/postSkeletonLoading";
-import { BlogPostDataBodyJson } from "../functions/interfaces";
+import { useEffect, useState } from "react"
+import Post from "../components/post"
+import PostSkeleton from "../components/postSkeletonLoading"
+import { API_URL } from '../functions/global'
+import { BlogPostDataBodyJson } from "../functions/interfaces"
 
 const PostPage = () => {
   const [post, setPost] = useState<BlogPostDataBodyJson | null>(null);
@@ -14,7 +15,7 @@ const PostPage = () => {
     async function fetchPost() {
       try {
         const response = await fetch(
-          `http://localhost:8080/blog/post/${ID}?files=true`,
+          `${API_URL}/blog/post/${ID}?files=true`,
           {
             method: "GET",
           }

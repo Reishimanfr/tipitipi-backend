@@ -1,7 +1,8 @@
-import Post from "../components/post";
-import { useState, useEffect } from "react";
-import PostSkeleton from "../components/postSkeletonLoading";
-import { BlogPostDataBodyJson } from "../functions/interfaces";
+import { useEffect, useState } from "react"
+import Post from "../components/post"
+import PostSkeleton from "../components/postSkeletonLoading"
+import { API_URL } from '../functions/global'
+import { BlogPostDataBodyJson } from "../functions/interfaces"
 
 const Blog = () => {
   const limit = 6;
@@ -16,7 +17,7 @@ const Blog = () => {
     async function fetchPost() {
       try {
         const response = await fetch(
-          `http://localhost:8080/blog/posts?offset=${offset}&limit=${limit}&sort=${sortBy}`,
+          `${API_URL}/blog/posts?offset=${offset}&limit=${limit}&sort=${sortBy}`,
           {
             method: "GET",
           }

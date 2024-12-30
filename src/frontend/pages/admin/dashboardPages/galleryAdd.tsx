@@ -1,14 +1,15 @@
-import { useState, useEffect } from "react";
-import validateToken from "../../../functions/validate";
-import Unauthorized from "../../errorPages/unauthorized";
-import { GalleryGroup } from "../../../functions/interfaces";
+import { useEffect, useState } from "react"
+import { GalleryGroup } from "../../../functions/interfaces"
 import {
-  buildGalleryMultipart,
-  getToken,
-} from "../../../functions/postManipulatingFunctions";
+        buildGalleryMultipart,
+        getToken,
+} from "../../../functions/postManipulatingFunctions"
+import validateToken from "../../../functions/validate"
+import Unauthorized from "../../errorPages/unauthorized"
 
-import {toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
+import { API_URL } from '../../../functions/global'
 
 
 async function addNewGroup(name: string , setNewGroupName: React.Dispatch<React.SetStateAction<string>>) {
@@ -22,7 +23,7 @@ async function addNewGroup(name: string , setNewGroupName: React.Dispatch<React.
   }
   try {
     const response = await fetch(
-      `http://localhost:8080/gallery/groups/new/${name}`,
+      `${API_URL}/gallery/groups/new/${name}`,
       {
         method: "POST",
         headers: {
@@ -54,7 +55,7 @@ const GalleryAdd = () => {
   async function fetchGroups() {
     try {
       const response = await fetch(
-        `http://localhost:8080/gallery/groups/all/info`,
+        `${API_URL}/gallery/groups/all/info`,
         {
           method: "GET",
         }
@@ -86,7 +87,7 @@ const GalleryAdd = () => {
     const formData = buildGalleryMultipart(images);
     try {
       const response = await fetch(
-        `http://localhost:8080/gallery/groups/${selectedGroup.id}/images`,
+        `${API_URL}/gallery/groups/${selectedGroup.id}/images`,
         {
           method: "POST",
           headers: {

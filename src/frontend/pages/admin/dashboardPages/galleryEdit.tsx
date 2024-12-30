@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
-import validateToken from "../../../functions/validate";
-import Unauthorized from "../../errorPages/unauthorized";
-import { GroupInfo } from "../../../functions/interfaces";
-import { getToken } from "../../../functions/postManipulatingFunctions";
-import { toast } from "react-toastify";
+import { useEffect, useState } from "react"
+import { toast } from "react-toastify"
+import { API_URL } from '../../../functions/global'
+import { GroupInfo } from "../../../functions/interfaces"
+import { getToken } from "../../../functions/postManipulatingFunctions"
+import validateToken from "../../../functions/validate"
+import Unauthorized from "../../errorPages/unauthorized"
 
 const RED_BUTTON_CSS =
   "border w-40 text-white shadow-lg bg-red-500 hover:bg-red-600 hover:duration-300";
@@ -17,7 +18,7 @@ async function deleteGroup(id: number) {
   const token = getToken();
 
   try {
-    const response = await fetch(`http://localhost:8080/gallery/groups/${id}`, {
+    const response = await fetch(`${API_URL}/gallery/groups/${id}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -50,7 +51,7 @@ const GalleryEdit = () => {
     const token = getToken();
     try {
       const response = await fetch(
-        `http://localhost:8080/gallery/groups/${GroupID}/images/${imageID}`,
+        `${API_URL}/gallery/groups/${GroupID}/images/${imageID}`,
         {
           method: "DELETE",
           headers: {
@@ -87,7 +88,7 @@ const GalleryEdit = () => {
 
   try {
     const response = await fetch(
-      `http://localhost:8080/gallery/groups/${id}/images`,
+      `${API_URL}/gallery/groups/${id}/images`,
       {
         method: "DELETE",
         headers: {
@@ -119,7 +120,7 @@ const GalleryEdit = () => {
     async function fetchPost() {
       try {
         const response = await fetch(
-          `http://localhost:8080/gallery/everything`,
+          `${API_URL}/gallery/everything`,
           {
             method: "GET",
           }
@@ -188,7 +189,7 @@ const GalleryEdit = () => {
               return (
                 <div className="p-2 mx-auto bg-white border w-1/2 m-2" key={image.id}>
                   <p className="text-center">Zdjęcie numer: {image.id}</p>
-                  <img className="max-h-[200px] mx-auto my-6" src={`http://localhost:8080/proxy?key=${image.filename}&type=gallery`}/>
+                  <img className="max-h-[200px] mx-auto my-6" src={`${API_URL}/proxy?key=${image.filename}&type=gallery`}/>
                   <button
                     className={`border w-full ${RED_BUTTON_CSS}`}
                     onClick={() => {deleteImage(selectedGroup.id , image.id)}}

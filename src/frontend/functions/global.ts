@@ -1,0 +1,1 @@
+export const API_URL = "https://tipitipi.pl:8080"

@@ -1,3 +1,5 @@
+import { API_URL } from './global'
+
 export default async function validateToken(setLoading : React.Dispatch<React.SetStateAction<boolean>>) {
   const token = localStorage.getItem("token");
   try {
@@ -5,7 +7,7 @@ export default async function validateToken(setLoading : React.Dispatch<React.Se
       console.debug("Token is invalid");
       return false;
     }
-    const response = await fetch("http://localhost:8080/admin/validate", {
+    const response = await fetch(`${API_URL}/admin/validate`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
     });

@@ -1,7 +1,8 @@
-import SlideShow from "../components/slideshow";
-import { useState, useEffect } from "react";
-import PostSkeleton from "../components/postSkeletonLoading";
-import { GroupInfo } from "../functions/interfaces";
+import { useEffect, useState } from "react"
+import PostSkeleton from "../components/postSkeletonLoading"
+import SlideShow from "../components/slideshow"
+import { API_URL } from '../functions/global'
+import { GroupInfo } from "../functions/interfaces"
 const Gallery = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [groups, setGroups] = useState<Array<GroupInfo> | null>();
@@ -10,7 +11,7 @@ const Gallery = () => {
     async function fetchPost() {
       try {
         const response = await fetch(
-          `http://localhost:8080/gallery/everything`,
+          `${API_URL}/gallery/everything`,
           {
             method: "GET",
           }
@@ -72,7 +73,7 @@ const Gallery = () => {
           group.images ? (
             <SlideShow
               images={group.images.map((image) => {
-                return `http://localhost:8080/proxy?key=${image.filename}&type=gallery`;
+                return `${API_URL}/proxy?key=${image.filename}&type=gallery`;
               })}
             />
           ) : null

@@ -1,9 +1,10 @@
-import { useState ,useEffect } from "react";
-import validateToken from "../../../functions/validate";
-import Unauthorized from "../../errorPages/unauthorized";
-import { getToken } from "../../../functions/postManipulatingFunctions";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { toast } from "react-toastify"
+import { API_URL } from '../../../functions/global'
+import { getToken } from "../../../functions/postManipulatingFunctions"
+import validateToken from "../../../functions/validate"
+import Unauthorized from "../../errorPages/unauthorized"
 
 const validateAdminForm = (login : string , password : string) : boolean => {
   if (login == "" || password =="") {
@@ -30,7 +31,7 @@ async function updateCredentials() {
     const token = getToken()
 
     try{
-    const response = await fetch("http://localhost:8080/admin/account", {
+    const response = await fetch(`${API_URL}/admin/account`, {
       method: "PATCH",
       headers: {
         Authorization: `Bearer ${token}`

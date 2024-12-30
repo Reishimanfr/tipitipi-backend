@@ -1,13 +1,14 @@
-import { useEffect, useState } from "react";
-import Unauthorized from "../../errorPages/unauthorized";
-import validateToken from "../../../functions/validate";
+import { useEffect, useState } from "react"
+import { toast } from "react-toastify"
+import QuillBody from "../../../components/quillBody"
+import { API_URL } from '../../../functions/global'
 import {
-  validateDataForm,
-  buildPostMultipart,
-  getToken,
-} from "../../../functions/postManipulatingFunctions";
-import QuillBody from "../../../components/quillBody";
-import { toast } from "react-toastify";
+        buildPostMultipart,
+        getToken,
+        validateDataForm,
+} from "../../../functions/postManipulatingFunctions"
+import validateToken from "../../../functions/validate"
+import Unauthorized from "../../errorPages/unauthorized"
 
 export default function PostCreating() {
   const [title, setTitle] = useState("Tytuł posta");
@@ -23,7 +24,7 @@ export default function PostCreating() {
     const token = getToken();
 
     try {
-      const response = await fetch("http://localhost:8080/blog/post/", {
+      const response = await fetch(`${API_URL}/blog/post/`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

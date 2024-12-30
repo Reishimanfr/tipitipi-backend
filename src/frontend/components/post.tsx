@@ -1,6 +1,7 @@
-import { Link } from "react-router-dom";
-import { BlogFiles } from "../functions/interfaces";
 import "react-quill/dist/quill.snow.css"; // Załaduj style Quill, np. z wersji 'snow' (lub 'bubble', jeśli używasz innego stylu)
+import { Link } from "react-router-dom"
+import { API_URL } from '../functions/global'
+import { BlogFiles } from "../functions/interfaces"
 
 interface Props {
   id: number;
@@ -27,7 +28,7 @@ const Post = ({
       }
       content = content.replace(
         `{{${index}}}`,
-        `<img style="max-height:200px;" src="http://localhost:8080/proxy?key=${attachment.filename}&type=blog" alt="${attachment.filename}"/>`
+        `<img style="max-height:200px;" src="${API_URL}/proxy?key=${attachment.filename}&type=blog" alt="${attachment.filename}"/>`
       );
     });
   } else {

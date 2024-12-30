@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
+import { API_URL } from '../../functions/global'
 
 interface LoginResponse {
     token?: string
@@ -20,7 +21,7 @@ const Login = () => {
         formData.append("username",login)
         formData.append("password",password)
         try{
-            const response = await fetch("http://localhost:8080/admin/login", {
+            const response = await fetch(`${API_URL}/admin/login`, {
                 method: "POST",
                 body: JSON.stringify({
                     username: login,

@@ -30,8 +30,6 @@ type Server struct {
 }
 
 type ServerConfig struct {
-	Port       string
-	HttpConfig *http.Server
 	CorsConfig *cors.Config
 }
 
@@ -61,10 +59,6 @@ func New(c *ServerConfig) (*Server, error) {
 
 	s.Router.Use(middleware.RateLimiterMiddleware(middleware.NewRateLimiter(5, 10)))
 	s.Router.Use(cors.New(*c.CorsConfig))
-
-	c.HttpConfig.Addr = ":" + c.Port
-	c.HttpConfig.Handler = s.Router
-	s.Http = c.HttpConfig
 
 	return s, nil
 }
