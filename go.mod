@@ -1,4 +1,4 @@
-module bash06/strona-fundacja
+module bash06/tipitipi-backend
 
 go 1.23.0
 
