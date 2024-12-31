@@ -31,6 +31,7 @@ type Server struct {
 
 type ServerConfig struct {
 	CorsConfig *cors.Config
+	HttpConfig *http.Server
 }
 
 type FileUploadResult struct {
@@ -53,12 +54,16 @@ func New(c *ServerConfig) (*Server, error) {
 		Log:    log,
 		Db:     db,
 		Router: gin.Default(),
-
-		Argon: core.NewArgon2idHash(1, 32, 64*1024, 32, 256),
+		Argon:  core.NewArgon2idHash(1, 32, 64*1024, 32, 256),
 	}
 
 	s.Router.Use(middleware.RateLimiterMiddleware(middleware.NewRateLimiter(5, 10)))
 	s.Router.Use(cors.New(*c.CorsConfig))
+
+	c.HttpConfig = &http.Server{
+		Addr:    ":" + *flags.Port,
+		Handler: s.Router.Handler(),
+	}
 
 	return s, nil
 }

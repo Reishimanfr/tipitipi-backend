@@ -21,33 +21,30 @@ func main() {
 		panic("Failed to initialize logger: " + err.Error())
 	}
 
+	// potentially (extremely) stupid thing that should be fixed
 	if os.Getenv("JWT_SECRET") == "" {
 		os.Setenv("JWT_SECRET", core.RandStr(128))
 	}
 
 	if !*flags.Dev {
-		// Disable gin's debug logs
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	serverConfig := &srv.ServerConfig{
+	server, err := srv.New(&srv.ServerConfig{
 		CorsConfig: &cors.Config{
 			AllowMethods:           []string{"HEAD", "POST", "DELETE", "PATCH", "GET"},
 			AllowHeaders:           []string{"Content-Type", "Authorization"},
+			AllowOrigins:           []string{"http://localhost*", "https://tipitpip.pl"},
 			AllowCredentials:       true,
 			AllowFiles:             false,
-			AllowAllOrigins:        true,
 			AllowWebSockets:        false,
 			AllowBrowserExtensions: false,
+			AllowWildcard:          true,
 		},
-	}
-
-	server, err := srv.New(serverConfig)
+	})
 	if err != nil {
 		log.Fatal("Failed to initialize server", zap.Error(err))
 	}
-
-	server.Router.RunTLS("")
 
 	server.InitHandler()
 
@@ -61,7 +58,6 @@ func main() {
 				log.Fatal("Failed to start secure server", zap.Error(err))
 			}
 		}
-
 	}()
 
 	log.Info("Server started. Listening to requests...")
@@ -71,12 +67,19 @@ func main() {
 	signal.Notify(quit, os.Interrupt)
 	<-quit
 
+	log.Info("Gracefully shutting down backend server...")
+
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := server.Http.Shutdown(ctx); err != nil {
-		log.Fatal("Server forced to shutdown", zap.Error(err))
+		log.Fatal("Server shutdown:", zap.Error(err))
 	}
 
-	log.Warn("Gracefully shutting down backend server...")
+	select {
+	case <-ctx.Done():
+		log.Error("Timed out after 5 seconds")
+	}
+
+	log.Info("Server exiting")
 }
