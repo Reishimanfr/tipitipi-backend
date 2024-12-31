@@ -3,11 +3,19 @@ package srv
 import "bash06/tipitipi-backend/middleware"
 
 func (s *Server) InitHandler() {
+	// Routes that are available without having to provide a token
 	public := s.Router.Group("/")
 	{
+		// Logs admin users in returning an opaque token
 		public.POST("/admin/login", s.Authorize)
+
+		// Returns a blog post by it's ID
 		public.GET("/blog/post/:id", s.BlogGetOne)
+
+		// Returns multiple blog posts based on parameters
 		public.GET("/blog/posts", s.BlogGetBulk)
+
+		// Serves an image based on it's filename
 		public.GET("/proxy", s.Proxy)
 
 		// Get EVERYTHING that's available out there (who gives a fuck?)
@@ -26,8 +34,9 @@ func (s *Server) InitHandler() {
 		// public.GET("/gallery/groups/:groupId/images", s.GalleryGetImagesOne)
 	}
 
+	// Routes that need the Authorization header with an opaque token
 	protected := s.Router.Group("/")
-	protected.Use(middleware.AuthMiddleware())
+	protected.Use(middleware.AuthMiddleware(s.Db, s.Log))
 	{
 		blog := protected.Group("/blog/post")
 		{
@@ -57,8 +66,14 @@ func (s *Server) InitHandler() {
 
 		admin := protected.Group("/admin")
 		{
+			// Validates a provided access token
 			admin.POST("/validate", s.ValidateToken)
+
+			// Updates admin credentials
 			admin.PATCH("/update", s.UpdateCredentials)
+
+			// Deauthorizes all active opaque tokens (including the one used in recent requests)
+			admin.DELETE("/deauth", s.Deauth)
 		}
 	}
 }

@@ -32,6 +32,9 @@ type Server struct {
 type ServerConfig struct {
 	CorsConfig *cors.Config
 	HttpConfig *http.Server
+	Logger     *zap.Logger
+	Db         *gorm.DB
+	Port       *string
 }
 
 type FileUploadResult struct {
@@ -41,18 +44,29 @@ type FileUploadResult struct {
 }
 
 func New(c *ServerConfig) (*Server, error) {
-	log, err := core.InitLogger()
-	if err != nil {
-		return nil, err
+	if c.HttpConfig == nil {
+		return nil, fmt.Errorf("no http server config provided")
 	}
-	db, err := core.InitDb()
-	if err != nil {
-		return nil, err
+
+	if c.CorsConfig == nil {
+		return nil, fmt.Errorf("no cors config provided")
+	}
+
+	if c.Logger == nil {
+		return nil, fmt.Errorf("no logger provided")
+	}
+
+	if c.Db == nil {
+		return nil, fmt.Errorf("no db provided")
+	}
+
+	if c.Port == nil {
+		*c.Port = "8080"
 	}
 
 	s := &Server{
-		Log:    log,
-		Db:     db,
+		Log:    c.Logger,
+		Db:     c.Db,
 		Router: gin.Default(),
 		Argon:  core.NewArgon2idHash(1, 32, 64*1024, 32, 256),
 	}
@@ -60,10 +74,9 @@ func New(c *ServerConfig) (*Server, error) {
 	s.Router.Use(middleware.RateLimiterMiddleware(middleware.NewRateLimiter(5, 10)))
 	s.Router.Use(cors.New(*c.CorsConfig))
 
-	c.HttpConfig = &http.Server{
-		Addr:    ":" + *flags.Port,
-		Handler: s.Router.Handler(),
-	}
+	c.HttpConfig.Addr = ":" + *c.Port
+	c.HttpConfig.Handler = s.Router.Handler()
+	s.Http = c.HttpConfig
 
 	return s, nil
 }

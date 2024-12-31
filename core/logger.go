@@ -1,7 +1,7 @@
 package core
 
 import (
-	"os"
+	"bash06/tipitipi-backend/flags"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -10,11 +10,11 @@ import (
 func InitLogger() (*zap.Logger, error) {
 	var config zap.Config
 
-	if os.Getenv("DEV") != "true" {
-		config = zap.NewProductionConfig()
-	} else {
+	if *flags.Dev {
 		config = zap.NewDevelopmentConfig()
 		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+	} else {
+		config = zap.NewProductionConfig()
 	}
 
 	logger, err := config.Build()

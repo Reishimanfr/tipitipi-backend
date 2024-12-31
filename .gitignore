@@ -1,4 +1,6 @@
 *.db
+*.sqlite
+*.txt
 
 # Builtbinary
 tipitipi-backend

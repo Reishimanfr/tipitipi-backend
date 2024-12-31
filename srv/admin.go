@@ -2,7 +2,7 @@ package srv
 
 import (
 	"bash06/tipitipi-backend/core"
-	"bash06/tipitipi-backend/middleware"
+	"bash06/tipitipi-backend/flags"
 	"net/http"
 	"strings"
 
@@ -47,8 +47,7 @@ func (s *Server) Authorize(c *gin.Context) {
 			s.Log.Error("Error while hashing the provided default admin password", zap.Error(err))
 
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-				"error":   "Failed to hash password",
-				"message": nil,
+				"error": "Failed to hash password",
 			})
 			return
 		}
@@ -67,25 +66,17 @@ func (s *Server) Authorize(c *gin.Context) {
 
 	if body.Username != adminUser.Username || err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-			"error":   "Invalid credentials",
-			"message": nil,
+			"error": "Invalid credentials",
 		})
 		return
 	}
 
-	token, err := middleware.GenerateJWT(body.Username)
-	if err != nil {
-		s.Log.Error("Error while generating JWT token", zap.Error(err))
+	token := core.RandStr(*flags.TokenSize)
+	c.JSON(http.StatusOK, gin.H{"token": token})
 
-		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-			"error":   "Failed to generate new token",
-			"message": nil,
-		})
+	if err := s.Db.Create(&core.Token{Token: token}).Error; err != nil {
+		s.Log.Error("Failed to save new token to db", zap.Error(err))
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"token": token,
-	})
 }
 
 func (s *Server) UpdateCredentials(c *gin.Context) {
@@ -148,8 +139,23 @@ func (s *Server) UpdateCredentials(c *gin.Context) {
 }
 
 func (s *Server) ValidateToken(c *gin.Context) {
-	// The reason we can do this is that the JWT middleware
+	// The reason we can do this is that the auth middleware
 	// already handles everything for us and writing the same
 	// code again would just be a waste of time
+	c.Status(http.StatusOK)
+}
+
+// Deauthorizes all active opaque tokens (including the one used in recent requests)
+func (s *Server) Deauth(c *gin.Context) {
+	if err := s.Db.Exec("DELETE FROM Tokens").Error; err != nil {
+		s.Log.Error("Failed to truncate table with access tokens", zap.Error(err))
+
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to delete all records in table",
+			"error":   err.Error(),
+		})
+		return
+	}
+
 	c.Status(http.StatusOK)
 }

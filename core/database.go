@@ -46,6 +46,10 @@ type AdminUser struct {
 	Salt     string
 }
 
+type Token struct {
+	Token string `gorm:"primaryKey,index"`
+}
+
 func InitDb() (*gorm.DB, error) {
 	gormConfig := &gorm.Config{}
 
@@ -59,7 +63,7 @@ func InitDb() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(&BlogPost{}, &AdminUser{}, &File{}, &GalleryRecord{}, &GalleryGroup{})
+	db.AutoMigrate(&BlogPost{}, &AdminUser{}, &File{}, &GalleryRecord{}, &GalleryGroup{}, &Token{})
 
 	return db, nil
 }

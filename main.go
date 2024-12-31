@@ -5,6 +5,7 @@ import (
 	"bash06/tipitipi-backend/flags"
 	"bash06/tipitipi-backend/srv"
 	"context"
+	"flag"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,14 +17,16 @@ import (
 )
 
 func main() {
+	flag.Parse()
+
 	log, err := core.InitLogger()
 	if err != nil {
 		panic("Failed to initialize logger: " + err.Error())
 	}
 
-	// potentially (extremely) stupid thing that should be fixed
-	if os.Getenv("JWT_SECRET") == "" {
-		os.Setenv("JWT_SECRET", core.RandStr(128))
+	db, err := core.InitDb()
+	if err != nil {
+		log.Fatal("Failed to initialize database:", zap.Error(err))
 	}
 
 	if !*flags.Dev {
@@ -34,13 +37,17 @@ func main() {
 		CorsConfig: &cors.Config{
 			AllowMethods:           []string{"HEAD", "POST", "DELETE", "PATCH", "GET"},
 			AllowHeaders:           []string{"Content-Type", "Authorization"},
-			AllowOrigins:           []string{"http://localhost*", "https://tipitpip.pl"},
+			AllowOrigins:           []string{"http://localhost*", "https://tipitipi.pl"},
 			AllowCredentials:       true,
 			AllowFiles:             false,
 			AllowWebSockets:        false,
 			AllowBrowserExtensions: false,
 			AllowWildcard:          true,
 		},
+		HttpConfig: &http.Server{},
+		Logger:     log,
+		Db:         db,
+		Port:       flags.Port,
 	})
 	if err != nil {
 		log.Fatal("Failed to initialize server", zap.Error(err))

@@ -1,9 +1,8 @@
 module bash06/tipitipi-backend
 
-go 1.23.0
+go 1.22.0
 
 require (
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.10.0
 	go.uber.org/zap v1.27.0
