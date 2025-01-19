@@ -8,6 +8,12 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+type PageContent struct {
+	ID      int    `gorm:"primaryKey;autoIncrement" json:"id"`
+	Name    string `gorm:"unique;size:255" json:"name"`
+	Content string `gorm:"type:text" json:"content"`
+}
+
 type GalleryGroup struct {
 	ID          int             `gorm:"primaryKey;autoIncrement;index" json:"id"`
 	Name        string          `gorm:"unique;size:255" json:"name"`
@@ -64,7 +70,7 @@ func InitDb() (*gorm.DB, error) {
 		return nil, err
 	}
 
-	db.AutoMigrate(&BlogPost{}, &AdminUser{}, &File{}, &GalleryRecord{}, &GalleryGroup{}, &Token{})
+	db.AutoMigrate(&BlogPost{}, &AdminUser{}, &File{}, &GalleryRecord{}, &GalleryGroup{}, &Token{}, PageContent{})
 
 	return db, nil
 }

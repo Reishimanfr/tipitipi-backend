@@ -23,6 +23,9 @@ func (s *Server) InitHandler() {
 
 		// Returns multiple gallery groups based on parameters
 		public.GET("/gallery", s.GalleryGetBulk)
+
+		// Returns the content of a page by it's name
+		public.GET("/page/:name", s.PageGetOne)
 	}
 
 	// Routes that need the Authorization header with an opaque token
@@ -61,6 +64,12 @@ func (s *Server) InitHandler() {
 
 			// Deauthorizes all active tokens
 			admin.DELETE("/deauth", s.Deauth)
+		}
+
+		page := protected.Group("/page")
+		{
+			// Updates the content of a page
+			page.PUT("/:name", s.PageUpdateOne)
 		}
 	}
 }
