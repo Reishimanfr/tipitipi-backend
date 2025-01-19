@@ -6,7 +6,7 @@ func (s *Server) InitHandler() {
 	// Routes that are available without having to provide a token
 	public := s.Router.Group("/")
 	{
-		// Logs admin users in returning an opaque token
+		// Admin login route
 		public.POST("/admin/login", s.Authorize)
 
 		// Returns a blog post by it's ID
@@ -18,20 +18,11 @@ func (s *Server) InitHandler() {
 		// Serves an image based on it's filename
 		public.GET("/proxy", s.Proxy)
 
-		// Get EVERYTHING that's available out there (who gives a fuck?)
-		public.GET("/gallery/everything", s.GetEverything)
+		// Returns a gallery group by it's ID
+		public.GET("/gallery/:id", s.GalleryGetOne)
 
-		// Get info on all available gallery groups (like how many images they have)
-		public.GET("/gallery/groups/all/info", s.GalleryGetGroupsBulk)
-
-		// public.GET("/gallery/groups/all/images", s.GalleryGetImagesBulk)
-
-		// Get info on a specified gallery group
-		// public.GET("/gallery/groups/:groupId/info", s.GalleryGetGroupOne)
-
-		// Get image from a specified gallery group
-		// TESTING NEEDED
-		// public.GET("/gallery/groups/:groupId/images", s.GalleryGetImagesOne)
+		// Returns multiple gallery groups based on parameters
+		public.GET("/gallery", s.GalleryGetBulk)
 	}
 
 	// Routes that need the Authorization header with an opaque token
@@ -47,21 +38,17 @@ func (s *Server) InitHandler() {
 
 		gallery := protected.Group("/gallery")
 		{
-			// Initializes a new gallery group
-			// TESTING NEEDED
-			gallery.POST("/groups/new/:name", s.GalleryCreateOne)
+			// Creates a new gallery group
+			gallery.POST("/", s.GalleryCreateOne)
 
-			// // Post an image to a specified group
-			gallery.POST("/groups/:groupId/images", s.GalleryPostBulk)
+			// Adds images to a gallery group
+			gallery.POST("/:id/images", s.GalleryPostBulk)
 
-			// // Delete an image from a specified group
-			gallery.DELETE("/groups/:groupId/images/:imageId", s.GalleryDeleteOne)
+			// Deletes images from a gallery group
+			gallery.DELETE("/:id/images", s.GalleryDeleteMany)
 
-			// Delete all images from a group (without deleting the group)
-			gallery.DELETE("/groups/:groupId/images", s.GalleryDeleteAll)
-
-			// Delete an entire gallery group
-			gallery.DELETE("/groups/:groupId/", s.GalleryDelete)
+			// Deletes a gallery group
+			gallery.DELETE("/:id", s.GalleryDeleteGroup)
 		}
 
 		admin := protected.Group("/admin")
@@ -72,7 +59,7 @@ func (s *Server) InitHandler() {
 			// Updates admin credentials
 			admin.PATCH("/update", s.UpdateCredentials)
 
-			// Deauthorizes all active opaque tokens (including the one used in recent requests)
+			// Deauthorizes all active tokens
 			admin.DELETE("/deauth", s.Deauth)
 		}
 	}

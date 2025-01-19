@@ -83,8 +83,7 @@ func main() {
 		log.Fatal("Server shutdown:", zap.Error(err))
 	}
 
-	select {
-	case <-ctx.Done():
+	if <-ctx.Done(); true {
 		log.Error("Timed out after 5 seconds")
 	}
 

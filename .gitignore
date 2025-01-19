@@ -2,5 +2,8 @@
 *.sqlite
 *.txt
 
-# Builtbinary
+# Built binary
 tipitipi-backend
+
+# Commit description
+commit.txt
