@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/chenyahui/gin-cache/persist"
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -27,6 +28,7 @@ type Server struct {
 	Router *gin.Engine
 	Http   *http.Server
 	Argon  *core.Argon2idHash
+	Cache  *persist.MemoryStore
 }
 
 type ServerConfig struct {

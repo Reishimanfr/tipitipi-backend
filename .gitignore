@@ -7,3 +7,6 @@ tipitipi-backend
 
 # Commit description
 commit.txt
+
+# Ignore uploaded files
+files

@@ -15,6 +15,7 @@ var (
 	TokenSize      = flag.Int("token-size", 128, "The amount of bytes to use for tokens")
 	MaxFileSize    = flag.Int64("max-file-size", 50, "The maximum file size in MiB")
 	MaxFileUploads = flag.Int64("max-file-uploads", 5, "The maximum amount of files that can be uploaded at once")
+	CacheLifetime  = flag.Int("cache-lifetime", 5, "The amount of minutes to cache data")
 
 	execPath, _ = os.Executable()
 	BasePath    = filepath.Dir(execPath)

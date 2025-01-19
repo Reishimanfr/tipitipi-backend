@@ -1,8 +1,21 @@
 package srv
 
-import "bash06/tipitipi-backend/middleware"
+import (
+	"bash06/tipitipi-backend/flags"
+	"bash06/tipitipi-backend/middleware"
+	"time"
+
+	cache "github.com/chenyahui/gin-cache"
+	"github.com/chenyahui/gin-cache/persist"
+)
+
+var (
+	cacheTime = time.Minute * time.Duration(*flags.CacheLifetime)
+)
 
 func (s *Server) InitHandler() {
+	s.Cache = persist.NewMemoryStore(cacheTime)
+
 	// Routes that are available without having to provide a token
 	public := s.Router.Group("/")
 	{
@@ -10,22 +23,22 @@ func (s *Server) InitHandler() {
 		public.POST("/admin/login", s.Authorize)
 
 		// Returns a blog post by it's ID
-		public.GET("/blog/post/:id", s.BlogGetOne)
+		public.GET("/blog/post/:id", s.BlogGetOne, cache.CacheByRequestURI(s.Cache, cacheTime))
 
 		// Returns multiple blog posts based on parameters
-		public.GET("/blog/posts", s.BlogGetBulk)
+		public.GET("/blog/posts", s.BlogGetBulk, cache.CacheByRequestURI(s.Cache, cacheTime))
 
 		// Serves an image based on it's filename
-		public.GET("/proxy", s.Proxy)
+		public.GET("/proxy", s.Proxy, cache.CacheByRequestURI(s.Cache, cacheTime))
 
 		// Returns a gallery group by it's ID
-		public.GET("/gallery/:id", s.GalleryGetOne)
+		public.GET("/gallery/:id", s.GalleryGetOne, cache.CacheByRequestURI(s.Cache, cacheTime))
 
 		// Returns multiple gallery groups based on parameters
-		public.GET("/gallery", s.GalleryGetBulk)
+		public.GET("/gallery", s.GalleryGetBulk, cache.CacheByRequestURI(s.Cache, cacheTime))
 
 		// Returns the content of a page by it's name
-		public.GET("/page/:name", s.PageGetOne)
+		public.GET("/page/:name", s.PageGetOne, cache.CacheByRequestURI(s.Cache, cacheTime))
 	}
 
 	// Routes that need the Authorization header with an opaque token
