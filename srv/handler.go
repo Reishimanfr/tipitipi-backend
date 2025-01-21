@@ -22,23 +22,23 @@ func (s *Server) InitHandler() {
 		// Admin login route
 		public.POST("/admin/login", s.Authorize)
 
-		// Returns a blog post by it's ID
-		public.GET("/blog/post/:id", s.BlogGetOne, cache.CacheByRequestURI(s.Cache, cacheTime))
+		// Returns a blog post by its ID
+		public.GET("/blog/post/:id", s.BlogGetOne, cache.CacheByRequestPath(s.Cache, cacheTime))
 
 		// Returns multiple blog posts based on parameters
-		public.GET("/blog/posts", s.BlogGetBulk, cache.CacheByRequestURI(s.Cache, cacheTime))
+		public.GET("/blog/posts", s.BlogGetBulk, cache.CacheByRequestPath(s.Cache, cacheTime))
 
-		// Serves an image based on it's filename
-		public.GET("/proxy", s.Proxy, cache.CacheByRequestURI(s.Cache, cacheTime))
+		// Serves an image based on its filename
+		public.GET("/proxy", s.Proxy, cache.CacheByRequestPath(s.Cache, cacheTime))
 
-		// Returns a gallery group by it's ID
-		public.GET("/gallery/:id", s.GalleryGetOne, cache.CacheByRequestURI(s.Cache, cacheTime))
+		// Returns a gallery group by its ID
+		public.GET("/gallery/:id", s.GalleryGetOne, cache.CacheByRequestPath(s.Cache, cacheTime))
 
 		// Returns multiple gallery groups based on parameters
-		public.GET("/gallery", s.GalleryGetBulk, cache.CacheByRequestURI(s.Cache, cacheTime))
+		public.GET("/gallery", s.GalleryGetBulk, cache.CacheByRequestPath(s.Cache, cacheTime))
 
-		// Returns the content of a page by it's name
-		public.GET("/page/:name", s.PageGetOne, cache.CacheByRequestURI(s.Cache, cacheTime))
+		// Returns the content of a page by its name
+		public.GET("/page/:name", s.PageGetOne, cache.CacheByRequestPath(s.Cache, cacheTime))
 	}
 
 	// Routes that need the Authorization header with an opaque token
