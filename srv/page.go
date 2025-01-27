@@ -17,12 +17,12 @@ type PageContentUpdateBody struct {
 Returns the contents of a page
 */
 func (s *Server) PageGetOne(c *gin.Context) {
-	name := c.Param("name")
+	pageStr := c.Param("page")
 
 	var page core.PageContent
 
 	err := s.Db.
-		Where("name = ?", name).
+		Where("page = ?", pageStr).
 		Find(&page).
 		Error
 
@@ -45,7 +45,7 @@ func (s *Server) PageGetOne(c *gin.Context) {
 Updates the contents of a page
 */
 func (s *Server) PageUpdateOne(c *gin.Context) {
-	name := c.Param("name")
+	page := c.Param("page")
 
 	var newContent PageContentUpdateBody
 
@@ -59,7 +59,7 @@ func (s *Server) PageUpdateOne(c *gin.Context) {
 	var pageContent core.PageContent
 
 	err = s.Db.
-		Where("name = ?", name).
+		Where("page = ?", page).
 		Find(&pageContent).
 		Error
 	if err != nil {
@@ -76,7 +76,7 @@ func (s *Server) PageUpdateOne(c *gin.Context) {
 
 	pageContent.Content = newContent.Content
 	// Set the name just in case
-	pageContent.Name = name
+	pageContent.Page = page
 
 	err = s.Db.
 		Save(&pageContent).
