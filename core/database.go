@@ -10,7 +10,7 @@ import (
 
 type PageContent struct {
 	ID      int    `gorm:"primaryKey;autoIncrement" json:"id"`
-	Name    string `gorm:"unique;size:255" json:"name"`
+	Page    string `gorm:"unique;size:255" json:"page"`
 	Content string `gorm:"type:text" json:"content"`
 }
 
