@@ -37,7 +37,7 @@ func main() {
 		CorsConfig: &cors.Config{
 			AllowMethods:           []string{"HEAD", "POST", "DELETE", "PATCH", "GET"},
 			AllowHeaders:           []string{"Content-Type", "Authorization"},
-			AllowOrigins:           []string{"http://localhost*", "https://tipitipi.pl"},
+			AllowOrigins:           []string{"http://localhost*", "https://tipitipi.pl", "http://83.10.205.21:5173"},
 			AllowCredentials:       true,
 			AllowFiles:             false,
 			AllowWebSockets:        false,
@@ -83,9 +83,9 @@ func main() {
 		log.Fatal("Server shutdown:", zap.Error(err))
 	}
 
-	if <-ctx.Done(); true {
-		log.Error("Timed out after 5 seconds")
-	}
+	// if <-ctx.Done(); true {
+	// 	log.Error("Timed out after 5 seconds")
+	// }
 
 	log.Info("Server exiting")
 }

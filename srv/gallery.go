@@ -200,6 +200,13 @@ func (s *Server) GalleryPostBulk(c *gin.Context) {
 	form, _ := c.MultipartForm()
 	files := form.File["images[]"]
 
+	if len(files) <= 0 {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
+			"error": "No images provided",
+		})
+		return
+	}
+
 	var wg sync.WaitGroup
 	downloadErrs := make(chan error, len(files))
 
